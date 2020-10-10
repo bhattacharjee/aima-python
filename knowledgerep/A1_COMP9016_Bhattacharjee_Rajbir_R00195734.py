@@ -147,28 +147,31 @@ class TwoDEnvironment(Environment):
         self.matrix[row][col] = thing
 
     def get_print_matrix(self):
-        pass
-
-    # If curses is not supported, print the maze in text format
-    def print_state_text(self):
-        print("TODO: code print_state_text")
-
-    # Use ncurses to print the maze
-    def print_state_curses(self):
-        for i in range(self.cols + 2):
-            self.window.addstr(0, i, '#')
-            self.window.addstr(self.rows+1, i, '#')
+        m = [[' ' for i in range(self.cols + 2)] for j in range(self.rows + 2)]
+        for i in range(self.cols +2):
+            m[0][i] = '#'
+            m[self.rows+1][i] = '#'
         for i in range(self.rows):
-            self.window.addstr(i+1, 0, '#')
-            self.window.addstr(i+1, self.cols + 1, '#')
-        for i in range(self.rows):
-            for j in range(self.cols):
-                self.window.addstr(i+1, j+1, ' ')
+            m[i+1][0] = '#'
         for thing in self.things:
             if isinstance(thing, TwoDThing) or isinstance(thing, TwoDAgent):
                 x, y = thing.get_location()
                 c = thing.get_display()
-                self.window.addstr(x+1, y+1, c)
+                m[x+1][y+1] = c
+        return m
+
+    # If curses is not supported, print the maze in text format
+    def print_state_text(self):
+        m = self.get_print_matrix()
+        for i in m:
+            print(''.join(i))
+
+    # Use ncurses to print the maze
+    def print_state_curses(self):
+        m = self.get_print_matrix()
+        for i, arr in enumerate(m):
+            for j, c in enumerate(arr):
+                self.window.addstr(i, j, c)
         self.window.refresh()
 
     def print_state(self):
@@ -211,7 +214,7 @@ def get_agent_location_from_maze_string(mazeString=str):
 class TwoDAgent(Agent):
     def __init__(self, program=None):
         self.x = self.y = 1
-        self.current_display = 'P'
+        self.current_display = 0
         self.direction = Direction.D
         self.num_moves = 0
         self.num_power = 0
@@ -226,8 +229,11 @@ class TwoDAgent(Agent):
         return self.location[0], self.location[1]
     
     def get_display(self):
-        self.current_display = 'P' if 'b' == self.current_display else 'b'
-        return self.current_display
+        next_item = list("-\\|/")
+        next_item = list("-*\\*|*/*")
+        self.current_display += 1
+        self.current_display = self.current_display  % len(next_item)
+        return next_item[self.current_display]
 
 # SimpleReflexProgram randomly chooses a move in any direction
 # as long as it doesn't hit a wall
