@@ -10,7 +10,7 @@ try:
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir) 
-    from agents import Environment, Thing
+    from agents import Environment, Thing, Direction, Agent
 except:
     print("Could not import from parent folder... Exiting")
     sys.exit(1)
@@ -75,7 +75,7 @@ class TwoDEnvironment(Environment):
             for j in range(self.cols):
                 self.window.addstr(i+1, j+1, ' ')
         for thing in self.things:
-            if isinstance(thing, TwoDThing):
+            if isinstance(thing, TwoDThing) or isinstance(thing, TwoDAgent):
                 x, y = thing.get_location()
                 c = thing.get_display()
                 self.window.addstr(x+1, y+1, c)
@@ -98,10 +98,34 @@ class TwoDMaze(TwoDEnvironment):
             for j in range(cols):
                 if '#' == mazeString[i][j]:
                     wall = Wall(i, j)
-                    self.add_thing(wall)
+                    self.add_thing(wall, (i,j))
                 if 'x' == mazeString[i][j]:
                     door = Door(i, j)
-                    self.add_thing(door)
+                    self.add_thing(door, (i,j))
+
+class TwoDAgent(Agent):
+    def __init__(self, program=None):
+        self.x = self.y = 1
+        self.current_display = 'P'
+        self.direction = Direction.D
+        super().__init__(program)
+
+    def set_location(self, x, y):
+        self.x = x
+        self.y = y
+
+    def get_location(self):
+        return self.x, self.y
+    
+    def get_display(self):
+        self.current_display = 'P' if 'b' == self.current_display else 'b'
+        return self.current_display
+
+def SimpleReflexProgram(percepts):
+    def program(percepts):
+        pass
+    return program
+
 
 
 def create_2d_environment(maze=str):
@@ -120,8 +144,12 @@ maze = """
 
 def main():
     env = TwoDMaze(maze)
-    env.print_state()
-    time.sleep(2)
+    agent = TwoDAgent(SimpleReflexProgram)
+    agent.set_location(2, 2)
+    env.add_thing(agent, (2,2))
+    for i in range(10):
+        env.print_state()
+        time.sleep(1)
     pass
 
 if "__main__" == __name__:
