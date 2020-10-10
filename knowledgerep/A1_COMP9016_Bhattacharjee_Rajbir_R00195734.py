@@ -123,6 +123,7 @@ class TwoDAgent(Agent):
 
 def SimpleReflexProgram(percepts):
     def program(percepts):
+        print(percepts)
         pass
     return program
 
@@ -149,6 +150,7 @@ def main():
     env.add_thing(agent, (2,2))
     for i in range(10):
         env.print_state()
+        #env.step()
         time.sleep(1)
     pass
 
