@@ -41,7 +41,18 @@ class TwoDThing(Thing):
 
 class Power(TwoDThing):
     def __init__(self, x, y):
-        super().__init__(x, y, '^')
+        self.power_value = -1
+        super().__init__(x, y, 'o')
+
+    def set_power_value(self, i: int):
+        self.power_value = i
+
+    def get_power_value(self):
+        assert(-1 != self.power_value)
+        return self.power_value
+
+    def get_display(self):
+        return str(self.power_value)
 
 class Wall(TwoDThing):
     def __init__(self, x, y):
@@ -109,7 +120,11 @@ class TwoDEnvironment(Environment):
         assert(-1 != newrow)
         assert(-1 != newcol)
         self.matrix[row][col] = None
+        old_object = self.matrix[newrow][newcol]
         self.matrix[newrow][newcol] = agent
+        if (None != old_object and isinstance(old_object, Power)):
+            agent.num_power += old_object.get_power_value()
+            self.things.remove(old_object)
         agent.set_location(newrow, newcol)
         agent.num_moves += 1
         pass
@@ -174,6 +189,11 @@ class TwoDMaze(TwoDEnvironment):
                 if 'x' == mazeString[i][j]:
                     door = Door(i, j)
                     self.add_thing(door, [i,j])
+                if mazeString[i][j] in list('0123456789'):
+                    power = Power(i, j)
+                    power_value = int(mazeString[i][j])
+                    power.set_power_value(power_value)
+                    self.add_thing(power, [i, j])
 
 def get_agent_location_from_maze_string(mazeString=str):
     mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
@@ -280,7 +300,7 @@ def SimpleReflexProgram():
 
 
 
-maze = """
+smallMaze = """
 ##############################
 #         #              #   #
 #o####    ########       #   #
@@ -291,10 +311,22 @@ maze = """
 #              #       #     #
 ##############################"""
 
+smallMazeWithPower = """
+##############################
+#   3 5   #     1        #   #
+#o#### 77 ########   3 5 #   #
+# 2  #  8 # 9 9 2 3 ^    # ^ #
+#    ###  7  #####  ######   #
+#  9   #     #   #  #      ###
+#     ##### 6  #  7 #  # x   #
+#  3      5    #  8    #     #
+##############################"""
+
+
 def main():
-    env = TwoDMaze(maze)
+    env = TwoDMaze(smallMazeWithPower)
     agent = TwoDAgent(SimpleReflexProgram())
-    ag_x, ag_y = get_agent_location_from_maze_string(maze)
+    ag_x, ag_y = get_agent_location_from_maze_string(smallMazeWithPower)
     assert(-1 != ag_x and -1 != ag_y)
     env.add_thing(agent, (ag_x,ag_y))
     while not env.is_done():
@@ -303,7 +335,7 @@ def main():
             env.print_state()
     time.sleep(1)
     del env
-    print(f"Num_Moves: = {agent.num_moves}")
+    print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
 
 if "__main__" == __name__:
     main()
