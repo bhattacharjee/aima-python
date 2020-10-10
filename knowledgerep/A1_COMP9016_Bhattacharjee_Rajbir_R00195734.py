@@ -108,6 +108,7 @@ class TwoDEnvironment(Environment):
         self.matrix[row][col] = None
         self.matrix[newrow][newcol] = agent
         agent.set_location(newrow, newcol)
+        agent.num_moves += 1
         pass
 
     # If curses is not supported, print the maze in text format
@@ -176,6 +177,10 @@ class TwoDAgent(Agent):
         self.x = self.y = 1
         self.current_display = 'P'
         self.direction = Direction.D
+        self.num_moves = 0
+        self.num_power = 0
+        self.cost_incurred = 0
+        self.points = 0
         super().__init__(program)
 
     def set_location(self, x, y):
@@ -276,13 +281,14 @@ maze = """
 def main():
     env = TwoDMaze(maze)
     agent = TwoDAgent(SimpleReflexProgram())
-    agent.set_location(2, 1)
     env.add_thing(agent, (2,1))
-    for i in range(100000):
+    while not env.is_done():
         env.step()
         for i in range(6):
             env.print_state()
-    pass
+    time.sleep(1)
+    del env
+    print(f"Num_Moves: = {agent.num_moves}")
 
 if "__main__" == __name__:
     main()
