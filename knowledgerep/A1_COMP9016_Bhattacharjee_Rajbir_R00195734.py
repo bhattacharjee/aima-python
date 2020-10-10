@@ -323,10 +323,10 @@ smallMazeWithPower = """
 ##############################"""
 
 
-def main():
-    env = TwoDMaze(smallMazeWithPower)
+def RunReflexAgentRandomAlgorithm(mazeString: str):
+    env = TwoDMaze(mazeString)
     agent = TwoDAgent(SimpleReflexProgram())
-    ag_x, ag_y = get_agent_location_from_maze_string(smallMazeWithPower)
+    ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
     assert(-1 != ag_x and -1 != ag_y)
     env.add_thing(agent, (ag_x,ag_y))
     while not env.is_done():
@@ -336,6 +336,9 @@ def main():
     time.sleep(1)
     del env
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
+
+def main():
+    RunReflexAgentRandomAlgorithm(smallMazeWithPower)
 
 if "__main__" == __name__:
     main()
