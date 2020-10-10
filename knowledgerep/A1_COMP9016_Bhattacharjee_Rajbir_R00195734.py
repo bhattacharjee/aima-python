@@ -70,11 +70,26 @@ class TwoDEnvironment(Environment):
         super().__init__()
         self.rows = rows
         self.cols = cols
+        self.thedoor = None
         #self.matrix = [[None] * cols] * rows
         self.matrix = [[None for i in range(cols)] for j in range(rows)]
         if g_curses_available:
             self.window = curses.initscr()
     
+    def is_done(self):
+        dr_row = dr_col = -1
+        ag_row, ag_col = self.agents[0].get_location()
+        assert(None != ag_row and None != ag_col)
+        if None == self.thedoor:
+            for thing in self.things:
+                if (isinstance(thing, Door)):
+                    self.thedoor = thing
+        assert(None != self.thedoor)
+        dr_row, dr_col = self.thedoor.get_location()
+        assert(None != dr_row and None != dr_col and -1 != dr_row and -1 != dr_col)
+        done = (dr_row == ag_row and dr_col == ag_col)
+        return done
+
     def __del__(self):
         global g_curses_available
         if g_curses_available:
@@ -188,7 +203,14 @@ def SimpleReflexProgram():
         (0, -1): "moveLeft",
         (0, 1): "moveRight"
     }
+
+    # Recreate the matrix from the percepts
     matrix = None
+
+    # Helper routine to get the candidate moves, it doesn't care
+    # whether the move is blocked by a wall or not 
+    # However, it checks whether the move is out of bounds
+    # or not
     def get_candidate_positions(ag_location, mt_dimensions):
         row = ag_location[0]
         col = ag_location[1]
@@ -207,12 +229,17 @@ def SimpleReflexProgram():
         mt_dimensions = percepts["dimensions"]
         ag_location = percepts["location"]
         things = percepts["things"]
+
+        # First recreate the matrix
         matrix = [[None for i in range(mt_dimensions[1])] for j in range(mt_dimensions[0])]
         for thing in things:
             row = thing.location[0]
             col = thing.location[1]
             matrix[row][col] = thing
+
+        # Get the candidate positions
         candidate_positions = get_candidate_positions(ag_location, mt_dimensions)
+        # Randomly select a new position
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
             x, y = candidate_positions[i]
@@ -222,19 +249,18 @@ def SimpleReflexProgram():
                 break
             else:
                 del candidate_positions[i]
+        # Convert position to move (eg. [0, 0] -> MoveUp)
         if -1 != rowCandidate and -1 != colCandidate:
             row_move = rowCandidate - ag_location[0]
             col_move = colCandidate - ag_location[1]
             move = move_table[(row_move, col_move)]
+            assert(None != move)
             return move
         return None
 
     return program
 
 
-
-def create_2d_environment(maze=str):
-    pass
 
 maze = """
 ##############################
@@ -254,10 +280,8 @@ def main():
     env.add_thing(agent, (2,1))
     for i in range(100000):
         env.step()
-        if (i % 100 == 0):
-            for i in range(6):
-                env.print_state()
-                time.sleep(0.1)
+        for i in range(6):
+            env.print_state()
     pass
 
 if "__main__" == __name__:
