@@ -100,12 +100,10 @@ class TwoDMaze(TwoDEnvironment):
             for j in range(cols):
                 if '#' == mazeString[i][j]:
                     wall = Wall(i, j)
-                    self.add_thing(wall, (i,j))
-                    wall.set_location([i,j])
+                    self.add_thing(wall, [i,j])
                 if 'x' == mazeString[i][j]:
                     door = Door(i, j)
-                    self.add_thing(door, (i,j))
-                    door.set_location([i,j])
+                    self.add_thing(door, [i,j])
 
 class TwoDAgent(Agent):
     def __init__(self, program=None):
