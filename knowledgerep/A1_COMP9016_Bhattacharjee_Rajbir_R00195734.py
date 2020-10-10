@@ -75,7 +75,7 @@ class TwoDEnvironment(Environment):
         self.matrix = [[None for i in range(cols)] for j in range(rows)]
         if g_curses_available:
             self.window = curses.initscr()
-    
+
     def is_done(self):
         dr_row = dr_col = -1
         ag_row, ag_col = self.agents[0].get_location()
@@ -222,7 +222,7 @@ def SimpleReflexProgram():
             if (row >= 0 and row < total_rows and col >= 0 and col < total_cols):
                 candidates.append((row, col))
         return candidates
-        
+ 
     def program(percepts):
         nonlocal matrix
         rowCandidate = colCandidate = -1
