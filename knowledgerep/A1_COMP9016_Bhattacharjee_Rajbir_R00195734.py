@@ -39,6 +39,9 @@ class TwoDThing(Thing):
     def get_display(self):
         return self.display
 
+class Power(TwoDThing):
+    def __init__(self, x, y):
+        super().__init__(x, y, '^')
 
 class Wall(TwoDThing):
     def __init__(self, x, y):
