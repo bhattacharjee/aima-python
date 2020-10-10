@@ -109,6 +109,7 @@ class TwoDEnvironment(Environment):
         if g_curses_available:
             curses.endwin()
 
+
     def execute_action(self, agent, action):
         if None == action:
             return
@@ -129,10 +130,6 @@ class TwoDEnvironment(Environment):
         agent.num_moves += 1
         pass
 
-    # If curses is not supported, print the maze in text format
-    def print_state_text(self):
-        print("TODO: code print_state_text")
-
     def percept(self, agent):
         percept = {}
         x, y = agent.get_location()
@@ -143,12 +140,18 @@ class TwoDEnvironment(Environment):
             percept["things"].append(thing)
         return percept
 
-
     def add_thing(self, thing, location):
         row = location[0]
         col = location[1]
         super().add_thing(thing, location)
         self.matrix[row][col] = thing
+
+    def get_print_matrix(self):
+        pass
+
+    # If curses is not supported, print the maze in text format
+    def print_state_text(self):
+        print("TODO: code print_state_text")
 
     # Use ncurses to print the maze
     def print_state_curses(self):
