@@ -25,12 +25,14 @@ except:
 class TwoDThing(Thing):
     def __init__(self, x = 0, y = 0, display='T'):
         super().__init__()
-        self.x = x
-        self.y = y
+        self.location = [x, y]
         self.display = display
 
     def get_location(self):
-        return (self.x, self.y)
+        return (self.location[0], self.location[1])
+
+    def set_location(self, location = []):
+        self.location = location
 
     def get_display(self):
         return self.display
@@ -99,9 +101,11 @@ class TwoDMaze(TwoDEnvironment):
                 if '#' == mazeString[i][j]:
                     wall = Wall(i, j)
                     self.add_thing(wall, (i,j))
+                    wall.set_location([i,j])
                 if 'x' == mazeString[i][j]:
                     door = Door(i, j)
                     self.add_thing(door, (i,j))
+                    door.set_location([i,j])
 
 class TwoDAgent(Agent):
     def __init__(self, program=None):
@@ -111,18 +115,28 @@ class TwoDAgent(Agent):
         super().__init__(program)
 
     def set_location(self, x, y):
-        self.x = x
-        self.y = y
+        self.location = [x, y]
 
     def get_location(self):
-        return self.x, self.y
+        return self.location[0], self.location[1]
     
     def get_display(self):
         self.current_display = 'P' if 'b' == self.current_display else 'b'
         return self.current_display
 
 def SimpleReflexProgram(percepts):
+    # Percepts are of the form
+    # {
+    #    "location": [row, col],
+    #    "things" : [thing1, thing2, thing3]
+    # }
     def program(percepts):
+        my_location = percepts["location"]
+        things = percepts["things"]
+        highest_row = location[0]
+        highest_col = location[1]
+        for thing in things:
+            pass
         print(percepts)
         pass
     return program
