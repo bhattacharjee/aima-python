@@ -172,6 +172,16 @@ class TwoDMaze(TwoDEnvironment):
                     door = Door(i, j)
                     self.add_thing(door, [i,j])
 
+def get_agent_location_from_maze_string(mazeString=str):
+    mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
+    rows = len(mazeString)
+    cols = len(mazeString[0])
+    for i in range(rows):
+        for j in range(cols):
+            if 'o' == mazeString[i][j]:
+                return i, j
+    return -1, -1
+
 class TwoDAgent(Agent):
     def __init__(self, program=None):
         self.x = self.y = 1
@@ -270,7 +280,7 @@ def SimpleReflexProgram():
 maze = """
 ##############################
 #         #              #   #
-# ####    ########       #   #
+#o####    ########       #   #
 #    #    #              #   #
 #    ###     #####  ######   #
 #      #     #   #  #      ###
@@ -281,7 +291,9 @@ maze = """
 def main():
     env = TwoDMaze(maze)
     agent = TwoDAgent(SimpleReflexProgram())
-    env.add_thing(agent, (2,1))
+    ag_x, ag_y = get_agent_location_from_maze_string(maze)
+    assert(-1 != ag_x and -1 != ag_y)
+    env.add_thing(agent, (ag_x,ag_y))
     while not env.is_done():
         env.step()
         for i in range(6):
