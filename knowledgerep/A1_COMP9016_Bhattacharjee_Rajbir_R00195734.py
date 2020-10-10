@@ -173,6 +173,8 @@ class TwoDAgent(Agent):
         self.current_display = 'P' if 'b' == self.current_display else 'b'
         return self.current_display
 
+# SimpleReflexProgram randomly chooses a move in any direction
+# as long as it doesn't hit a wall
 def SimpleReflexProgram():
     # Percepts are of the form
     # {
