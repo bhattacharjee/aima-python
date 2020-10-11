@@ -37,7 +37,9 @@ class MissionariesProblem(Problem):
             return False
         if (state[1] + state[4]) != 3 or (state[2] + state[5]) != 3: # n-miss = n-can = 3
             return False
-        if (state[1] < state[2] or state[4] < state[5]): # n-miss >= n-can:
+        if (state[1] != 0 and (state[1] < state[2])):
+            return False
+        if (state[4] != 0 and (state[4] < state[5])):
             return False
         s1 = state[0] + state[1] + state[2]
         s2 = orig_state[0] + orig_state[1] + orig_state[2]
@@ -57,12 +59,20 @@ class MissionariesProblem(Problem):
         # Formally, delta = {s1, s2, s3, s4, s5, s6} where si belongs to {-1, 0, 1}
         # This delta will be added to the states
         orig_state = copy.deepcopy(state)
-        delta_states = []
+        delta_states =[ \
+            (-1, 0, -2, 1, 0, 2),  # Right 2C 1B
+            (-1, -2, 0, 1, 2, 0),  # Right 2M 1B
+            (-1, 0, -1, 1, 0, 1),  # Right 1C 1B
+            (-1, -1, 0, 1, 1, 0),  # Right 1M 1B
+            (-1, -1, -1, 1, 1, 1), # Right 1C 1M 1B
+            (1, 0, 2, -1, 0, -2),  # Left 2C 1B
+            (1, 2, 0, -1, -2, 0),  # Left 2M 1B
+            (1, 0, 1, -1, 0, -1),  # Left 1C 1B
+            (1, 1, 0, -1, -1, 0),  # Left 1M 1B
+            (1, 1, 1, -1, -1, -1)  # Left 1C 1M 1B
+            ]
         temp_new_states = []
         new_states = []
-        for i in itertools.combinations_with_replacement([-1, 0, 1], 6):
-            delta_states.append(i) # new-states, is the delta at this point
-        # Add the original state to the new states
         for i in range(len(delta_states)):
             arr1 = list(delta_states[i])
             arr2 = list(state)
@@ -91,4 +101,12 @@ def my_heuristic(state):
         m += ((i - j) * (i - j))
     return m
 
-astar_search(MissionariesProblem(), my_heuristic).solution()
+def missionary_problem():
+    srch = astar_search(MissionariesProblem(), my_heuristic)
+    print(srch.solution())
+
+def main():
+    missionary_problem()
+
+if "__main__" == __name__:
+    main()
