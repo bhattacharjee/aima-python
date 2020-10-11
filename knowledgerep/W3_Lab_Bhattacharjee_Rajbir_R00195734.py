@@ -3,6 +3,7 @@
 import os,sys,inspect, random, copy
 import itertools
 import time
+import argparse
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -71,13 +72,11 @@ class MissionariesProblem(Problem):
             (1, 1, 0, -1, -1, 0),  # Left 1M 1B
             (1, 1, 1, -1, -1, -1)  # Left 1C 1M 1B
             ]
-        temp_new_states = []
         new_states = []
         for i in range(len(delta_states)):
             arr1 = list(delta_states[i])
             arr2 = list(state)
             arr3 = [a + b for a, b in zip(arr1, arr2)]
-            temp_new_states.append(tuple(arr3))
             if (self.is_state_valid(tuple(arr3), orig_state)):
                 new_states.append(tuple(arr3))
         return new_states
@@ -202,9 +201,19 @@ def NQueenDriver():
 
 
 def main():
-    #missionary_problem()
-    #EightPuzzleDriver()
-    NQueenDriver()
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-mc", "--missionary-cannibal", action="store_true", help="Solve the missionaries problem")
+    parser.add_argument("-p8", "--puzzle-8", action="store_true", help="Solve the 8-puzzle")
+    parser.add_argument("-nq", "--n-queen", action="store_true", help="Solve the N-Queens puzzle")
+    args = parser.parse_args()
+    if (args.missionary_cannibal):
+        missionary_problem()
+    if (args.puzzle_8):
+        EightPuzzleDriver()
+    if (args.n_queen):
+        NQueenDriver()
+    if (not args.missionary_cannibal and not args.puzzle_8 and not args.n_queen):
+        parser.print_help()
 
 
 if "__main__" == __name__:
