@@ -9,7 +9,7 @@ try:
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir) 
-    from search import Problem, astar_search, EightPuzzle, hill_climbing, simulated_annealing, simulated_annealing_full
+    from search import Problem, astar_search, EightPuzzle, hill_climbing, simulated_annealing, simulated_annealing_full, NQueensProblem
 except:
     print("Could not import from parent folder... Exiting")
     sys.exit(1)
@@ -151,10 +151,28 @@ def EightPuzzleDriver():
     print(f"Hill climbing:                     {hill_solved_count} / {hill_attempted_count}")
     print(f"Simulated annealing:               {sa_solved_count} / {sa_attempted_count}")
 
+class MyNQueen(NQueensProblem):
+    def value(self, state):
+        """Return number of conflicting queens for a given node"""
+        num_conflicts = 0
+        for (r1, c1) in enumerate(state):
+            for (r2, c2) in enumerate(state):
+                if (r1, c1) != (r2, c2):
+                    num_conflicts += self.conflict(r1, c1, r2, c2)
+        return -1 * num_conflicts
 
 def main():
     missionary_problem()
+    nqp = MyNQueen(8)
+    hc = hill_climbing(nqp)
+    print(hc, type(hc))
+    sa = simulated_annealing(nqp)
+    print(sa)
+    saf = simulated_annealing_full(nqp)
+    print(saf)
     EightPuzzleDriver()
+    EightPuzzleDriver()
+
 
 if "__main__" == __name__:
     main()
