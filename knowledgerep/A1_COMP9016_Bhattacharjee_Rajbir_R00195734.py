@@ -143,12 +143,19 @@ class TwoDEnvironment(Environment):
 
     def percept(self, agent):
         percept = {}
+        thedoor = None
         x, y = agent.get_location()
         percept["dimensions"] = [self.rows, self.cols]
         percept["location"] = [x, y]
         percept["things"] = []
         for thing in self.things:
             percept["things"].append(thing)
+            if (isinstance(thing, Door)):
+                thedoor = thing
+        assert(None != thedoor)
+        dx, dy = thedoor.get_location()
+        assert(None != dx and None != dy)
+        percept["Goal-Direction"] = [dx - x, dy - y]
         return percept
 
     def add_thing(self, thing, location):
