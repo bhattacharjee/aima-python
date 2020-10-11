@@ -102,8 +102,16 @@ def my_heuristic(state):
     return m
 
 def missionary_problem():
+    print("*" * 80)
+    print("Missionary problem, the encoding is a set of tuples")
+    print("Encoding: (nBoat, nMissionaries, nCannibals, nBoats2, nMissionaries2, nCannibals2) eg. (1, 3, 3, 0, 0, 0)")
+    print("The first three numbers denote the numbers of boats, missionaries, cannibals on the first side")
+    print("The second three numbers denote the numbers of boats, missionaries, cannibals on the other side")
+    print("The solution is displayed as the state after executing every move")
     srch = astar_search(MissionariesProblem(), my_heuristic)
-    print(srch.solution())
+    print('-' * 80)
+    [print("%3d" % (i + 1), ". ", j) for i, j in enumerate(srch.solution())]
+    print("*" * 80)
 
 def main():
     missionary_problem()
