@@ -79,13 +79,14 @@ def get_updated_row_col(x, y, action):
 
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
-    def __init__(self, rows, cols):
+    def __init__(self, rows, cols, restore_power=False):
         global g_curses_available
         self.stored_power = None
         super().__init__()
         self.rows = rows
         self.cols = cols
         self.thedoor = None
+        self.restore_power = restore_power # Powers once taken should reappear
         #self.matrix = [[None] * cols] * rows
         self.matrix = [[None for i in range(cols)] for j in range(rows)]
         if g_curses_available:
@@ -129,10 +130,10 @@ class TwoDEnvironment(Environment):
             self.things.remove(old_object)
         agent.set_location(newrow, newcol)
         agent.num_moves += 1
-        if None != self.stored_power:
+        if None != self.stored_power and True == self.restore_power:
             self.add_thing(self.stored_power, [row, col])
             self.stored_power = None
-        if old_object != None and isinstance(old_object, Power):
+        if True == self.restore_power and old_object != None and isinstance(old_object, Power):
             self.stored_power = old_object
         pass
 
