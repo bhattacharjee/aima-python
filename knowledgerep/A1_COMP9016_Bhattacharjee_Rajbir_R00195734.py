@@ -141,6 +141,10 @@ class TwoDEnvironment(Environment):
             self.stored_power = old_object
         pass
 
+    # "dimensions" : dimensions of board
+    # "location" : location of agent
+    # "things" : list of things
+    # "goal_direction": direction of goal [dx, dy] dx/dy can be negative
     def percept(self, agent):
         percept = {}
         thedoor = None
@@ -155,7 +159,7 @@ class TwoDEnvironment(Environment):
         assert(None != thedoor)
         dx, dy = thedoor.get_location()
         assert(None != dx and None != dy)
-        percept["Goal-Direction"] = [dx - x, dy - y]
+        percept["goal_direction"] = [dx - x, dy - y]
         return percept
 
     def add_thing(self, thing, location):
@@ -325,6 +329,128 @@ def SimpleReflexProgram():
 
     return program
 
+def GoalDrivenAgentProgram():
+
+    # Gaol driven greedy search may get stuck. If it does
+    # We need to randomly go to a new node which we haven't visited earlier
+    doing_random = False
+    visited_matrix = None
+    move_table = {
+        (-1, 0): "moveUp",
+        (1, 0): "moveDown",
+        (0, -1): "moveLeft",
+        (0, 1): "moveRight"
+    }
+    def get_matrix(rows, cols, things):
+        matrix = [[' ' for i in range(cols)] for j in range(rows)]
+        for thing in things:
+            if not isinstance(thing, Agent):
+                row = thing.location[0]
+                col = thing.location[1]
+                if (isinstance(thing, Wall)):
+                    matrix[row][col] = '#'
+                if (isinstance(thing, Door)):
+                    matrix[row][col] = 'D'
+        return matrix
+
+    # Helper routine to get the candidate moves, it doesn't care
+    # whether the move is blocked by a wall or not 
+    # However, it checks whether the move is out of bounds
+    # or not
+    def get_candidate_positions(ag_location, mt_dimensions):
+        row = ag_location[0]
+        col = ag_location[1]
+        total_rows = mt_dimensions[0]
+        total_cols = mt_dimensions[1]
+        temp = [ (row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
+        candidates = []
+        for row, col in temp:
+            if (row >= 0 and row < total_rows and col >= 0 and col < total_cols):
+                candidates.append((row, col))
+        return candidates
+
+    def get_random_move(matrix, a_loc):
+        assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
+        mt_dim = [len(matrix), len(matrix[0])]
+        candidates = get_candidate_positions(a_loc, mt_dim)
+        while 0 != len(candidate_positions):
+            i = random.randrange(0, len(candidate_positions))
+            x, y = candidate_positions[i]
+            if not isinstance(matrix[x][y], Wall):
+                rowCandidate = x
+                colCandidate = y
+                break
+            else:
+                del candidate_positions[i]
+        # Convert position to move (eg. [0, 0] -> MoveUp)
+        if -1 != rowCandidate and -1 != colCandidate:
+            row_move = rowCandidate - ag_location[0]
+            col_move = colCandidate - ag_location[1]
+            move = move_table[(row_move, col_move)]
+            assert(None != move)
+            return move
+        return None
+
+
+    def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy):
+        # First try moving rows
+        if (0 != dx):
+            newrow = a_row + dx
+            newcol = a_col
+            if (newrow >= 0 and newrow < m_rows):
+                if (matrix[newrow][newcol] != '#'):
+                    return newrow, newcol
+        if (0 != dy):
+            newrow = a_row
+            newcol = a_col + dy
+            if (newcol >= 0 and newcol < m_cols):
+                if (matrix[newrow][newcol] != '#'):
+                    return newrow, newcol
+        return -1, -1
+
+    def get_action_string(n_r, n_c, o_r, o_c):
+        nonlocal move_table
+        dx = n_r - o_r
+        dy = n_c - o_c
+        assert(None != move_table[(dx, dy)])
+        return move_table[(dx, dy)]
+
+    # "dimensions" : dimensions of board
+    # "location" : location of agent
+    # "things" : list of things
+    # "goal_direction": direction of goal [dx, dy] dx/dy can be negative
+    def program(percepts):
+        nonlocal visited_matrix
+        nonlocal doing_random
+        rows = percepts["dimensions"][0]
+        cols = percepts["dimensions"][1]
+        a_row = percepts["location"][0]
+        a_col = percepts["location"][1]
+        dx = percepts["goal_direction"][0]
+        dy = percepts["goal_direction"][1]
+        dx = dx if 0 == dx else dx // abs(dx)
+        dy = dy if 0 == dy else dy // abs(dy)
+        assert(a_row != None and a_col != None and rows != None and cols != None)
+        assert(-1 != a_row and -1 != a_col and -1 != rows and -1 != cols)
+        matrix = get_matrix(rows, cols, percepts["things"])
+        if (None == visited_matrix):
+            visited_matrix = [[False for i in range(rows)] for j in range(cols)]
+        if (not visited_matrix[a_row][a_col]):
+            doing_random = False
+        visited_matrix[a_row][a_col] = True
+        if (not doing_random):
+            nr, nc = get_goal_directed_new_location(matrix, rows, cols, a_row, a_col, dx, dy)
+            if (-1 != nr and -1 != nc):
+                return get_action_string(nr, nc, a_row, a_col)
+            else:
+                doing_random = True
+        assert(True == doing_random)
+        move = get_random_move(matrix, [a_row, a_col])
+        assert(None != move)
+        return move
+    
+    return program
+
 
 
 smallMaze = """
@@ -352,7 +478,7 @@ smallMazeWithPower = """
 
 def RunReflexAgentRandomAlgorithm(mazeString: str):
     env = TwoDMaze(mazeString)
-    agent = TwoDAgent(SimpleReflexProgram())
+    agent = TwoDAgent(GoalDrivenAgentProgram())
     ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
     assert(-1 != ag_x and -1 != ag_y)
     env.add_thing(agent, (ag_x,ag_y))
@@ -360,6 +486,7 @@ def RunReflexAgentRandomAlgorithm(mazeString: str):
         env.step()
         for i in range(6):
             env.print_state()
+            time.sleep(0.1)
     time.sleep(1)
     del env
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
