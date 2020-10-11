@@ -329,8 +329,16 @@ def SimpleReflexProgram():
 
     return program
 
+# The goal driven agent program tries to go greedily towards a goal
+# It just sees which direction the goal is and proceeds along that
+# This algorithm suffers from the disadvantage that the agent might get
+# stuck in cul-de-sacs.
+# The easiest way to fix this problem was that if it ever got stuck,
+# then the agent should make random moves till it reaches a node it has
+# not visited previously.
+# Once it visits a node that it hasn't visited previously, then it resumes
+# the goal-driven approach once again
 def GoalDrivenAgentProgram():
-
     # Gaol driven greedy search may get stuck. If it does
     # We need to randomly go to a new node which we haven't visited earlier
     doing_random = False
@@ -340,6 +348,12 @@ def GoalDrivenAgentProgram():
         (1, 0): "moveDown",
         (0, -1): "moveLeft",
         (0, 1): "moveRight"
+    }
+    backward_move_table = {
+        "moveUp": (-1, 0),
+        "moveDown": (1, 0),
+        "moveLeft": (0, -1),
+        "moveRight": (0, 1)
     }
     def get_matrix(rows, cols, things):
         matrix = [[' ' for i in range(cols)] for j in range(rows)]
@@ -372,11 +386,11 @@ def GoalDrivenAgentProgram():
     def get_random_move(matrix, a_loc):
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
         mt_dim = [len(matrix), len(matrix[0])]
-        candidates = get_candidate_positions(a_loc, mt_dim)
+        candidate_positions = get_candidate_positions(a_loc, mt_dim)
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
             x, y = candidate_positions[i]
-            if not isinstance(matrix[x][y], Wall):
+            if '#' != matrix[x][y]:
                 rowCandidate = x
                 colCandidate = y
                 break
@@ -384,28 +398,43 @@ def GoalDrivenAgentProgram():
                 del candidate_positions[i]
         # Convert position to move (eg. [0, 0] -> MoveUp)
         if -1 != rowCandidate and -1 != colCandidate:
-            row_move = rowCandidate - ag_location[0]
-            col_move = colCandidate - ag_location[1]
+            row_move = rowCandidate - a_loc[0]
+            col_move = colCandidate - a_loc[1]
             move = move_table[(row_move, col_move)]
             assert(None != move)
             return move
+        assert(True) # Should never reach here
         return None
 
 
     def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy):
-        # First try moving rows
-        if (0 != dx):
-            newrow = a_row + dx
-            newcol = a_col
-            if (newrow >= 0 and newrow < m_rows):
-                if (matrix[newrow][newcol] != '#'):
-                    return newrow, newcol
-        if (0 != dy):
-            newrow = a_row
-            newcol = a_col + dy
-            if (newcol >= 0 and newcol < m_cols):
-                if (matrix[newrow][newcol] != '#'):
-                    return newrow, newcol
+        # Sometimes, try moving rows first, at other times, try moving columns first
+        if random.choice([True, False]):
+            if (0 != dx):
+                newrow = a_row + dx
+                newcol = a_col
+                if (newrow >= 0 and newrow < m_rows):
+                    if (matrix[newrow][newcol] != '#'):
+                        return newrow, newcol
+            if (0 != dy):
+                newrow = a_row
+                newcol = a_col + dy
+                if (newcol >= 0 and newcol < m_cols):
+                    if (matrix[newrow][newcol] != '#'):
+                        return newrow, newcol
+        else:
+            if (0 != dy):
+                newrow = a_row
+                newcol = a_col + dy
+                if (newcol >= 0 and newcol < m_cols):
+                    if (matrix[newrow][newcol] != '#'):
+                        return newrow, newcol
+            if (0 != dx):
+                newrow = a_row + dx
+                newcol = a_col
+                if (newrow >= 0 and newrow < m_rows):
+                    if (matrix[newrow][newcol] != '#'):
+                        return newrow, newcol
         return -1, -1
 
     def get_action_string(n_r, n_c, o_r, o_c):
@@ -414,6 +443,15 @@ def GoalDrivenAgentProgram():
         dy = n_c - o_c
         assert(None != move_table[(dx, dy)])
         return move_table[(dx, dy)]
+
+    # Validate that the next move is not out of bounds
+    def validate_move(move, a_row, a_col, rows, cols):
+        nr, nc = get_updated_row_col(a_row, a_col, move)
+        if (nr < 0 or nc < 0):
+            return False
+        if (nr >= rows or nc >= cols):
+            return False
+        return True
 
     # "dimensions" : dimensions of board
     # "location" : location of agent
@@ -434,18 +472,21 @@ def GoalDrivenAgentProgram():
         assert(-1 != a_row and -1 != a_col and -1 != rows and -1 != cols)
         matrix = get_matrix(rows, cols, percepts["things"])
         if (None == visited_matrix):
-            visited_matrix = [[False for i in range(rows)] for j in range(cols)]
+            visited_matrix = [[False for i in range(cols)] for j in range(rows)]
         if (not visited_matrix[a_row][a_col]):
             doing_random = False
         visited_matrix[a_row][a_col] = True
         if (not doing_random):
             nr, nc = get_goal_directed_new_location(matrix, rows, cols, a_row, a_col, dx, dy)
             if (-1 != nr and -1 != nc):
-                return get_action_string(nr, nc, a_row, a_col)
+                move = get_action_string(nr, nc, a_row, a_col)
+                assert(validate_move(move, a_row, a_col, rows, cols))
+                return move
             else:
                 doing_random = True
         assert(True == doing_random)
         move = get_random_move(matrix, [a_row, a_col])
+        assert(validate_move(move, a_row, a_col, rows, cols))
         assert(None != move)
         return move
     
@@ -476,9 +517,9 @@ smallMazeWithPower = """
 ##############################"""
 
 
-def RunReflexAgentRandomAlgorithm(mazeString: str):
+def RunAgentAlgorithm(program, mazeString: str):
     env = TwoDMaze(mazeString)
-    agent = TwoDAgent(GoalDrivenAgentProgram())
+    agent = TwoDAgent(program)
     ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
     assert(-1 != ag_x and -1 != ag_y)
     env.add_thing(agent, (ag_x,ag_y))
@@ -486,13 +527,14 @@ def RunReflexAgentRandomAlgorithm(mazeString: str):
         env.step()
         for i in range(6):
             env.print_state()
-            time.sleep(0.1)
     time.sleep(1)
     del env
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
 
+
 def main():
-    RunReflexAgentRandomAlgorithm(smallMazeWithPower)
+    RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
 
 if "__main__" == __name__:
     main()
