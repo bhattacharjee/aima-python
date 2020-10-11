@@ -4,6 +4,9 @@ import time
 
 # Is curses available or not?
 g_curses_available = True
+g_suppress_state_printing = False
+g_state_print_same_place_loop_count = 6
+g_state_refresh_sleep = 0
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -197,6 +200,9 @@ class TwoDEnvironment(Environment):
         self.window.refresh()
 
     def print_state(self):
+        global g_suppress_state_printing
+        if g_suppress_state_printing:
+            return
         global g_curses_available
         if g_curses_available:
             return self.print_state_curses()
@@ -555,6 +561,57 @@ mediumMaze2= """
 #o                                        #
 ###########################################"""
 
+largeMaze = """
+####################################################################################################################
+#                                                                                                                  #
+#                   #                  ############################            #        ####    ########       #   #
+#                   #                                                              #       #    #              #   #
+#                   #############################                                  #       ###     #####  ######   #
+#                                 #                                          #######  ####         #   #  #        #
+#                                 #                                          #  #              ##    #    #  # x   #
+#                                 #          ###########################     #  #              #     #       #     #
+#           ################      #                                             #    ######    #         #         #
+#                                 #                                             #              #         #  ########
+#                    #                                                         ##     ##########         #         #
+#                    #                                            #                                ############    #
+#                    #     #####################################  #          ##             #            #         #
+#                    #                                            #           #########     ########               #
+#                    #                                            #           #             #           #########  #
+#                    #                                            #  ########                    #                 #
+#                    #          #           #                     #                              #                 #
+#                    #          #           #                     #             #          #     #                 #
+#                    #          #           #                     #             #          #                       #
+#                    #          #           #                     #             #          #           #           #
+#                               #           #                     #   ########  #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #           ######################################          #             #          #    ###############    #
+#     #                                                           #             #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #                              #                            #  #########  #          #           #           #
+#     #                              #                            #             #          #           #           #
+#     #                              #                            #             #          #                       #
+#     #                              #                            #             #          #        #  ##          #
+#     #                              #                            #             #          #        #   #          #
+#     #                              #                            #             #          #            #####      #
+#     #                                                                         #          #                       #
+#     #  ###################################       ########################                #                       #
+#     #                                                                                    #   #############       #
+#     #                                                                   #                #          #            #
+#     #                      #                                            #                #          #            #
+#     #                      #        #############################       #                           #            #
+#     #                      #                                            #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#                            #                                            #                                        #
+#o                                                                                                                 #
+#                                                                                                                  #
+####################################################################################################################"""
 def RunAgentAlgorithm(program, mazeString: str):
     env = TwoDMaze(mazeString)
     agent = TwoDAgent(program)
@@ -571,10 +628,12 @@ def RunAgentAlgorithm(program, mazeString: str):
 
 
 def main():
-    RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
-    RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
+    #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
+    RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
     main()
