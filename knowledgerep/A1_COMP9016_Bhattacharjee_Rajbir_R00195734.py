@@ -516,6 +516,44 @@ smallMazeWithPower = """
 #  3      5    #  8    #     #
 ##############################"""
 
+mediumMaze= """
+###########################################
+#     #                #              #   #
+#o    #        ####    ########       #   #
+#     #####       #    #              #   #
+#         #       ###     #####  ######   #
+#   #######  ####   #     #   #  #      ###
+#   #  #           #####    #    #  # x   #
+#   #  #              #     #       #     #
+#      #    ######    #         #         #
+#      #              #         #  ########
+#     ##     ##########         #         #
+#                         ############    #
+#   ##             #            #         #
+#    #########     ########               #
+#    #             #           #########  #
+#                                         #
+###########################################"""
+
+# Maze with fewer cul-de-sacs
+mediumMaze2= """
+###########################################
+#                                         #
+#     #        ####    ########       #   #
+#         #       #    #              #   #
+#         #       ###     #####  ######   #
+#   #######  ####         #   #  #        #
+#   #  #              ##    #    #  # x   #
+#   #  #              #     #       #     #
+#      #    ######    #         #         #
+#      #              #         #  ########
+#     ##     ##########         #         #
+#                         ############    #
+#   ##             #            #         #
+#    #########     ########               #
+#    #             #           #########  #
+#o                                        #
+###########################################"""
 
 def RunAgentAlgorithm(program, mazeString: str):
     env = TwoDMaze(mazeString)
@@ -533,8 +571,10 @@ def RunAgentAlgorithm(program, mazeString: str):
 
 
 def main():
-    RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
+    RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
+    RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
 
 if "__main__" == __name__:
     main()
