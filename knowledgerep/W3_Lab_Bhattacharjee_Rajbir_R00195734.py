@@ -127,6 +127,8 @@ def EightPuzzleDriver():
     hill_attempted_count = 0
     sa_attempted_count = 0
     sa_solved_count = 0
+    saf_attempted_count = 0
+    saf_solved_count = 0
     solution = (1, 2, 3, 4, 5, 6, 7, 8, 0)
     for i in itertools.permutations(list("012345678")):
         initial = tuple([int(j) for j in list(i)])
@@ -141,15 +143,23 @@ def EightPuzzleDriver():
         my_8_pz = MyEightPuzzle(initial)
         sa = simulated_annealing(my_8_pz)
         sa_attempted_count += 1
-        if (solution == hc):
+        if (solution == sa):
             print(f"Simulated annealing solved {initial} -> {state}")
             sa_solved_count += 1
+
+        my_8_pz = MyEightPuzzle(initial)
+        saf = simulated_annealing_full(my_8_pz)
+        saf_attempted_count += 1
+        if (solution == saf):
+            print(f"Simulated annealing full solved {initial} -> {state}")
+            saf_solved_count += 1
 
         if hill_attempted_count > 1000:
             break
         
-    print(f"Hill climbing:                     {hill_solved_count} / {hill_attempted_count}")
-    print(f"Simulated annealing:               {sa_solved_count} / {sa_attempted_count}")
+    print(f"8-puzzle: Hill climbing (solved / attempted):                     {hill_solved_count} / {hill_attempted_count}")
+    print(f"8-puzzle: Simulated annealing (solved / attempted):               {sa_solved_count} / {sa_attempted_count}")
+    print(f"8-puzzle: Simulated annealing full (solved / attempted):          {saf_solved_count} / {saf_attempted_count}")
 
 class MyNQueen(NQueensProblem):
     def value(self, state):
@@ -161,17 +171,40 @@ class MyNQueen(NQueensProblem):
                     num_conflicts += self.conflict(r1, c1, r2, c2)
         return -1 * num_conflicts
 
+def NQueenDriver():
+    attempted = 0
+    hc_solved = 0
+    sa_solved = 0
+    saf_solved = 0
+
+    for i in range(1000):
+        attempted += 1
+
+        hc = hill_climbing(MyNQueen(8))
+        if -1 not in hc:
+            hc_solved += 1
+            print(f"hill_climbing solution: {hc}")
+        
+        sa = simulated_annealing(MyNQueen(8))
+        if -1 not in sa:
+            sa_solved += 1
+            print(f"simulated annealing solution: {sa}")
+
+        saf = simulated_annealing_full(MyNQueen(8))
+        if -1 not in saf:
+            saf_solved += 1
+            print(f"Simulated annealing full solved: {saf}")
+    print(f"N-Queen: Hill climbing (solved/attempted)                {hc_solved} / {attempted}")
+    print(f"N-Queen: Simulated annealing (solved/attempted)          {sa_solved} / {attempted}")
+    print(f"N-Queen: Simluated annealing full (solved/attempted)     {saf_solved} / {attempted}")
+
+
+
+
 def main():
-    missionary_problem()
-    nqp = MyNQueen(8)
-    hc = hill_climbing(nqp)
-    print(hc, type(hc))
-    sa = simulated_annealing(nqp)
-    print(sa)
-    saf = simulated_annealing_full(nqp)
-    print(saf)
-    EightPuzzleDriver()
-    EightPuzzleDriver()
+    #missionary_problem()
+    #EightPuzzleDriver()
+    NQueenDriver()
 
 
 if "__main__" == __name__:
