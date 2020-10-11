@@ -81,6 +81,7 @@ def get_updated_row_col(x, y, action):
 class TwoDEnvironment(Environment):
     def __init__(self, rows, cols):
         global g_curses_available
+        self.stored_power = None
         super().__init__()
         self.rows = rows
         self.cols = cols
@@ -128,6 +129,11 @@ class TwoDEnvironment(Environment):
             self.things.remove(old_object)
         agent.set_location(newrow, newcol)
         agent.num_moves += 1
+        if None != self.stored_power:
+            self.add_thing(self.stored_power, [row, col])
+            self.stored_power = None
+        if old_object != None and isinstance(old_object, Power):
+            self.stored_power = old_object
         pass
 
     def percept(self, agent):
