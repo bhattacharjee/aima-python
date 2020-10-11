@@ -9,7 +9,7 @@ try:
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir) 
-    from search import Problem, astar_search
+    from search import Problem, astar_search, EightPuzzle, hill_climbing, simulated_annealing, simulated_annealing_full
 except:
     print("Could not import from parent folder... Exiting")
     sys.exit(1)
@@ -113,8 +113,48 @@ def missionary_problem():
     [print("%3d" % (i + 1), ". ", j) for i, j in enumerate(srch.solution())]
     print("*" * 80)
 
+class MyEightPuzzle(EightPuzzle):
+    def value(self, state):
+        assert(isinstance(state, tuple))
+        distance = 0
+        for i in range(10):
+            lc = abs(i//3 - state[i//3]) + abs(i%3 - state[i%3])
+            distance += lc
+        return distance
+
+def EightPuzzleDriver():
+    hill_solved_count = 0
+    hill_attempted_count = 0
+    sa_attempted_count = 0
+    sa_solved_count = 0
+    solution = (1, 2, 3, 4, 5, 6, 7, 8, 0)
+    for i in itertools.permutations(list("012345678")):
+        initial = tuple([int(j) for j in list(i)])
+        my_8_pz = MyEightPuzzle(initial)
+
+        hc = hill_climbing(my_8_pz)
+        hill_attempted_count += 1
+        if (solution == hc):
+            print(f"Hill climbing solved {initial} -> {state}")
+            hill_solved_count += 1
+        
+        my_8_pz = MyEightPuzzle(initial)
+        sa = simulated_annealing(my_8_pz)
+        sa_attempted_count += 1
+        if (solution == hc):
+            print(f"Simulated annealing solved {initial} -> {state}")
+            sa_solved_count += 1
+
+        if hill_attempted_count > 1000:
+            break
+        
+    print(f"Hill climbing:                     {hill_solved_count} / {hill_attempted_count}")
+    print(f"Simulated annealing:               {sa_solved_count} / {sa_attempted_count}")
+
+
 def main():
     missionary_problem()
+    EightPuzzleDriver()
 
 if "__main__" == __name__:
     main()
