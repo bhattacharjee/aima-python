@@ -66,6 +66,14 @@ class Door(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'D')
 
+class Grow(TwoDThing):
+    def __init__(self, x, y):
+        super().__init__(x, y, 'G')
+
+class Shrink(TwoDThing):
+    def __init__(self, x, y):
+        super().__init__(x, y, 'S')
+
 def get_updated_row_col(x, y, action):
     row = x
     col = y
@@ -83,7 +91,7 @@ def get_updated_row_col(x, y, action):
 
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
-    def __init__(self, rows, cols, restore_power=True, initial_agent_max_length=8, ag_can_grow=False):
+    def __init__(self, rows, cols, restore_power=True, initial_agent_max_length=8, ag_can_grow=True):
         global g_curses_available
         self.stored_power = None
         super().__init__()
@@ -101,9 +109,14 @@ class TwoDEnvironment(Environment):
         if g_curses_available:
             self.window = curses.initscr()
 
-    def agent_grow_shrink_fn(self, direction):
-        if (self.agent_can_grow):
-            self.agent_max_length += direction * 4
+    def process_agent_grow_shrink(self, direction):
+        if not self.agent_can_grow:
+            return
+        self.agent_max_length += direction * 2
+        if (self.agent_max_length < 0):
+            self.agent_max_length = 0
+        while(len(self.agent_history) > self.agent_max_length):
+            self.agent_history.popleft()
 
     def is_done(self):
         if self.is_stuck:
@@ -127,6 +140,8 @@ class TwoDEnvironment(Environment):
             curses.endwin()
 
     def execute_action(self, agent, action):
+        should_grow = False
+        should_shrink = False
         global g_self_crossing_not_allowed
         if None == action:
             return
@@ -141,14 +156,18 @@ class TwoDEnvironment(Environment):
         if len(self.agent_history) > 0 and \
                 (row, col) != self.agent_history[len(self.agent_history) - 1]:
             self.agent_history.append((row, col))
-            if (len(self.agent_history) > self.agent_max_length):
-                while(len(self.agent_history) > self.agent_max_length):
-                    self.agent_history.popleft()
+            while(len(self.agent_history) > self.agent_max_length):
+                self.agent_history.popleft()
         assert((newrow, newcol) not in self.agent_history or not g_self_crossing_not_allowed)
         old_object = self.matrix[newrow][newcol]
         self.matrix[newrow][newcol] = agent
-        if (None != old_object and isinstance(old_object, Power)):
-            agent.num_power += old_object.get_power_value()
+        if (None != old_object and (isinstance(old_object, Power) or isinstance(old_object, Grow) or isinstance(old_object, Shrink))):
+            if (isinstance(old_object, Power)):
+                agent.num_power += old_object.get_power_value()
+            if (isinstance(old_object, Grow)):
+                should_grow = True
+            if (isinstance(old_object, Shrink)):
+                should_shrink = True
             if (not self.restore_power):
                 self.things.remove(old_object)
         agent.set_location(newrow, newcol)
@@ -159,8 +178,12 @@ class TwoDEnvironment(Environment):
             else:
                 self.stored_power.location = [row, col]
             self.stored_power = None
-        if True == self.restore_power and old_object != None and isinstance(old_object, Power):
+        if True == self.restore_power and old_object != None and (isinstance(old_object, Power) or isinstance(old_object, Grow) or isinstance(old_object, Shrink)):
             self.stored_power = old_object
+        direction = 0
+        direction = 1 if should_grow else direction
+        direction = -1 if should_shrink else direction
+        self.process_agent_grow_shrink(direction)
 
     # "dimensions" : dimensions of board
     # "location" : location of agent
@@ -267,6 +290,12 @@ class TwoDMaze(TwoDEnvironment):
                     power_value = int(mazeString[i][j])
                     power.set_power_value(power_value)
                     self.add_thing(power, [i, j])
+                if 'G' == mazeString[i][j]:
+                    grow = Grow(i, j)
+                    self.add_thing(grow, [i, j])
+                if 'S' == mazeString[i][j]:
+                    shrink = Shrink(i, j)
+                    self.add_thing(shrink, [i, j])
 
     def is_deque_stuck(self, d):
         if (0 == len(d) or 1 == len(d) or None == d):
@@ -697,9 +726,9 @@ largeMaze = """
 #                                 #                                             #              #         #  ########
 #                    #                                                         ##     ##########         #         #
 #                    #                                            #                                ############    #
-#                    #     #####################################  #          ##             #            #         #
-#                    #                                            #           #########     ########               #
-#                    #                                            #           #             #           #########  #
+#  G          G      #     #####################################  #          ##             #            #         #
+#          G         #                                            #           #########     ########               #
+#                    #           S             S                 S#           #             #           #########  #
 #                    #                                            #  ########                    #                 #
 #                    #          #           #                     #                              #                 #
 #                    #          #           #                     #             #          #     #                 #
@@ -722,18 +751,18 @@ largeMaze = """
 #     #                                                                                    #   #############       #
 #     #                                                                   #                #          #            #
 #     #                      #                                            #                #          #            #
-#     #                      #        #############################       #                           #            #
+#     #    S    G            #        #############################       #                           #            #
 #     #                      #                                            #                           #            #
 #     #                      #                         #                  #                           #            #
 #     #                      #                         #                  #                           #            #
-#     #                      #                         #                  #                           #            #
+#     #    G                 #                         #                  #                           #            #
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
-#                            #                                            #                                        #
-#o                                                                                                                 #
-#                                                                                                                  #
+#S    G                      #                                            #                                        #
+#oG                                                                                                                #
+#S                                                                                                                 #
 ####################################################################################################################"""
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
@@ -766,7 +795,7 @@ def main():
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
     RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
     main()
