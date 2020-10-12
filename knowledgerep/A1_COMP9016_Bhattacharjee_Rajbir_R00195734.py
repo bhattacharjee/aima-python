@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os,sys,inspect, random, collections
+import os,sys,inspect, random, collections, copy
 import time
 
 # Is curses available or not?
@@ -83,22 +83,27 @@ def get_updated_row_col(x, y, action):
 
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
-    MAX_AGENT_HISTORY = 10
-    def __init__(self, rows, cols, restore_power=True):
+    def __init__(self, rows, cols, restore_power=True, initial_agent_max_length=8, ag_can_grow=False):
         global g_curses_available
         self.stored_power = None
         super().__init__()
         self.rows = rows
+        self.agent_max_length = initial_agent_max_length
         self.cols = cols
         self.is_stuck = False
         self.goal_distance = -1
         self.thedoor = None
+        self.agent_can_grow = ag_can_grow
         self.restore_power = restore_power # Powers once taken should reappear
         self.agent_history = collections.deque()
         #self.matrix = [[None] * cols] * rows
         self.matrix = [[None for i in range(cols)] for j in range(rows)]
         if g_curses_available:
             self.window = curses.initscr()
+
+    def agent_grow_shrink_fn(self, direction):
+        if (self.agent_can_grow):
+            self.agent_max_length += direction * 4
 
     def is_done(self):
         if self.is_stuck:
@@ -136,8 +141,8 @@ class TwoDEnvironment(Environment):
         if len(self.agent_history) > 0 and \
                 (row, col) != self.agent_history[len(self.agent_history) - 1]:
             self.agent_history.append((row, col))
-            if (len(self.agent_history) > TwoDEnvironment.MAX_AGENT_HISTORY):
-                while(len(self.agent_history) > TwoDEnvironment.MAX_AGENT_HISTORY):
+            if (len(self.agent_history) > self.agent_max_length):
+                while(len(self.agent_history) > self.agent_max_length):
                     self.agent_history.popleft()
         assert((newrow, newcol) not in self.agent_history or not g_self_crossing_not_allowed)
         old_object = self.matrix[newrow][newcol]
@@ -393,10 +398,24 @@ class NextMoveHelper(object):
     
     def get_move_string2(oldx, oldy, newx, newy):
         return NextMoveHelper.get_move_string(newx - oldx, newy - oldy)
+
+    def get_move_suitability(oldx, oldy, newx, newy, gdx, gdy):
+        gdx = 0 if 0 == gdx else gdx // abs(gdx)
+        gdy = 0 if 0 == gdy else gdy // abs(gdy)
+        dx = newx - oldx
+        dy = newy - oldy
+        dx = 0 if 0 == dx else dx // abs(dx)
+        dy = 0 if 0 == dy else dy // abs(dy)
+        score = 2
+        if (dy == gdy):
+            score += 1
+        if (dx == gdx):
+            score += 1
+        return score
  
 # SimpleReflexProgram randomly chooses a move in any direction
 # as long as it doesn't hit a wall
-def SimpleReflexProgram():
+def SimpleReflexProgram(weighted_rand_sel=False):
     # Percepts are of the form
     # {
     #    "dimensions" = [row, col],
@@ -406,15 +425,21 @@ def SimpleReflexProgram():
 
     # Recreate the matrix from the percepts
     matrix = None
+    use_weighted_random_selection = weighted_rand_sel
 
     def program(percepts):
         nonlocal matrix
+        nonlocal use_weighted_random_selection
         rowCandidate = colCandidate = -1
         mt_dimensions = percepts["dimensions"]
         ag_location = percepts["location"]
         things = percepts["things"]
         history = percepts["agent_history"]
-
+        goal_direction = percepts["goal_direction"]
+        dx = goal_direction[0]
+        dy = goal_direction[1]
+        dx = dx if 0 == dx else dx // abs(dx)
+        dy = dy if 0 == dy else dy // abs(dy)
         # First recreate the matrix
         matrix = [[None for i in range(mt_dimensions[1])] for j in range(mt_dimensions[0])]
         for thing in things:
@@ -423,7 +448,18 @@ def SimpleReflexProgram():
             matrix[row][col] = thing
 
         # Get the candidate positions
-        candidate_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
+        candidate_positions = []
+        # Assign higher probability to those which are in the direction of the door
+        temp_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
+        for item in temp_positions:
+            nx = item[0]
+            ny = item[1]
+            if (use_weighted_random_selection):
+                weight = NextMoveHelper.get_move_suitability(ag_location[0], ag_location[1], nx, ny, dx, dy)
+            else:
+                weight = 1
+            for i in range(weight):
+                candidate_positions.append(copy.deepcopy(item))
         # Randomly select a new position
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
@@ -729,8 +765,8 @@ def main():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    #RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
     main()
