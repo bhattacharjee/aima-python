@@ -382,6 +382,9 @@ class NextMoveHelper(object):
         x = x + delta[0]
         y = y + delta[0]
         return x, y
+    
+    def get_move_string2(oldx, oldy, newx, newy):
+        return NextMoveHelper.get_move_string(newx - oldx, newy - oldy)
  
 # SimpleReflexProgram randomly chooses a move in any direction
 # as long as it doesn't hit a wall
@@ -425,9 +428,7 @@ def SimpleReflexProgram():
                 del candidate_positions[i]
         # Convert position to move (eg. [0, 0] -> MoveUp)
         if -1 != rowCandidate and -1 != colCandidate:
-            row_move = rowCandidate - ag_location[0]
-            col_move = colCandidate - ag_location[1]
-            move = NextMoveHelper.get_move_string(row_move, col_move)
+            move = NextMoveHelper.get_move_string2(ag_location[0], ag_location[1], rowCandidate, colCandidate)
             assert(None != move)
             return move
         return None
