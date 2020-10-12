@@ -7,13 +7,13 @@ g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
 g_state_refresh_sleep = 0
-g_self_crossing_not_allowed = False
+g_self_crossing_not_allowed = True
 
 # Import the AIMA libraries from the parent directory
 try:
     currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
     parentdir = os.path.dirname(currentdir)
-    sys.path.insert(0,parentdir) 
+    sys.path.insert(0,parentdir)
     from agents import Environment, Thing, Direction, Agent
 except:
     print("Could not import from parent folder... Exiting")
@@ -90,6 +90,7 @@ class TwoDEnvironment(Environment):
         super().__init__()
         self.rows = rows
         self.cols = cols
+        self.is_stuck = False
         self.thedoor = None
         self.restore_power = restore_power # Powers once taken should reappear
         self.agent_history = collections.deque()
@@ -117,6 +118,10 @@ class TwoDEnvironment(Environment):
         if g_curses_available:
             curses.endwin()
 
+    def is_done(self):
+        if self.is_stuck:
+            return True
+        return super().is_done()
 
     def execute_action(self, agent, action):
         global g_self_crossing_not_allowed
@@ -209,6 +214,9 @@ class TwoDEnvironment(Environment):
             m[x+1][y+1] = '*'
         x, y = theAgent.get_location()
         m[x+1][y+1] = theAgent.get_display()
+        if (True == self.is_stuck):
+            for i, c in enumerate(list("S  T  U  C  K !!!")):
+                m[0][i] = c
         return m
 
     # If curses is not supported, print the maze in text format
@@ -236,8 +244,10 @@ class TwoDEnvironment(Environment):
             return self.print_state_text()
 
 class TwoDMaze(TwoDEnvironment):
+    NUM_NULL_MOVES_TILL_STUCK = 2
     def __init__(self, mazeString=str):
         mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
+        self.stuck_detect = collections.deque()
         rows = len(mazeString)
         cols = len(mazeString[0])
         super().__init__(rows, cols)
@@ -254,6 +264,40 @@ class TwoDMaze(TwoDEnvironment):
                     power_value = int(mazeString[i][j])
                     power.set_power_value(power_value)
                     self.add_thing(power, [i, j])
+
+    def is_deque_stuck(self, d):
+        if (0 == len(d) or 1 == len(d) or None == d):
+            return False
+        for e in d:
+            if (None != e):
+                return False
+        return True
+
+    # There is a need to detect that the agent is stuck, hence
+    # this function was copied over from the parent class, and a bit
+    # of code added to check that there are no valid moves left
+    def step(self):
+        if not self.is_done():
+            actions = []
+            for agent in self.agents:
+                if agent.alive:
+                    act = agent.program(self.percept(agent))
+                    if (None == act or (not isinstance(act, list) and not isinstance(act, tuple))):
+                        self.stuck_detect.append(act)
+                    else:
+                        [self.stuck_detect.append(a) for a in act]
+                    actions.append(act)
+                else:
+                    actions.append("")
+            for (agent, action) in zip(self.agents, actions):
+                self.execute_action(agent, action)
+            self.exogenous_change()
+            while (len(self.stuck_detect) > TwoDMaze.NUM_NULL_MOVES_TILL_STUCK):
+                self.stuck_detect.popleft()
+            self.is_stuck = self.is_deque_stuck(self.stuck_detect)
+
+    def got_stuck(self):
+        return self.is_stuck
 
 def get_agent_location_from_maze_string(mazeString=str):
     mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
@@ -313,6 +357,7 @@ def SimpleReflexProgram():
     # However, it checks whether the move is out of bounds
     # or not
     def get_candidate_positions(ag_location, mt_dimensions, history):
+        global g_self_crossing_not_allowed
         row = ag_location[0]
         col = ag_location[1]
         total_rows = mt_dimensions[0]
@@ -408,6 +453,7 @@ def GoalDrivenAgentProgram():
     # However, it checks whether the move is out of bounds
     # or not
     def get_candidate_positions(ag_location, mt_dimensions, history=None):
+        global g_self_crossing_not_allowed
         row = ag_location[0]
         col = ag_location[1]
         total_rows = mt_dimensions[0]
@@ -653,6 +699,8 @@ largeMaze = """
 #                                                                                                                  #
 ####################################################################################################################"""
 def RunAgentAlgorithm(program, mazeString: str):
+    global g_state_print_same_place_loop_count
+    global g_state_refresh_sleep
     env = TwoDMaze(mazeString)
     agent = TwoDAgent(program)
     ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
@@ -660,21 +708,27 @@ def RunAgentAlgorithm(program, mazeString: str):
     env.add_thing(agent, (ag_x,ag_y))
     while not env.is_done():
         env.step()
-        for i in range(6):
+        for i in range(g_state_print_same_place_loop_count):
             env.print_state()
-            #time.sleep(0.03)
+            if (0 != g_state_refresh_sleep):
+                time.sleep(g_state_refresh_sleep)
     time.sleep(1)
+    stuck = env.got_stuck()
     del env
+    if (stuck):
+        print("Got Stuck, didn't complete..")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
 
 
 def main():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
+    RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
     #RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
     main()
