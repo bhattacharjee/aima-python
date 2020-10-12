@@ -153,6 +153,7 @@ class TwoDEnvironment(Environment):
     # "location" : location of agent
     # "things" : list of things
     # "goal_direction": direction of goal [dx, dy] dx/dy can be negative
+    # "agent_history": list of past locations of the agent [(r,c), (r,c), ..]
     def percept(self, agent):
         percept = {}
         thedoor = None
@@ -160,6 +161,8 @@ class TwoDEnvironment(Environment):
         percept["dimensions"] = [self.rows, self.cols]
         percept["location"] = [x, y]
         percept["things"] = []
+        percept["agent_history"] = []
+        [percept["agent_history"].append(l) for l in self.agent_history]
         for thing in self.things:
             percept["things"].append(thing)
             if (isinstance(thing, Door)):
