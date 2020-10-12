@@ -6,7 +6,7 @@ import time
 g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
-g_state_refresh_sleep = 0.01
+g_state_refresh_sleep = 0
 g_self_crossing_not_allowed = True
 
 # Import the AIMA libraries from the parent directory
@@ -91,6 +91,7 @@ class TwoDEnvironment(Environment):
         self.rows = rows
         self.cols = cols
         self.is_stuck = False
+        self.goal_distance = -1
         self.thedoor = None
         self.restore_power = restore_power # Powers once taken should reappear
         self.agent_history = collections.deque()
@@ -100,6 +101,8 @@ class TwoDEnvironment(Environment):
             self.window = curses.initscr()
 
     def is_done(self):
+        if self.is_stuck:
+            return True
         dr_row = dr_col = -1
         ag_row, ag_col = self.agents[0].get_location()
         assert(None != ag_row and None != ag_col)
@@ -117,11 +120,6 @@ class TwoDEnvironment(Environment):
         global g_curses_available
         if g_curses_available:
             curses.endwin()
-
-    def is_done(self):
-        if self.is_stuck:
-            return True
-        return super().is_done()
 
     def execute_action(self, agent, action):
         global g_self_crossing_not_allowed
@@ -297,6 +295,16 @@ class TwoDMaze(TwoDEnvironment):
             self.is_stuck = self.is_deque_stuck(self.stuck_detect)
 
     def got_stuck(self):
+        the_agent = None
+        the_door = None
+        for thing in self.things:
+            if isinstance(thing, Agent):
+                the_agent = thing
+            if isinstance(thing, Door):
+                the_door = thing
+        x1, y1 = the_door.get_location()
+        x2, y2 = the_agent.get_location()
+        self.goal_distance = ((x1 - x2) ** 2) + ((y1 - y2) ** 2)
         return self.is_stuck
 
 def get_agent_location_from_maze_string(mazeString=str):
@@ -707,9 +715,10 @@ def RunAgentAlgorithm(program, mazeString: str):
                 time.sleep(g_state_refresh_sleep)
     time.sleep(1)
     stuck = env.got_stuck()
+    dist = env.goal_distance
     del env
     if (stuck):
-        print("Got Stuck, didn't complete..")
+        print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
 
 
@@ -720,7 +729,7 @@ def main():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
     RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
