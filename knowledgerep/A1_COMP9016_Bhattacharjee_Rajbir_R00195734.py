@@ -6,7 +6,7 @@ import time
 g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
-g_state_refresh_sleep = 0
+g_state_refresh_sleep = 0.01
 g_self_crossing_not_allowed = True
 
 # Import the AIMA libraries from the parent directory
@@ -333,29 +333,25 @@ class TwoDAgent(Agent):
         self.current_display = self.current_display  % len(next_item)
         return next_item[self.current_display]
 
-# SimpleReflexProgram randomly chooses a move in any direction
-# as long as it doesn't hit a wall
-def SimpleReflexProgram():
-    # Percepts are of the form
-    # {
-    #    "dimensions" = [row, col],
-    #    "location": [row, col],
-    #    "things" : [thing1, thing2, thing3]
-    # }
+class NextMoveHelper(object):
     move_table = {
         (-1, 0): "moveUp",
         (1, 0): "moveDown",
         (0, -1): "moveLeft",
         (0, 1): "moveRight"
     }
-
-    # Recreate the matrix from the percepts
-    matrix = None
+    backward_move_table = {
+        "moveUp": (-1, 0),
+        "moveDown": (1, 0),
+        "moveLeft": (0, -1),
+        "moveRight": (0, 1)
+    }
 
     # Helper routine to get the candidate moves, it doesn't care
     # whether the move is blocked by a wall or not 
     # However, it checks whether the move is out of bounds
     # or not
+    # It also checks if the move is within the body of the agent (snake)
     def get_candidate_positions(ag_location, mt_dimensions, history):
         global g_self_crossing_not_allowed
         row = ag_location[0]
@@ -371,7 +367,35 @@ def SimpleReflexProgram():
                         or ((row, col) not in history)):
                     candidates.append((row, col))
         return candidates
+
+    def get_move_string(dx, dy):
+        return NextMoveHelper.move_table[(dx, dy)]
+
+    def get_new_location(move, x, y):
+        if (isinstance(x, list) or isinstance(x, tuple)):
+            y = x[0]
+            x = x[1]
+        if None == move:
+            return x, y
+        delta = backward_move_table[move]
+        assert(None != delta)
+        x = x + delta[0]
+        y = y + delta[0]
+        return x, y
  
+# SimpleReflexProgram randomly chooses a move in any direction
+# as long as it doesn't hit a wall
+def SimpleReflexProgram():
+    # Percepts are of the form
+    # {
+    #    "dimensions" = [row, col],
+    #    "location": [row, col],
+    #    "things" : [thing1, thing2, thing3]
+    # }
+
+    # Recreate the matrix from the percepts
+    matrix = None
+
     def program(percepts):
         nonlocal matrix
         rowCandidate = colCandidate = -1
@@ -388,7 +412,7 @@ def SimpleReflexProgram():
             matrix[row][col] = thing
 
         # Get the candidate positions
-        candidate_positions = get_candidate_positions(ag_location, mt_dimensions, history)
+        candidate_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
         # Randomly select a new position
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
@@ -403,7 +427,7 @@ def SimpleReflexProgram():
         if -1 != rowCandidate and -1 != colCandidate:
             row_move = rowCandidate - ag_location[0]
             col_move = colCandidate - ag_location[1]
-            move = move_table[(row_move, col_move)]
+            move = NextMoveHelper.get_move_string(row_move, col_move)
             assert(None != move)
             return move
         return None
@@ -424,18 +448,7 @@ def GoalDrivenAgentProgram():
     # We need to randomly go to a new node which we haven't visited earlier
     doing_random = False
     visited_matrix = None
-    move_table = {
-        (-1, 0): "moveUp",
-        (1, 0): "moveDown",
-        (0, -1): "moveLeft",
-        (0, 1): "moveRight"
-    }
-    backward_move_table = {
-        "moveUp": (-1, 0),
-        "moveDown": (1, 0),
-        "moveLeft": (0, -1),
-        "moveRight": (0, 1)
-    }
+
     def get_matrix(rows, cols, things):
         matrix = [[' ' for i in range(cols)] for j in range(rows)]
         for thing in things:
@@ -448,31 +461,11 @@ def GoalDrivenAgentProgram():
                     matrix[row][col] = 'D'
         return matrix
 
-    # Helper routine to get the candidate moves, it doesn't care
-    # whether the move is blocked by a wall or not 
-    # However, it checks whether the move is out of bounds
-    # or not
-    def get_candidate_positions(ag_location, mt_dimensions, history=None):
-        global g_self_crossing_not_allowed
-        row = ag_location[0]
-        col = ag_location[1]
-        total_rows = mt_dimensions[0]
-        total_cols = mt_dimensions[1]
-        assert(None != history)
-        temp = [ (row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
-        candidates = []
-        for row, col in temp:
-            if (row >= 0 and row < total_rows and col >= 0 and col < total_cols):
-                if (0 == len(history) or False == g_self_crossing_not_allowed \
-                        or ((row, col) not in history)):
-                    candidates.append((row, col))
-        return candidates
-
     def get_random_move(matrix, a_loc, history):
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
         mt_dim = [len(matrix), len(matrix[0])]
         rowCandidate = colCandidate = -1
-        candidate_positions = get_candidate_positions(a_loc, mt_dim, history)
+        candidate_positions = NextMoveHelper.get_candidate_positions(a_loc, mt_dim, history)
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
             x, y = candidate_positions[i]
@@ -486,7 +479,7 @@ def GoalDrivenAgentProgram():
         if -1 != rowCandidate and -1 != colCandidate:
             row_move = rowCandidate - a_loc[0]
             col_move = colCandidate - a_loc[1]
-            move = move_table[(row_move, col_move)]
+            move = NextMoveHelper.get_move_string(row_move, col_move)
             assert(None != move)
             return move
         assert(True) # Should never reach here
@@ -529,11 +522,10 @@ def GoalDrivenAgentProgram():
         return -1, -1
 
     def get_action_string(n_r, n_c, o_r, o_c):
-        nonlocal move_table
         dx = n_r - o_r
         dy = n_c - o_c
-        assert(None != move_table[(dx, dy)])
-        return move_table[(dx, dy)]
+        assert(None != NextMoveHelper.get_move_string(dx, dy))
+        return NextMoveHelper.get_move_string(dx, dy)
 
     # Validate that the next move is not out of bounds
     def validate_move(move, a_row, a_col, rows, cols):
@@ -723,12 +715,12 @@ def RunAgentAlgorithm(program, mazeString: str):
 def main():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
-    RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
+    #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    #RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
     main()
