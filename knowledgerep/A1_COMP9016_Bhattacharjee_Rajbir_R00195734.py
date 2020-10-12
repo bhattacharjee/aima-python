@@ -7,6 +7,7 @@ g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
 g_state_refresh_sleep = 0
+g_self_crossing_not_allowed = False
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -118,6 +119,7 @@ class TwoDEnvironment(Environment):
 
 
     def execute_action(self, agent, action):
+        global g_self_crossing_not_allowed
         if None == action:
             return
         row, col = agent.get_location()
@@ -128,6 +130,13 @@ class TwoDEnvironment(Environment):
         assert(-1 != newrow)
         assert(-1 != newcol)
         self.matrix[row][col] = None
+        if len(self.agent_history) > 0 and \
+                (row, col) != self.agent_history[len(self.agent_history) - 1]:
+            self.agent_history.append((row, col))
+            if (len(self.agent_history) > TwoDEnvironment.MAX_AGENT_HISTORY):
+                while(len(self.agent_history) > TwoDEnvironment.MAX_AGENT_HISTORY):
+                    self.agent_history.popleft()
+        assert((newrow, newcol) not in self.agent_history or not g_self_crossing_not_allowed)
         old_object = self.matrix[newrow][newcol]
         self.matrix[newrow][newcol] = agent
         if (None != old_object and isinstance(old_object, Power)):
@@ -144,10 +153,6 @@ class TwoDEnvironment(Environment):
             self.stored_power = None
         if True == self.restore_power and old_object != None and isinstance(old_object, Power):
             self.stored_power = old_object
-        if (row, col) != self.agent_history[len(self.agent_history) - 1]:
-            self.agent_history.append((row, col))
-            if (len(self.agent_history) > TwoDEnvironment.MAX_AGENT_HISTORY):
-                self.agent_history.popleft()
 
     # "dimensions" : dimensions of board
     # "location" : location of agent
@@ -307,16 +312,19 @@ def SimpleReflexProgram():
     # whether the move is blocked by a wall or not 
     # However, it checks whether the move is out of bounds
     # or not
-    def get_candidate_positions(ag_location, mt_dimensions):
+    def get_candidate_positions(ag_location, mt_dimensions, history):
         row = ag_location[0]
         col = ag_location[1]
         total_rows = mt_dimensions[0]
         total_cols = mt_dimensions[1]
         temp = [ (row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
         candidates = []
+        assert(None != history)
         for row, col in temp:
             if (row >= 0 and row < total_rows and col >= 0 and col < total_cols):
-                candidates.append((row, col))
+                if (0 == len(history) or False == g_self_crossing_not_allowed
+                        or ((row, col) not in history)):
+                    candidates.append((row, col))
         return candidates
  
     def program(percepts):
@@ -325,6 +333,7 @@ def SimpleReflexProgram():
         mt_dimensions = percepts["dimensions"]
         ag_location = percepts["location"]
         things = percepts["things"]
+        history = percepts["agent_history"]
 
         # First recreate the matrix
         matrix = [[None for i in range(mt_dimensions[1])] for j in range(mt_dimensions[0])]
@@ -334,7 +343,7 @@ def SimpleReflexProgram():
             matrix[row][col] = thing
 
         # Get the candidate positions
-        candidate_positions = get_candidate_positions(ag_location, mt_dimensions)
+        candidate_positions = get_candidate_positions(ag_location, mt_dimensions, history)
         # Randomly select a new position
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
@@ -398,22 +407,26 @@ def GoalDrivenAgentProgram():
     # whether the move is blocked by a wall or not 
     # However, it checks whether the move is out of bounds
     # or not
-    def get_candidate_positions(ag_location, mt_dimensions):
+    def get_candidate_positions(ag_location, mt_dimensions, history=None):
         row = ag_location[0]
         col = ag_location[1]
         total_rows = mt_dimensions[0]
         total_cols = mt_dimensions[1]
+        assert(None != history)
         temp = [ (row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
         candidates = []
         for row, col in temp:
             if (row >= 0 and row < total_rows and col >= 0 and col < total_cols):
-                candidates.append((row, col))
+                if (0 == len(history) or False == g_self_crossing_not_allowed \
+                        or ((row, col) not in history)):
+                    candidates.append((row, col))
         return candidates
 
-    def get_random_move(matrix, a_loc):
+    def get_random_move(matrix, a_loc, history):
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
         mt_dim = [len(matrix), len(matrix[0])]
-        candidate_positions = get_candidate_positions(a_loc, mt_dim)
+        rowCandidate = colCandidate = -1
+        candidate_positions = get_candidate_positions(a_loc, mt_dim, history)
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
             x, y = candidate_positions[i]
@@ -434,33 +447,38 @@ def GoalDrivenAgentProgram():
         return None
 
 
-    def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy):
+    def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
         # Sometimes, try moving rows first, at other times, try moving columns first
+        assert(None != history)
         if random.choice([True, False]):
             if (0 != dx):
                 newrow = a_row + dx
                 newcol = a_col
                 if (newrow >= 0 and newrow < m_rows):
-                    if (matrix[newrow][newcol] != '#'):
+                    if (matrix[newrow][newcol] != '#'\
+                            and (newrow, newcol) not in history):
                         return newrow, newcol
             if (0 != dy):
                 newrow = a_row
                 newcol = a_col + dy
                 if (newcol >= 0 and newcol < m_cols):
-                    if (matrix[newrow][newcol] != '#'):
+                    if (matrix[newrow][newcol] != '#' \
+                            and (newrow, newcol) not in history):
                         return newrow, newcol
         else:
             if (0 != dy):
                 newrow = a_row
                 newcol = a_col + dy
                 if (newcol >= 0 and newcol < m_cols):
-                    if (matrix[newrow][newcol] != '#'):
+                    if (matrix[newrow][newcol] != '#' \
+                            and (newrow, newcol) not in history):
                         return newrow, newcol
             if (0 != dx):
                 newrow = a_row + dx
                 newcol = a_col
                 if (newrow >= 0 and newrow < m_rows):
-                    if (matrix[newrow][newcol] != '#'):
+                    if (matrix[newrow][newcol] != '#' \
+                            and (newrow, newcol) not in history):
                         return newrow, newcol
         return -1, -1
 
@@ -493,6 +511,8 @@ def GoalDrivenAgentProgram():
         a_col = percepts["location"][1]
         dx = percepts["goal_direction"][0]
         dy = percepts["goal_direction"][1]
+        history = percepts["agent_history"]
+        assert(None != history)
         dx = dx if 0 == dx else dx // abs(dx)
         dy = dy if 0 == dy else dy // abs(dy)
         assert(a_row != None and a_col != None and rows != None and cols != None)
@@ -504,17 +524,16 @@ def GoalDrivenAgentProgram():
             doing_random = False
         visited_matrix[a_row][a_col] = True
         if (not doing_random):
-            nr, nc = get_goal_directed_new_location(matrix, rows, cols, a_row, a_col, dx, dy)
+            nr, nc = get_goal_directed_new_location(matrix, rows, cols, a_row, a_col, dx, dy, history)
             if (-1 != nr and -1 != nc):
                 move = get_action_string(nr, nc, a_row, a_col)
-                assert(validate_move(move, a_row, a_col, rows, cols))
+                assert(None == move or validate_move(move, a_row, a_col, rows, cols))
                 return move
             else:
                 doing_random = True
         assert(True == doing_random)
-        move = get_random_move(matrix, [a_row, a_col])
-        assert(validate_move(move, a_row, a_col, rows, cols))
-        assert(None != move)
+        move = get_random_move(matrix, [a_row, a_col], history)
+        assert(None == move or validate_move(move, a_row, a_col, rows, cols))
         return move
     
     return program
@@ -643,7 +662,7 @@ def RunAgentAlgorithm(program, mazeString: str):
         env.step()
         for i in range(6):
             env.print_state()
-            time.sleep(0.05)
+            #time.sleep(0.03)
     time.sleep(1)
     del env
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
