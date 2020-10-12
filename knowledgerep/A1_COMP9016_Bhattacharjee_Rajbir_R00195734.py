@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os,sys,inspect, random
+import os,sys,inspect, random, collections
 import time
 
 # Is curses available or not?
@@ -82,6 +82,7 @@ def get_updated_row_col(x, y, action):
 
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
+    MAX_AGENT_HISTORY = 10
     def __init__(self, rows, cols, restore_power=True):
         global g_curses_available
         self.stored_power = None
@@ -90,6 +91,7 @@ class TwoDEnvironment(Environment):
         self.cols = cols
         self.thedoor = None
         self.restore_power = restore_power # Powers once taken should reappear
+        self.agent_history = collections.deque()
         #self.matrix = [[None] * cols] * rows
         self.matrix = [[None for i in range(cols)] for j in range(rows)]
         if g_curses_available:
@@ -142,7 +144,10 @@ class TwoDEnvironment(Environment):
             self.stored_power = None
         if True == self.restore_power and old_object != None and isinstance(old_object, Power):
             self.stored_power = old_object
-        pass
+        if (row, col) != self.agent_history[len(self.agent_history) - 1]:
+            self.agent_history.append((row, col))
+            if (len(self.agent_history) > TwoDEnvironment.MAX_AGENT_HISTORY):
+                self.agent_history.popleft()
 
     # "dimensions" : dimensions of board
     # "location" : location of agent
@@ -170,19 +175,32 @@ class TwoDEnvironment(Environment):
         col = location[1]
         super().add_thing(thing, location)
         self.matrix[row][col] = thing
+        if (True == isinstance(thing, Agent)):
+            x, y = thing.get_location()
+            self.agent_history.append((x, y))
 
     def get_print_matrix(self):
+        theAgent = None
         m = [[' ' for i in range(self.cols + 2)] for j in range(self.rows + 2)]
         for i in range(self.cols +2):
             m[0][i] = '#'
             m[self.rows+1][i] = '#'
         for i in range(self.rows):
             m[i+1][0] = '#'
+            m[i+1][self.cols+1] = '#'
         for thing in self.things:
             if isinstance(thing, TwoDThing) or isinstance(thing, TwoDAgent):
                 x, y = thing.get_location()
                 c = thing.get_display()
                 m[x+1][y+1] = c
+                if (isinstance(thing, TwoDAgent)):
+                    theAgent = thing
+        for location in self.agent_history:
+            x = location[0]
+            y = location[1]
+            m[x+1][y+1] = '*'
+        x, y = theAgent.get_location()
+        m[x+1][y+1] = theAgent.get_display()
         return m
 
     # If curses is not supported, print the maze in text format
@@ -622,6 +640,7 @@ def RunAgentAlgorithm(program, mazeString: str):
         env.step()
         for i in range(6):
             env.print_state()
+            time.sleep(0.05)
     time.sleep(1)
     del env
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
@@ -632,7 +651,7 @@ def main():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)
     RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 if "__main__" == __name__:
