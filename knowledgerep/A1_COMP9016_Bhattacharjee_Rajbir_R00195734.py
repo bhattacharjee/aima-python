@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os,sys,inspect, random, collections, copy
+import argparse
 import time
 
 # Is curses available or not?
@@ -190,6 +191,9 @@ class TwoDEnvironment(Environment):
     # "things" : list of things
     # "goal_direction": direction of goal [dx, dy] dx/dy can be negative
     # "agent_history": list of past locations of the agent [(r,c), (r,c), ..]
+    # 'agent_can_grow": can the agent shrink and grow?
+    # 'agent_max_length': maximum length till which the agent can grow (excluding head)
+    # 'agent_history': the history of the places the agent has been, also doubles as the body
     def percept(self, agent):
         percept = {}
         thedoor = None
@@ -198,6 +202,9 @@ class TwoDEnvironment(Environment):
         percept["location"] = [x, y]
         percept["things"] = []
         percept["agent_history"] = []
+        percept["agent_can_grow"] =  self.agent_can_grow
+        percept["agent_max_length"] = self.agent_max_length
+        percept["history"] = copy.deepcopy(self.agent_history)
         [percept["agent_history"].append(l) for l in self.agent_history]
         for thing in self.things:
             percept["things"].append(thing)
@@ -787,15 +794,29 @@ def RunAgentAlgorithm(program, mazeString: str):
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
 
 
-def main():
+def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+
+def main():
+    global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
+    parser.add_argument("-ssp", "--suppress-state-printing", help="Do not print the board matrix after each step", action="store_true")
+    parser.add_argument("-rd", "--refresh-delay",default=0.0, help="Number of seconds between refreshes", type=float)
+    parser.add_argument("-ac", "--allow-crossing-self", help="Allow crossing over one's body", action="store_true")
+    args = parser.parse_args()
+    g_curses_available = False if args.no_ncurses else g_curses_available
+    g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
+    g_state_refresh_sleep = 0 if args.refresh_delay < 0.0001 else args.refresh_delay
+    g_self_crossing_not_allowed = not args.allow_crossing_self
+    process()
 
 if "__main__" == __name__:
     main()
