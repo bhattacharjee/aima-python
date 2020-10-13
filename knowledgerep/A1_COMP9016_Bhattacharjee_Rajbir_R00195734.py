@@ -27,7 +27,15 @@ except:
     g_curses_available = False
     print("Curses is not available, continuing without it...")
 
-#g_curses_available = False
+g_stuck_banner = """
+  ********       **********       **     **         ******        **   **       **
+ **//////       /////**///       /**    /**        **////**      /**  **       /**
+/**                 /**          /**    /**       **    //       /** **        /**
+/*********          /**          /**    /**      /**             /****         /**
+////////**          /**          /**    /**      /**             /**/**        /**
+       /**          /**          /**    /**      //**    **      /**//**       // 
+ ********           /**          //*******        //******       /** //**       **
+////////            //            ///////          //////        //   //       // """
 
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
@@ -243,6 +251,13 @@ class TwoDEnvironment(Environment):
             x, y = thing.get_location()
             self.agent_history.append((x, y))
 
+    def print_stuck_banner(self, m):
+        global g_stuck_banner
+        assert(None != m and isinstance(m, list))
+        for i, line in enumerate(g_stuck_banner.split('\n')):
+            for j, c in enumerate(list(line)):
+                m[i][j] = c
+
     def get_print_matrix(self):
         theAgent = None
         m = [[' ' for i in range(self.cols + 2)] for j in range(self.rows + 2)]
@@ -265,9 +280,8 @@ class TwoDEnvironment(Environment):
             m[x+1][y+1] = '*'
         x, y = theAgent.get_location()
         m[x+1][y+1] = theAgent.get_display()
-        if (True == self.is_stuck):
-            for i, c in enumerate(list("S  T  U  C  K !!!")):
-                m[0][i] = c
+        if self.is_stuck:
+            self.print_stuck_banner(m)
         return m
 
     # If curses is not supported, print the maze in text format
@@ -834,8 +848,8 @@ def process():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
