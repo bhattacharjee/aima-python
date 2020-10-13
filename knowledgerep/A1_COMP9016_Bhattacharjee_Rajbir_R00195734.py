@@ -37,6 +37,23 @@ g_stuck_banner = """
  ********           /**          //*******        //******       /** //**       **
 ////////            //            ///////          //////        //   //       // """
 
+g_stuck_banner1 = """
+:'######:::::'########::::'##::::'##:::::'######:::::'##:::'##::::'####:
+'##... ##::::... ##..::::: ##:::: ##::::'##... ##:::: ##::'##::::: ####:
+ ##:::..:::::::: ##::::::: ##:::: ##:::: ##:::..::::: ##:'##:::::: ####:
+. ######:::::::: ##::::::: ##:::: ##:::: ##:::::::::: #####:::::::: ##::
+:..... ##::::::: ##::::::: ##:::: ##:::: ##:::::::::: ##. ##:::::::..:::
+'##::: ##::::::: ##::::::: ##:::: ##:::: ##::: ##:::: ##:. ##:::::'####:
+. ######:::::::: ##:::::::. #######:::::. ######::::: ##::. ##:::: ####:
+:......:::::::::..:::::::::.......:::::::......::::::..::::..:::::....::"""
+g_stuck_banner2= """
+███████╗    ████████╗    ██╗   ██╗     ██████╗    ██╗  ██╗    ██╗
+██╔════╝    ╚══██╔══╝    ██║   ██║    ██╔════╝    ██║ ██╔╝    ██║
+███████╗       ██║       ██║   ██║    ██║         █████╔╝     ██║
+╚════██║       ██║       ██║   ██║    ██║         ██╔═██╗     ╚═╝
+███████║       ██║       ╚██████╔╝    ╚██████╗    ██║  ██╗    ██╗
+╚══════╝       ╚═╝        ╚═════╝      ╚═════╝    ╚═╝  ╚═╝    ╚═╝"""
+
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
 # Which the environment can use to print a board if required
@@ -99,6 +116,8 @@ class TwoDEnvironment(Environment):
         global g_curses_available
         self.stored_power = None
         super().__init__()
+        self.stuck_banner_completed = False
+        self.last_banner_used = 0
         self.rows = rows
         self.agent_max_length = initial_agent_max_length
         self.cols = cols
@@ -252,9 +271,11 @@ class TwoDEnvironment(Environment):
             self.agent_history.append((x, y))
 
     def print_stuck_banner(self, m):
-        global g_stuck_banner
+        global g_stuck_banner, g_stuck_banner1
+        self.last_banner_used = 0 if self.last_banner_used != 0 else 1
+        banner = g_stuck_banner if 0 == self.last_banner_used else g_stuck_banner1
         assert(None != m and isinstance(m, list))
-        for i, line in enumerate(g_stuck_banner.split('\n')):
+        for i, line in enumerate(banner.split('\n')):
             for j, c in enumerate(list(line)):
                 m[i][j] = c
 
@@ -304,7 +325,13 @@ class TwoDEnvironment(Environment):
             return
         global g_curses_available
         if g_curses_available:
-            return self.print_state_curses()
+            self.print_state_curses()
+            if (self.is_stuck and not self.stuck_banner_completed):
+                for i in range(4):
+                    time.sleep(1)
+                    self.print_state_curses()
+                self.stuck_banner_completed = True
+            return
         else:
             return self.print_state_text()
 
@@ -510,6 +537,28 @@ def SimpleReflexProgram(weighted_rand_sel=False):
     matrix = None
     use_weighted_random_selection = weighted_rand_sel
 
+    def select_random(cp):
+        rowCandidate = colCandidate = -1
+        while 0 != len(cp):
+            i = random.randrange(0, len(cp))
+            x, y = cp[i]
+            if not isinstance(matrix[x][y], Wall):
+                rowCandidate = x
+                colCandidate = y
+                break
+            else:
+                del cp[i]
+        return rowCandidate, colCandidate
+        
+    def get_goal_directions(percepts):
+        goal_direction = percepts["goal_direction"]
+        dx = goal_direction[0]
+        dy = goal_direction[1]
+        dx = dx if 0 == dx else dx // abs(dx)
+        dy = dy if 0 == dy else dy // abs(dy)
+        return dx, dy
+
+
     def program(percepts):
         nonlocal matrix
         nonlocal use_weighted_random_selection
@@ -518,11 +567,7 @@ def SimpleReflexProgram(weighted_rand_sel=False):
         ag_location = percepts["location"]
         things = percepts["things"]
         history = percepts["agent_history"]
-        goal_direction = percepts["goal_direction"]
-        dx = goal_direction[0]
-        dy = goal_direction[1]
-        dx = dx if 0 == dx else dx // abs(dx)
-        dy = dy if 0 == dy else dy // abs(dy)
+        dx, dy = get_goal_directions(percepts)
         # First recreate the matrix
         matrix = [[None for i in range(mt_dimensions[1])] for j in range(mt_dimensions[0])]
         for thing in things:
@@ -544,15 +589,7 @@ def SimpleReflexProgram(weighted_rand_sel=False):
             for i in range(weight):
                 candidate_positions.append(copy.deepcopy(item))
         # Randomly select a new position
-        while 0 != len(candidate_positions):
-            i = random.randrange(0, len(candidate_positions))
-            x, y = candidate_positions[i]
-            if not isinstance(matrix[x][y], Wall):
-                rowCandidate = x
-                colCandidate = y
-                break
-            else:
-                del candidate_positions[i]
+        rowCandidate, colCandidate = select_random(candidate_positions)
         # Convert position to move (eg. [0, 0] -> MoveUp)
         if -1 != rowCandidate and -1 != colCandidate:
             move = NextMoveHelper.get_move_string2(ag_location[0], ag_location[1], rowCandidate, colCandidate)
@@ -848,8 +885,9 @@ def process():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
+    RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
