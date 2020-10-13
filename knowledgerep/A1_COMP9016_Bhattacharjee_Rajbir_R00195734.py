@@ -29,6 +29,9 @@ except:
 
 #g_curses_available = False
 
+# Super-class for all things in 2-D environment
+# An additional get_display() method returns a character
+# Which the environment can use to print a board if required
 class TwoDThing(Thing):
     def __init__(self, x = 0, y = 0, display='T'):
         super().__init__()
@@ -44,6 +47,7 @@ class TwoDThing(Thing):
     def get_display(self):
         return self.display
 
+# Class power
 class Power(TwoDThing):
     def __init__(self, x, y):
         self.power_value = -1
@@ -52,43 +56,34 @@ class Power(TwoDThing):
     def set_power_value(self, i: int):
         self.power_value = i
 
+    # Get the value of the power, this is similar to points
     def get_power_value(self):
         assert(-1 != self.power_value)
         return self.power_value
 
+    # Get the display character, overriding that from the parent class
     def get_display(self):
         return str(self.power_value)
 
+# Wall
 class Wall(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, '#')
 
+# door
 class Door(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'D')
 
+# Grow the snake's size if the option is specified
 class Grow(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'G')
 
+# Shrink the snake's size if the option is specified
 class Shrink(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'S')
-
-def get_updated_row_col(x, y, action):
-    row = x
-    col = y
-    if "moveUp" == action:
-        row -= 1
-    elif "moveDown" == action:
-        row += 1
-    elif "moveLeft" == action:
-        col -= 1
-    elif "moveRight" == action:
-        col += 1
-    else:
-        row = col = -1
-    return row, col
 
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
@@ -105,11 +100,13 @@ class TwoDEnvironment(Environment):
         self.agent_can_grow = ag_can_grow
         self.restore_power = restore_power # Powers once taken should reappear
         self.agent_history = collections.deque()
-        #self.matrix = [[None] * cols] * rows
-        self.matrix = [[None for i in range(cols)] for j in range(rows)]
+        self.matrix = [[None for i in range(cols)] for j in range(rows)] # 2D array
         if g_curses_available:
             self.window = curses.initscr()
 
+    # If the agent has just moved over a grow/shrink square, then this is called
+    # to adjust the size of the history of agent's movements that the environment
+    # keeps track of
     def process_agent_grow_shrink(self, direction):
         if not self.agent_can_grow:
             return
@@ -118,7 +115,14 @@ class TwoDEnvironment(Environment):
             self.agent_max_length = 0
         while(len(self.agent_history) > self.agent_max_length):
             self.agent_history.popleft()
+    
+    def process_agent_grow_shrink2(self, should_grow, should_shrink):
+        direction = 0
+        direction = 1 if should_grow else direction
+        direction = -1 if should_shrink else direction
+        return self.process_agent_grow_shrink(direction)
 
+    # If the agent is stuck, or the agent has reached the door, return true
     def is_done(self):
         if self.is_stuck:
             return True
@@ -135,10 +139,42 @@ class TwoDEnvironment(Environment):
         done = (dr_row == ag_row and dr_col == ag_col)
         return done
 
+    # deletion of the object must close the ncurses session if it was started
     def __del__(self):
         global g_curses_available
         if g_curses_available:
             curses.endwin()
+
+    def trim_history(self):
+        while(len(self.agent_history) > self.agent_max_length):
+            self.agent_history.popleft()
+
+    def old_object_processing(self, old_object):
+        should_grow = False
+        should_shrink = False
+        num_power = 0
+        if None == old_object:
+            return should_grow, should_shrink, num_power
+        if (isinstance(old_object, Power)):
+            agent.num_power += old_object.get_power_value()
+        if (isinstance(old_object, Grow)):
+            should_grow = True
+        if (isinstance(old_object, Shrink)):
+                should_shrink = True
+        if (not self.restore_power):
+            self.things.remove(old_object)
+        return should_grow, should_shrink, num_power
+
+    def stash_old_object(self, old_object):
+        if True == self.restore_power and old_object != None:
+            if isinstance(old_object, Power) or isinstance(old_object, Grow)\
+                    or isinstance(old_object, Shrink):
+                self.stored_power = old_object
+
+    def update_agent(self, agent, r, c, n_power):
+        agent.num_power = n_power
+        agent.set_location(r, c)
+        agent.num_moves += 1
 
     def execute_action(self, agent, action):
         should_grow = False
@@ -147,44 +183,26 @@ class TwoDEnvironment(Environment):
         if None == action:
             return
         row, col = agent.get_location()
-        assert(self.matrix[row][col] == agent)
-        assert(None != row)
-        assert(None != col)
-        newrow, newcol = get_updated_row_col(row, col, action)
-        assert(-1 != newrow)
-        assert(-1 != newcol)
+        assert(self.matrix[row][col] == agent and None != row and None != col)
+        newrow, newcol = NextMoveHelper.get_updated_row_col(row, col, action)
+        assert(-1 != newrow and -1 != newcol)
         self.matrix[row][col] = None
-        if len(self.agent_history) > 0 and \
-                (row, col) != self.agent_history[len(self.agent_history) - 1]:
+        if len(self.agent_history) > 0 and (row, col) != self.agent_history[len(self.agent_history) - 1]:
             self.agent_history.append((row, col))
-            while(len(self.agent_history) > self.agent_max_length):
-                self.agent_history.popleft()
+            self.trim_history()
         assert((newrow, newcol) not in self.agent_history or not g_self_crossing_not_allowed)
         old_object = self.matrix[newrow][newcol]
         self.matrix[newrow][newcol] = agent
-        if (None != old_object and (isinstance(old_object, Power) or isinstance(old_object, Grow) or isinstance(old_object, Shrink))):
-            if (isinstance(old_object, Power)):
-                agent.num_power += old_object.get_power_value()
-            if (isinstance(old_object, Grow)):
-                should_grow = True
-            if (isinstance(old_object, Shrink)):
-                should_shrink = True
-            if (not self.restore_power):
-                self.things.remove(old_object)
-        agent.set_location(newrow, newcol)
-        agent.num_moves += 1
+        should_grow, should_shrink, num_power = self.old_object_processing(old_object)
+        self.update_agent(agent, newrow, newcol, num_power)
         if None != self.stored_power and True == self.restore_power:
             if self.stored_power not in self.things:
                 self.add_thing(self.stored_power, [row, col])
             else:
                 self.stored_power.location = [row, col]
             self.stored_power = None
-        if True == self.restore_power and old_object != None and (isinstance(old_object, Power) or isinstance(old_object, Grow) or isinstance(old_object, Shrink)):
-            self.stored_power = old_object
-        direction = 0
-        direction = 1 if should_grow else direction
-        direction = -1 if should_shrink else direction
-        self.process_agent_grow_shrink(direction)
+        self.stash_old_object(old_object)
+        self.process_agent_grow_shrink2(should_grow, should_shrink)
 
     # "dimensions" : dimensions of board
     # "location" : location of agent
@@ -449,6 +467,21 @@ class NextMoveHelper(object):
             score += 1
         return score
  
+    def get_updated_row_col(x, y, action):
+        row = x
+        col = y
+        if "moveUp" == action:
+            row -= 1
+        elif "moveDown" == action:
+            row += 1
+        elif "moveLeft" == action:
+            col -= 1
+        elif "moveRight" == action:
+            col += 1
+        else:
+            row = col = -1
+        return row, col
+
 # SimpleReflexProgram randomly chooses a move in any direction
 # as long as it doesn't hit a wall
 def SimpleReflexProgram(weighted_rand_sel=False):
@@ -610,7 +643,7 @@ def GoalDrivenAgentProgram():
 
     # Validate that the next move is not out of bounds
     def validate_move(move, a_row, a_col, rows, cols):
-        nr, nc = get_updated_row_col(a_row, a_col, move)
+        nr, nc = NextMoveHelper.get_updated_row_col(a_row, a_col, move)
         if (nr < 0 or nc < 0):
             return False
         if (nr >= rows or nc >= cols):
