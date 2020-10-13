@@ -558,6 +558,15 @@ def SimpleReflexProgram(weighted_rand_sel=False):
         dy = dy if 0 == dy else dy // abs(dy)
         return dx, dy
 
+    def recreate_board(percepts):
+        things = percepts["things"]
+        mt_dimensions = percepts["dimensions"]
+        matrix = [[None for i in range(mt_dimensions[1])] for j in range(mt_dimensions[0])]
+        for thing in things:
+            row = thing.location[0]
+            col = thing.location[1]
+            matrix[row][col] = thing
+        return matrix
 
     def program(percepts):
         nonlocal matrix
@@ -569,12 +578,7 @@ def SimpleReflexProgram(weighted_rand_sel=False):
         history = percepts["agent_history"]
         dx, dy = get_goal_directions(percepts)
         # First recreate the matrix
-        matrix = [[None for i in range(mt_dimensions[1])] for j in range(mt_dimensions[0])]
-        for thing in things:
-            row = thing.location[0]
-            col = thing.location[1]
-            matrix[row][col] = thing
-
+        matrix = recreate_board(percepts)
         # Get the candidate positions
         candidate_positions = []
         # Assign higher probability to those which are in the direction of the door
