@@ -59,38 +59,38 @@ g_stuck_banner2= """
 # Which the environment can use to print a board if required
 class TwoDThing(Thing):
     def __init__(self, x = 0, y = 0, display='T'):
-        """[constructor]
+        """constructor
 
         Args:
-            x (int, optional): [row of the item]. Defaults to 0.
-            y (int, optional): [column of the item]. Defaults to 0.
-            display (str, optional): [character to display when printing the board for this item]. Defaults to 'T'.
+            x (int, optional): row of the item. Defaults to 0.
+            y (int, optional): column of the item. Defaults to 0.
+            display (str, optional): character to display when printing the board for this item. Defaults to 'T'.
         """
         super().__init__()
         self.location = [x, y]
         self.display = display
 
     def get_location(self):
-        """[get the location for this item]
+        """get the location for this item
 
         Returns:
-            [tuple]: [tuple of row, column]
+            tuple: tuple of row, column
         """
         return (self.location[0], self.location[1])
 
     def set_location(self, location = []):
-        """[Set the location for this item]
+        """Set the location for this item
 
         Args:
-            location (list, optional): [location [row, col]]. Defaults to [].
+            location (list, optional): location [row, col]. Defaults to [].
         """
         self.location = location
 
     def get_display(self):
-        """[Get the display ]
+        """Get the display character
 
         Returns:
-            [str]: [character to display on the board corresponding to this object]
+            str: character to display on the board corresponding to this object
         """
         return self.display
 
