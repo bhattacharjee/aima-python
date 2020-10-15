@@ -7,7 +7,7 @@ import time
 g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
-g_state_refresh_sleep = 0
+g_state_refresh_sleep = 0.1
 g_self_crossing_not_allowed = True
 
 # Import the AIMA libraries from the parent directory
@@ -53,6 +53,31 @@ g_stuck_banner2= """
 ╚════██║       ██║       ██║   ██║    ██║         ██╔═██╗     ╚═╝
 ███████║       ██║       ╚██████╔╝    ╚██████╗    ██║  ██╗    ██╗
 ╚══════╝       ╚═╝        ╚═════╝      ╚═════╝    ╚═╝  ╚═╝    ╚═╝"""
+
+
+class Utils:
+    def manhattan_distance(l1, l2):
+        assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
+        assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
+        return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
+    
+    def euclidean_distance(l1, l2):
+        assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
+        assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
+        return math.sqrt((l1[0] - l2[0])**2 + (l1[1] - l2[1])**2)
+
+    def get_matrix_for_program(rows, cols, things):
+        matrix = [[' ' for i in range(cols)] for j in range(rows)]
+        for thing in things:
+            if not isinstance(thing, Agent):
+                row = thing.location[0]
+                col = thing.location[1]
+                if (isinstance(thing, Wall)):
+                    matrix[row][col] = '#'
+                if (isinstance(thing, Door)):
+                    matrix[row][col] = 'D'
+        return matrix
+
 
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
@@ -343,6 +368,7 @@ class TwoDEnvironment(Environment):
 
     def print_state(self):
         global g_suppress_state_printing
+        global g_state_refresh_sleep
         if g_suppress_state_printing:
             return
         global g_curses_available
@@ -350,8 +376,9 @@ class TwoDEnvironment(Environment):
             self.print_state_curses()
             if (self.is_stuck and not self.stuck_banner_completed):
                 for i in range(4):
-                    time.sleep(1)
                     self.print_state_curses()
+                    if (0 != g_state_refresh_sleep):
+                        time.sleep(g_state_refresh_sleep)
                 self.stuck_banner_completed = True
             return
         else:
@@ -515,6 +542,11 @@ class NextMoveHelper(object):
     
     def get_move_string2(oldx, oldy, newx, newy):
         return NextMoveHelper.get_move_string(newx - oldx, newy - oldy)
+    
+    def get_move_string3(old, new):
+        assert((isinstance(old, list) or isinstance(old, tuple)) and 2 == len(old))
+        assert((isinstance(new, list) or isinstance(new, tuple)) and 2 == len(new))
+        return NextMoveHelper.get_move_string2(old[0], old[1], new[0], new[1])
 
     def get_move_suitability(oldx, oldy, newx, newy, gdx, gdy):
         gdx = 0 if 0 == gdx else gdx // abs(gdx)
@@ -641,16 +673,7 @@ def GoalDrivenAgentProgram():
     visited_matrix = None
 
     def get_matrix(rows, cols, things):
-        matrix = [[' ' for i in range(cols)] for j in range(rows)]
-        for thing in things:
-            if not isinstance(thing, Agent):
-                row = thing.location[0]
-                col = thing.location[1]
-                if (isinstance(thing, Wall)):
-                    matrix[row][col] = '#'
-                if (isinstance(thing, Door)):
-                    matrix[row][col] = 'D'
-        return matrix
+        return Utils.get_matrix_for_program(rows, cols, things)
 
     def get_random_move(matrix, a_loc, history):
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
@@ -767,7 +790,77 @@ def GoalDrivenAgentProgram():
     
     return program
 
+# Utility based agent program. This program calculates the utility function
+# For each of the candidate locations, and then chooses the one that
+# maximizes the utility function
+def UtilityBasedAgentProgram():
 
+    # Agent program's memories of places visited, this becomes important
+    # To the utility function because a negative score must be associated
+    # with places we've visited so that we don't get stuck in a loop
+    memories = None
+
+    def utility_function(percepts, location, goal):
+        nonlocal memories
+        GOAL_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
+        HISTORY_SCALING_FACTOR = 100
+        MEMORY_SCALING_FACTOR = -10
+        assert((isinstance(location, tuple) or isinstance(location, list)) and 2 == len(location))
+        assert(None != memories)
+        utility_score = 0
+        # The further the goal is the less should be the score (goal_direction is already an offset, so this should be minimized)
+        utility_score += Utils.manhattan_distance(location, goal) * GOAL_SCALING_FACTOR
+        # The closer you get to your body, the less you score.
+        for loc in percepts["agent_history"]:
+            utility_score += Utils.manhattan_distance(loc, location) * HISTORY_SCALING_FACTOR
+        try:
+            utility_score += MEMORY_SCALING_FACTOR * memories[location[0]][location[1]]
+        except IndexError:
+            pass
+        return utility_score
+
+    def get_candidate_positions(percepts):
+        import sys
+        a_loc = percepts['location']
+        mt_dim = percepts["dimensions"]
+        history = percepts["history"]
+        gd = percepts["goal_direction"]
+        goal = (a_loc[0] + gd[0], a_loc[1] + gd[1])
+        candidates = NextMoveHelper.get_candidate_positions(a_loc, mt_dim, history)
+        matrix = Utils.get_matrix_for_program(mt_dim[0], mt_dim[1], percepts["things"])
+        max_utility = -1 * sys.maxsize - 1
+        candidates_not_walls = []
+        for candidate in candidates:
+            (r, c) = candidate
+            if ('#' == matrix[r][c]):
+                continue
+            candidates_not_walls.append(candidate)
+        if (None == candidates_not_walls or 0 == len(candidates_not_walls)):
+            return candidates_not_walls
+        utility_socres = [utility_function(percepts, candidate, goal) for candidate in candidates_not_walls]
+        max_utility = max(utility_socres)
+        selected_candidates = []
+        for candidate in candidates_not_walls:
+            utility = utility_function(percepts, candidate, goal)
+            if (utility == max_utility):
+                selected_candidates.append(candidate)
+        return selected_candidates
+
+
+    def program(percepts):
+        nonlocal memories
+        (row, col) = tuple(percepts["dimensions"])
+        if None == memories:
+            memories = [[0 for i in range(col)] for j in range(row)]
+        candidates = get_candidate_positions(percepts)
+        if (None == candidates or 0 == len(candidates)):
+            return None
+        candidate = random.choice(candidates)
+        if (None != candidate):
+            memories[candidate[0]][candidate[1]] += 1
+        return NextMoveHelper.get_move_string3(percepts["location"], candidate)
+
+    return program
 
 smallMaze = """
 ##############################
@@ -893,9 +986,7 @@ def RunAgentAlgorithm(program, mazeString: str):
         env.step()
         for i in range(g_state_print_same_place_loop_count):
             env.print_state()
-            if (0 != g_state_refresh_sleep):
-                time.sleep(g_state_refresh_sleep)
-    time.sleep(1)
+            time.sleep(g_state_refresh_sleep)
     stuck = env.got_stuck()
     dist = env.goal_distance
     del env
@@ -911,9 +1002,10 @@ def process():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
-    RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
