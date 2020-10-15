@@ -7,7 +7,7 @@ import time
 g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
-g_state_refresh_sleep = 0.1
+g_state_refresh_sleep = 1.0
 g_self_crossing_not_allowed = True
 
 # Import the AIMA libraries from the parent directory
@@ -66,7 +66,7 @@ class Utils:
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
         return math.sqrt((l1[0] - l2[0])**2 + (l1[1] - l2[1])**2)
 
-    def get_matrix_for_program(rows, cols, things):
+    def get_matrix_for_program(rows, cols, things, include_grow_shrink=False):
         matrix = [[' ' for i in range(cols)] for j in range(rows)]
         for thing in things:
             if not isinstance(thing, Agent):
@@ -76,6 +76,10 @@ class Utils:
                     matrix[row][col] = '#'
                 if (isinstance(thing, Door)):
                     matrix[row][col] = 'D'
+                if (include_grow_shrink and isinstance(thing, Grow)):
+                    matrix[row][col] = 'G'
+                if (include_grow_shrink and isinstance(thing, Shrink)):
+                    matrix[row][col] = 'S'
         return matrix
 
 
@@ -157,6 +161,7 @@ class Shrink(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'S')
 
+counter = 0
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
     def __init__(self, rows, cols, restore_power=True, initial_agent_max_length=8, ag_can_grow=True):
@@ -180,15 +185,18 @@ class TwoDEnvironment(Environment):
 
     # If the agent has just moved over a grow/shrink square, then this is called
     # to adjust the size of the history of agent's movements that the environment
+
     # keeps track of
     def process_agent_grow_shrink(self, direction):
         if not self.agent_can_grow:
             return
-        self.agent_max_length += direction * 2
+        self.agent_max_length += direction * 5
+        if (direction != 0):
+            global counter
+            counter = counter + 1
         if (self.agent_max_length < 0):
             self.agent_max_length = 0
-        while(len(self.agent_history) > self.agent_max_length):
-            self.agent_history.popleft()
+        self.trim_history()
     
     def process_agent_grow_shrink2(self, should_grow, should_shrink):
         direction = 0
@@ -245,6 +253,12 @@ class TwoDEnvironment(Environment):
                     or isinstance(old_object, Shrink):
                 self.stored_power = old_object
 
+    def restore_old_object(self):
+        if True == self.restore_power and None != self.stored_power:
+            (row, col) = tuple(self.stored_power.location)
+            self.matrix[row][col] = self.stored_power
+            self.stored_power = None
+
     def update_agent(self, agent, r, c, n_power):
         agent.num_power = n_power
         agent.set_location(r, c)
@@ -261,10 +275,13 @@ class TwoDEnvironment(Environment):
         newrow, newcol = NextMoveHelper.get_updated_row_col(row, col, action)
         assert(-1 != newrow and -1 != newcol)
         self.matrix[row][col] = None
-        if len(self.agent_history) > 0 and (row, col) != self.agent_history[len(self.agent_history) - 1]:
+        if (len(self.agent_history) > 0 and \
+            (row, col) != self.agent_history[len(self.agent_history) - 1]) or\
+            (0 == len(self.agent_history)):
             self.agent_history.append((row, col))
             self.trim_history()
         assert((newrow, newcol) not in self.agent_history or not g_self_crossing_not_allowed)
+        self.restore_old_object()
         old_object = self.matrix[newrow][newcol]
         self.matrix[newrow][newcol] = agent
         should_grow, should_shrink, num_power = self.old_object_processing(old_object)
@@ -800,13 +817,16 @@ def UtilityBasedAgentProgram():
     # with places we've visited so that we don't get stuck in a loop
     memories = None
 
-    def utility_function(percepts, location, goal):
+    def utility_function(percepts, location, goal, matrix):
         nonlocal memories
         GOAL_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
         HISTORY_SCALING_FACTOR = 100
         MEMORY_SCALING_FACTOR = -10
+        GROWTH_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
+        SHRINK_SCALING_FACTOR = 200 * (len(percepts["history"]) + 1)
         assert((isinstance(location, tuple) or isinstance(location, list)) and 2 == len(location))
-        assert(None != memories)
+        assert(None != memories and None != matrix and isinstance(matrix, list))
+        (row, col) = tuple(location)
         utility_score = 0
         # The further the goal is the less should be the score (goal_direction is already an offset, so this should be minimized)
         utility_score += Utils.manhattan_distance(location, goal) * GOAL_SCALING_FACTOR
@@ -814,12 +834,16 @@ def UtilityBasedAgentProgram():
         for loc in percepts["agent_history"]:
             utility_score += Utils.manhattan_distance(loc, location) * HISTORY_SCALING_FACTOR
         try:
-            utility_score += MEMORY_SCALING_FACTOR * memories[location[0]][location[1]]
+            utility_score += MEMORY_SCALING_FACTOR * memories[row][col]
         except IndexError:
             pass
+        if 'G' == matrix[row][col]:
+            utility_score += GROWTH_SCALING_FACTOR
+        if 'S' == matrix[row][col]:
+            utility_score += SHRINK_SCALING_FACTOR
         return utility_score
 
-    def get_candidate_positions(percepts):
+    def get_candidate_positions(percepts, matrix):
         import sys
         a_loc = percepts['location']
         mt_dim = percepts["dimensions"]
@@ -837,11 +861,11 @@ def UtilityBasedAgentProgram():
             candidates_not_walls.append(candidate)
         if (None == candidates_not_walls or 0 == len(candidates_not_walls)):
             return candidates_not_walls
-        utility_socres = [utility_function(percepts, candidate, goal) for candidate in candidates_not_walls]
+        utility_socres = [utility_function(percepts, candidate, goal, matrix) for candidate in candidates_not_walls]
         max_utility = max(utility_socres)
         selected_candidates = []
         for candidate in candidates_not_walls:
-            utility = utility_function(percepts, candidate, goal)
+            utility = utility_function(percepts, candidate, goal, matrix)
             if (utility == max_utility):
                 selected_candidates.append(candidate)
         return selected_candidates
@@ -850,9 +874,10 @@ def UtilityBasedAgentProgram():
     def program(percepts):
         nonlocal memories
         (row, col) = tuple(percepts["dimensions"])
+        matrix = Utils.get_matrix_for_program(row, col, percepts["things"], include_grow_shrink=True)
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
-        candidates = get_candidate_positions(percepts)
+        candidates = get_candidate_positions(percepts, matrix)
         if (None == candidates or 0 == len(candidates)):
             return None
         candidate = random.choice(candidates)
@@ -929,9 +954,9 @@ largeMaze = """
 #                   #                  ############################            #        ####    ########       #   #
 #                   #                                                              #       #    #              #   #
 #                   #############################                                  #       ###     #####  ######   #
-#                                 #                                          #######  ####         #   #  #        #
-#                                 #                                          #  #              ##    #    #  # x   #
-#                                 #          ###########################     #  #              #     #       #     #
+#                           G   GG#                                          #######  ####         #   #  #        #
+#                           G     #                                          #  #              ##    #    #  # x   #
+#                                G#          ###########################     #  #              #     #       #     #
 #           ################      #                                             #    ######    #         #         #
 #                                 #                                             #              #         #  ########
 #                    #                                                         ##     ##########         #         #
@@ -969,10 +994,10 @@ largeMaze = """
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
-#     #                      #                         #                  #                                        #
-#S    G                      #                                            #                                        #
-#oG                                                                                                                #
-#S                                                                                                                 #
+#SGGGG#                      #                         #                  #                                        #
+#SGGGGG                      #                                            #                                        #
+#oGGGG                                                                                                             #
+#GGGGG                                                                                                             #
 ####################################################################################################################"""
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
