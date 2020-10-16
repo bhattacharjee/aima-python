@@ -1123,15 +1123,6 @@ class SearchHelper:
     9. If we stepped on a square that grows or shrinks us, change the length of the history dequeue
     """
 class MazeSearchProblem(Problem):
-    """
-    Sequence of actions:
-    1. Get candidate locations
-    2. Discard walls from candidate locations
-    3. Update the history and trim if required
-    4. Update the agent's location to the new location
-    6. If we stepped on a square that grows/shrinks, change the length of history deque
-    """
-
 
     def actions(self, state):
         """
@@ -1157,6 +1148,14 @@ class MazeSearchProblem(Problem):
                 candidate_moves.append(NextMoveHelper.get_move_string2(oldrow, oldcol, row, col))
         return candidate_moves
 
+    """
+    Sequence of actions:
+    1. Get candidate locations
+    2. Discard walls from candidate locations
+    3. Update the history and trim if required
+    4. Update the agent's location to the new location
+    6. If we stepped on a square that grows/shrinks, change the length of history deque
+    """
     def result(self, state, action):
         state = SearchHelper.convert_state_to_percepts(state)
         # def get_new_location(move, x, y):
@@ -1176,7 +1175,7 @@ class MazeSearchProblem(Problem):
 def SearchBasedAgentProgram():
 
     search_results = None
-    search_results_dequeue = collections.deque()
+    search_results_deque = collections.deque()
     search_completed = False
 
     def get_state_for_search(percepts):
@@ -1192,7 +1191,7 @@ def SearchBasedAgentProgram():
 
     def program(percepts):
         nonlocal search_results
-        nonlocal search_results_dequeue
+        nonlocal search_results_deque
         nonlocal search_completed
         action = None
         if (not search_completed):
@@ -1202,10 +1201,10 @@ def SearchBasedAgentProgram():
                 solution = srch.solution()
                 if None != solution:
                     for action in solution:
-                        search_results_dequeue.append(action)
+                        search_results_deque.append(action)
             search_completed = True
         try:
-            action = search_results_dequeue.popleft()
+            action = search_results_deque.popleft()
         except IndexError:
             action = None
         return action
@@ -1235,7 +1234,6 @@ def RunAgentAlgorithm(program, mazeString: str):
         print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
 
-
 def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
@@ -1247,7 +1245,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(), smallMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(), largeMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
