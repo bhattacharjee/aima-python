@@ -397,6 +397,18 @@ class TwoDEnvironment(Environment):
         agent.set_location(r, c)
         agent.num_moves += 1
 
+    """
+    Sequence of actions
+    1. Convert the move to the newrow, newcol
+    2. Set the matrix position at curent row, col to None (agent was there till nwo)
+    3. If old-row, old-col are not already in history, add them to the history
+    4. Trim the history to size if required
+    5. Restore the stashed object in the matrix at row, col if applicable
+    6. Stash the object at newrow, newcol for later
+    7. Update the matrix to reflect the agent at newrow, newcol
+    8. Update the agent's internal location and other parameters
+    9. If we stepped on a square that grows or shrinks us, change the length of the history dequeue
+    """
     def execute_action(self, agent, action):
         should_grow = False
         should_shrink = False
