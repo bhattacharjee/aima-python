@@ -1019,7 +1019,6 @@ def UtilityBasedAgentProgram():
                 selected_candidates.append(candidate)
         return selected_candidates
 
-
     def program(percepts):
         nonlocal memories
         (row, col) = tuple(percepts["dimensions"])
@@ -1052,8 +1051,34 @@ def SearchBasedAgentProgram():
     search_results_deque = collections.deque()
     search_completed = False
 
+    def get_matrix_for_search(percepts):
+        things = percepts["things"]
+        (maxrow, maxcol) = tuple(percepts["dimensions"])
+        matrix = [[None for i in range(maxcol)] for j in range(maxrow)]
+        for thing in things:
+            (r, c) = tuple(thing.get_location())
+            matrix[r][c] = thing
+        return matrix
+    
     def get_state_for_search(percepts):
-        return None
+        matrix = get_matrix_for_search(percepts)
+        history = copy.deepcopy(percepts["agent_history"])
+        (curx, cury) = tuple(percepts["location"])
+        (goalx, goaly) = tuple(percepts["goal_direction"])
+        goalx += curx
+        goaly += cury
+        agent_can_grow = percepts["agent_can_grow"]
+        agent_max_length = percepts["agent_max_length"]
+        (dimx, dimy)= tuple(percepts["dimensions"])
+        state = {}
+        state["matrix"] = matrix
+        state["agent_history"] = history
+        state["location"] = [curx, cury]
+        state["goal"] = [goalx, goaly]
+        state["agent_can_grow"] = agent_can_grow
+        state["agent_max_length"] = agent_max_length
+        state["dimensions"] = [dimx, dimy]
+        return state
 
     def heuristic(state):
         return 0
@@ -1112,7 +1137,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
-    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     RunAgentAlgorithm(SearchBasedAgentProgram(), largeMaze)
 
 def main():
