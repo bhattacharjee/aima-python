@@ -70,8 +70,7 @@ class Utils:
         matrix = [[' ' for i in range(cols)] for j in range(rows)]
         for thing in things:
             if not isinstance(thing, Agent):
-                row = thing.location[0]
-                col = thing.location[1]
+                (row, col) = tuple(thing.location)
                 if (isinstance(thing, Wall)):
                     matrix[row][col] = '#'
                 if (isinstance(thing, Door)):
@@ -80,6 +79,26 @@ class Utils:
                     matrix[row][col] = 'G'
                 if (include_grow_shrink and isinstance(thing, Shrink)):
                     matrix[row][col] = 'S'
+        return matrix
+
+    def get_matrix_for_problem(rows:int, cols:int, things):
+        """Another variant of the state matrix for search problems
+        Get the matrix of all non-agent objects to store as the state of a search problem
+        This does a shallow copy of the objects, as a deep-copy is not required
+
+        Args:
+            rows (int): rows in the matrix
+            cols (int): columns in the matrix
+            things ([type]): list of things from the percept
+
+        Returns:
+            list of list: matrix containing all objects at their respective loctations, except the agent
+        """
+        matrix = [[None for i in range(cols)] for j in range(rows)]
+        for thing in things:
+            if not isinstance(thing, Agent):
+                (r, c) = tuple(thing.location)
+                matrix[r][c] = thing
         return matrix
 
 
