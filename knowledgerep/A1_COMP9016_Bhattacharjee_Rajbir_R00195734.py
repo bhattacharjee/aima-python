@@ -1181,13 +1181,19 @@ def SearchBasedAgentProgram():
     def get_state_for_search(percepts):
         return SearchHelper.convert_percepts_to_state(percepts)
 
-    def heuristic(state):
-        return 0
+    def heuristic(node):
+        percept = SearchHelper.convert_state_to_percepts(node.state)
+        (curx, cury) = tuple(percept["location"])
+        (goalx, goaly) = tuple(percept["goal_direction"])
+        goalx += curx
+        goaly += cury
+        return Utils.manhattan_distance([curx, cury], [goalx, goaly])
 
     def program(percepts):
         nonlocal search_results
         nonlocal search_results_deque
         nonlocal search_completed
+        search_results_dequeue = collections.deque()
         action = None
         for k, v in percepts.items():
             print(k, )
@@ -1195,15 +1201,12 @@ def SearchBasedAgentProgram():
             state = SearchHelper.convert_percepts_to_state(percepts)
             srch = astar_search(MazeSearchProblem(state), heuristic)
             if None != srch and None != srch.solution():
-                search_results_dequeue = collections.deque(srch.solution())
-                print(search_results_deque)
-                print(srch)
-            else:
-                print("srch is null or srch.solution() is null")
-                print(srch)
-                search_results_deque = collections.deque()
+                solution = srch.solution()
+                if None != solution:
+                    for action in solution:
+                        search_results_dequeue.append(action)
         try:
-            action = search_results_deque.popleft()
+            action = search_results_dequeue.popleft()
         except IndexError:
             action = None
         return action
@@ -1242,7 +1245,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(), largeMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(), smallMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
