@@ -16,6 +16,7 @@ try:
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir)
     from agents import Environment, Thing, Direction, Agent
+    from search import Problem, astar_search
 except:
     print("Could not import from parent folder... Exiting")
     sys.exit(1)
@@ -26,6 +27,119 @@ try:
 except:
     g_curses_available = False
     print("Curses is not available, continuing without it...")
+
+smallMaze = """
+##############################
+#         #              #   #
+#o####    ########       #   #
+#    #    #              #   #
+#    ###     #####  ######   #
+#      #     #   #  #      ###
+#     #####    #    #  # x   #
+#              #       #     #
+##############################"""
+
+smallMazeWithPower = """
+##############################
+#   3 5   #     1        #   #
+#o#### 77 ########   3 5 #   #
+# 2  #  8 # 9 9 2 3 ^    # ^ #
+#    ###  7  #####  ######   #
+#  9   #     #   #  #      ###
+#     ##### 6  #  7 #  # x   #
+#  3      5    #  8    #     #
+##############################"""
+
+mediumMaze= """
+###########################################
+#     #                #              #   #
+#o    #        ####    ########       #   #
+#     #####       #    #              #   #
+#         #       ###     #####  ######   #
+#   #######  ####   #     #   #  #      ###
+#   #  #           #####    #    #  # x   #
+#   #  #              #     #       #     #
+#      #    ######    #         #         #
+#      #              #         #  ########
+#     ##     ##########         #         #
+#                         ############    #
+#   ##             #            #         #
+#    #########     ########               #
+#    #             #           #########  #
+#                                         #
+###########################################"""
+
+# Maze with fewer cul-de-sacs
+mediumMaze2= """
+###########################################
+#                                         #
+#     #        ####    ########       #   #
+#         #       #    #              #   #
+#         #       ###     #####  ######   #
+#   #######  ####         #   #  #        #
+#   #  #              ##    #    #  # x   #
+#   #  #              #     #       #     #
+#      #    ######    #         #         #
+#      #              #         #  ########
+#     ##     ##########         #         #
+#                         ############    #
+#   ##             #            #         #
+#    #########     ########               #
+#    #             #           #########  #
+#o                                        #
+###########################################"""
+
+largeMaze = """
+####################################################################################################################
+#                                                                                                                  #
+#                   #                  ############################            #        ####    ########       #   #
+#                   #                                                              #       #    #              #   #
+#                   #############################                                  #       ###     #####  ######   #
+#                           G   GG#                                          #######  ####         #   #  #        #
+#                           G     #                                          #  #              ##    #    #  # x   #
+#                                G#          ###########################     #  #              #     #       #     #
+#           ################      #                                             #    ######    #         #         #
+#                                 #                                             #              #         #  ########
+#                    #                                                         ##     ##########         #         #
+#                    #                                            #                                ############    #
+#  G          G      #     #####################################  #          ##             #            #         #
+#          G         #                                            #           #########     ########               #
+#                    #           S             S                 S#           #             #           #########  #
+#                    #                                            #  ########                    #                 #
+#                    #          #           #                     #                              #                 #
+#                    #          #           #                     #             #          #     #                 #
+#                    #          #           #                     #             #          #                       #
+#                    #          #           #                     #             #          #           #           #
+#                               #           #                     #   ########  #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #           ######################################          #             #          #    ###############    #
+#     #                                                           #             #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #                              #                            #  #########  #          #           #           #
+#     #                              #                            #             #          #           #           #
+#     #                              #                            #             #          #                       #
+#     #                              #                            #             #          #        #  ##          #
+#     #                              #                            #             #          #        #   #          #
+#     #                              #                            #             #          #            #####      #
+#     #                                                                         #          #                       #
+#     #  ###################################       ########################                #                       #
+#     #                                                                                    #   #############       #
+#     #                                                                   #                #          #            #
+#     #                      #                                            #                #          #            #
+#     #    S    G            #        #############################       #                           #            #
+#     #                      #                                            #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #    G                 #                         #                  #                           #            #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#SGGGG#                      #                         #                  #                                        #
+#SGGGGG                      #                                            #                                        #
+#oGGGG                                                                                                             #
+#GGGGG                                                                                                             #
+####################################################################################################################"""
 
 g_stuck_banner = """
   ********       **********       **     **         ******        **   **       **
@@ -906,118 +1020,51 @@ def UtilityBasedAgentProgram():
 
     return program
 
-smallMaze = """
-##############################
-#         #              #   #
-#o####    ########       #   #
-#    #    #              #   #
-#    ###     #####  ######   #
-#      #     #   #  #      ###
-#     #####    #    #  # x   #
-#              #       #     #
-##############################"""
+class MazeSearchProblem(Problem):
+    def actions(self, state):
+        return []
 
-smallMazeWithPower = """
-##############################
-#   3 5   #     1        #   #
-#o#### 77 ########   3 5 #   #
-# 2  #  8 # 9 9 2 3 ^    # ^ #
-#    ###  7  #####  ######   #
-#  9   #     #   #  #      ###
-#     ##### 6  #  7 #  # x   #
-#  3      5    #  8    #     #
-##############################"""
+    def result(self, state, action):
+        pass
 
-mediumMaze= """
-###########################################
-#     #                #              #   #
-#o    #        ####    ########       #   #
-#     #####       #    #              #   #
-#         #       ###     #####  ######   #
-#   #######  ####   #     #   #  #      ###
-#   #  #           #####    #    #  # x   #
-#   #  #              #     #       #     #
-#      #    ######    #         #         #
-#      #              #         #  ########
-#     ##     ##########         #         #
-#                         ############    #
-#   ##             #            #         #
-#    #########     ########               #
-#    #             #           #########  #
-#                                         #
-###########################################"""
+    def goal_test(self, state):
+        pass
 
-# Maze with fewer cul-de-sacs
-mediumMaze2= """
-###########################################
-#                                         #
-#     #        ####    ########       #   #
-#         #       #    #              #   #
-#         #       ###     #####  ######   #
-#   #######  ####         #   #  #        #
-#   #  #              ##    #    #  # x   #
-#   #  #              #     #       #     #
-#      #    ######    #         #         #
-#      #              #         #  ########
-#     ##     ##########         #         #
-#                         ############    #
-#   ##             #            #         #
-#    #########     ########               #
-#    #             #           #########  #
-#o                                        #
-###########################################"""
+def SearchBasedAgentProgram():
 
-largeMaze = """
-####################################################################################################################
-#                                                                                                                  #
-#                   #                  ############################            #        ####    ########       #   #
-#                   #                                                              #       #    #              #   #
-#                   #############################                                  #       ###     #####  ######   #
-#                           G   GG#                                          #######  ####         #   #  #        #
-#                           G     #                                          #  #              ##    #    #  # x   #
-#                                G#          ###########################     #  #              #     #       #     #
-#           ################      #                                             #    ######    #         #         #
-#                                 #                                             #              #         #  ########
-#                    #                                                         ##     ##########         #         #
-#                    #                                            #                                ############    #
-#  G          G      #     #####################################  #          ##             #            #         #
-#          G         #                                            #           #########     ########               #
-#                    #           S             S                 S#           #             #           #########  #
-#                    #                                            #  ########                    #                 #
-#                    #          #           #                     #                              #                 #
-#                    #          #           #                     #             #          #     #                 #
-#                    #          #           #                     #             #          #                       #
-#                    #          #           #                     #             #          #           #           #
-#                               #           #                     #   ########  #          #           #           #
-#     #                                                           #             #          #           #           #
-#     #                                                           #             #          #           #           #
-#     #           ######################################          #             #          #    ###############    #
-#     #                                                           #             #          #           #           #
-#     #                                                           #             #          #           #           #
-#     #                              #                            #  #########  #          #           #           #
-#     #                              #                            #             #          #           #           #
-#     #                              #                            #             #          #                       #
-#     #                              #                            #             #          #        #  ##          #
-#     #                              #                            #             #          #        #   #          #
-#     #                              #                            #             #          #            #####      #
-#     #                                                                         #          #                       #
-#     #  ###################################       ########################                #                       #
-#     #                                                                                    #   #############       #
-#     #                                                                   #                #          #            #
-#     #                      #                                            #                #          #            #
-#     #    S    G            #        #############################       #                           #            #
-#     #                      #                                            #                           #            #
-#     #                      #                         #                  #                           #            #
-#     #                      #                         #                  #                           #            #
-#     #    G                 #                         #                  #                           #            #
-#     #                      #                         #                  #                                        #
-#     #                      #                         #                  #                                        #
-#     #                      #                         #                  #                                        #
-#SGGGG#                      #                         #                  #                                        #
-#SGGGGG                      #                                            #                                        #
-#oGGGG                                                                                                             #
-#GGGGG                                                                                                             #
-####################################################################################################################"""
+    search_results = None
+    search_results_deque = collections.deque()
+    search_completed = False
+
+    def get_state_for_search(percepts):
+        return None
+
+    def heuristic(state):
+        return 0
+
+    def program(percepts):
+        nonlocal search_results
+        nonlocal search_results_deque
+        nonlocal search_completed
+        action = None
+        if (not search_completed):
+            search_results_deque = collections.deque()
+            search_results = astar_search(MazeSearchProblem(get_state_for_search(percepts), None), heuristic)
+            search_results = None if None == search_results else search_results
+            if (None != search_results):
+                try:
+                    for i in search_results:
+                        search_results_deque.append(i)
+                except:
+                    search_results_deque.append(search_results)
+        try:
+            action = search_results_deque.popleft()
+        except IndexError:
+            action = None
+        return action
+            
+    return program
+
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
     global g_state_refresh_sleep
@@ -1049,7 +1096,8 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(), largeMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
