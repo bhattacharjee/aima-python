@@ -405,9 +405,11 @@ class TwoDEnvironment(Environment):
             return
         row, col = agent.get_location()
         assert(self.matrix[row][col] == agent and None != row and None != col)
+        # Get Where we are to move to
         newrow, newcol = NextMoveHelper.get_updated_row_col(row, col, action)
         assert(-1 != newrow and -1 != newcol)
         self.matrix[row][col] = None
+        # Update history with the current row, column if required
         if (len(self.agent_history) > 0 and \
             (row, col) != self.agent_history[len(self.agent_history) - 1]) or\
             (0 == len(self.agent_history)):
@@ -417,6 +419,7 @@ class TwoDEnvironment(Environment):
         self.restore_old_object()
         old_object = self.matrix[newrow][newcol]
         self.matrix[newrow][newcol] = agent
+        # If we stepped on something in the new row, col, we must grow or shrink
         should_grow, should_shrink, num_power = self.old_object_processing(old_object)
         self.update_agent(agent, newrow, newcol, num_power)
         if None != self.stored_power and True == self.restore_power:
@@ -426,6 +429,7 @@ class TwoDEnvironment(Environment):
                 self.stored_power.location = [row, col]
             self.stored_power = None
         self.stash_old_object(old_object)
+        # Do the actual growing/shrinking
         self.process_agent_grow_shrink2(should_grow, should_shrink)
 
     # "dimensions" : dimensions of board
