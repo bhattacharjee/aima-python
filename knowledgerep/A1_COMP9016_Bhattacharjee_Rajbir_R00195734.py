@@ -7,7 +7,7 @@ import time
 g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
-g_state_refresh_sleep = 1.0
+g_state_refresh_sleep = 0.4
 g_self_crossing_not_allowed = True
 
 # Import the AIMA libraries from the parent directory
@@ -567,13 +567,14 @@ class TwoDEnvironment(Environment):
     def print_state(self):
         global g_suppress_state_printing
         global g_state_refresh_sleep
+        global g_state_print_same_place_loop_count
         if g_suppress_state_printing:
             return
         global g_curses_available
         if g_curses_available:
             self.print_state_curses()
             if (self.is_stuck and not self.stuck_banner_completed):
-                for i in range(4):
+                for i in g_state_print_same_place_loop_count:
                     self.print_state_curses()
                     if (0 != g_state_refresh_sleep):
                         time.sleep(g_state_refresh_sleep)
@@ -1175,7 +1176,7 @@ class MazeSearchProblem(Problem):
 def SearchBasedAgentProgram():
 
     search_results = None
-    search_results_deque = collections.deque()
+    search_results_dequeue = collections.deque()
     search_completed = False
 
     def get_state_for_search(percepts):
@@ -1191,12 +1192,9 @@ def SearchBasedAgentProgram():
 
     def program(percepts):
         nonlocal search_results
-        nonlocal search_results_deque
+        nonlocal search_results_dequeue
         nonlocal search_completed
-        search_results_dequeue = collections.deque()
         action = None
-        for k, v in percepts.items():
-            print(k, )
         if (not search_completed):
             state = SearchHelper.convert_percepts_to_state(percepts)
             srch = astar_search(MazeSearchProblem(state), heuristic)
@@ -1205,6 +1203,7 @@ def SearchBasedAgentProgram():
                 if None != solution:
                     for action in solution:
                         search_results_dequeue.append(action)
+            search_completed = True
         try:
             action = search_results_dequeue.popleft()
         except IndexError:
@@ -1216,6 +1215,8 @@ def SearchBasedAgentProgram():
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
     global g_state_refresh_sleep
+    global g_curses_available
+    loop_count = g_state_print_same_place_loop_count if g_curses_available else 1
     env = TwoDMaze(mazeString)
     agent = TwoDAgent(program)
     ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
@@ -1223,9 +1224,10 @@ def RunAgentAlgorithm(program, mazeString: str):
     env.add_thing(agent, (ag_x,ag_y))
     while not env.is_done():
         env.step()
-        for i in range(g_state_print_same_place_loop_count):
+        for i in range(loop_count):
             env.print_state()
-            time.sleep(g_state_refresh_sleep)
+            if (0 != g_state_refresh_sleep):
+                time.sleep(g_state_refresh_sleep)
     stuck = env.got_stuck()
     dist = env.goal_distance
     del env
