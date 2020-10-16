@@ -733,7 +733,7 @@ class NextMoveHelper(object):
         delta = NextMoveHelper.backward_move_table[move]
         assert(None != delta)
         x = x + delta[0]
-        y = y + delta[0]
+        y = y + delta[1]
         return x, y
     
     def get_move_string2(oldx, oldy, newx, newy):
@@ -1095,7 +1095,6 @@ class SearchHelper:
         agent_max_length = state[5]
         dimensions = state[6][0]
         matrix = Utils.convert_text_matrix_to_object(dimensions[0], dimensions[1], textmatrix)
-        things = []
         goal_dir_x = goal[0] - location[0]
         goal_dir_y = goal[1] - location[1]
         goal = [goal_dir_x, goal_dir_y]
