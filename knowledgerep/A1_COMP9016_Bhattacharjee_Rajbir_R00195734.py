@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os,sys,inspect, random, collections, copy
+import os,sys,inspect, random, collections, copy, pickle
 import argparse
 import time
 
@@ -194,6 +194,38 @@ class Utils:
                 if (include_grow_shrink and isinstance(thing, Shrink)):
                     matrix[row][col] = 'S'
         return matrix
+
+    def convert_text_matrix_to_object(rows, cols, tmatrix):
+        matrix = [[None for i in range(cols)] for j in range(rows)]
+        for i in range(rows):
+            for j in range(cols):
+                if '#' == tmatrix[i][j]:
+                    matrix[i][j] = Wall(i, j)
+                if 'G' == tmatrix[i][j]:
+                    matrix[i][j] = Grow(i, j)
+                if 'S' == tmatrix[i][j]:
+                    matrix[i][j] = Shrink(i, j)
+                if 'D' == tmatrix[i][j]:
+                    matrix[i][j] = Door(i, j)
+        return matrix
+    
+    def create_things_array_from_text_matrix(rows, cols, tmatrix):
+        things = []
+        for i in range(rows):
+            for j in range(cols):
+                thing = None
+                if '#' == tmatrix[i][j]:
+                    thing = Wall(i, j)
+                if 'G' == tmatrix[i][j]:
+                    thing = Grow(i, j)
+                if 'S' == tmatrix[i][j]:
+                    thing = Shrink(i, j)
+                if 'D' == tmatrix[i][j]:
+                    thing = Door(i, j)
+                if (None != thing):
+                    thing.set_location([i, j])
+                    things.append(thing)
+        return things
 
     def get_matrix_for_problem(rows:int, cols:int, things):
         """Another variant of the state matrix for search problems
@@ -677,10 +709,8 @@ class NextMoveHelper(object):
     # It also checks if the move is within the body of the agent (snake)
     def get_candidate_positions(ag_location, mt_dimensions, history):
         global g_self_crossing_not_allowed
-        row = ag_location[0]
-        col = ag_location[1]
-        total_rows = mt_dimensions[0]
-        total_cols = mt_dimensions[1]
+        (row, col) = tuple(ag_location)
+        (total_rows, total_cols) = tuple(mt_dimensions)
         temp = [ (row - 1, col), (row + 1, col), (row, col - 1), (row, col + 1)]
         candidates = []
         assert(None != history)
@@ -700,7 +730,7 @@ class NextMoveHelper(object):
             x = x[1]
         if None == move:
             return x, y
-        delta = backward_move_table[move]
+        delta = NextMoveHelper.backward_move_table[move]
         assert(None != delta)
         x = x + delta[0]
         y = y + delta[0]
@@ -1035,34 +1065,15 @@ def UtilityBasedAgentProgram():
 
     return program
 
-class MazeSearchProblem(Problem):
-    def actions(self, state):
-        return []
-
-    def result(self, state, action):
-        pass
-
-    def goal_test(self, state):
-        pass
-
-def SearchBasedAgentProgram():
-
-    search_results = None
-    search_results_deque = collections.deque()
-    search_completed = False
-
-    def get_matrix_for_search(percepts):
+class SearchHelper:
+    def get_text_matrix_for_search(percepts):
         things = percepts["things"]
         (maxrow, maxcol) = tuple(percepts["dimensions"])
-        matrix = [[None for i in range(maxcol)] for j in range(maxrow)]
-        for thing in things:
-            (r, c) = tuple(thing.get_location())
-            matrix[r][c] = thing
-        return matrix
+        return Utils.get_matrix_for_program(maxrow, maxcol, things, True)
     
-    def get_state_for_search(percepts):
-        matrix = get_matrix_for_search(percepts)
-        history = copy.deepcopy(percepts["agent_history"])
+    def convert_percepts_to_state(percepts):
+        matrix = SearchHelper.get_text_matrix_for_search(percepts)
+        ag_hist = list(percepts["agent_history"])
         (curx, cury) = tuple(percepts["location"])
         (goalx, goaly) = tuple(percepts["goal_direction"])
         goalx += curx
@@ -1070,15 +1081,106 @@ def SearchBasedAgentProgram():
         agent_can_grow = percepts["agent_can_grow"]
         agent_max_length = percepts["agent_max_length"]
         (dimx, dimy)= tuple(percepts["dimensions"])
-        state = {}
-        state["matrix"] = matrix
-        state["agent_history"] = history
-        state["location"] = [curx, cury]
-        state["goal"] = [goalx, goaly]
-        state["agent_can_grow"] = agent_can_grow
-        state["agent_max_length"] = agent_max_length
-        state["dimensions"] = [dimx, dimy]
-        return state
+        tup = ([matrix], [ag_hist], [[curx, cury]], [[goalx, goaly]], agent_can_grow, agent_max_length, [[dimx, dimy]])
+        tup = pickle.dumps(tup)
+        return tup
+    
+    def convert_state_to_percepts(state):
+        state = pickle.loads(state)
+        textmatrix = state[0][0]
+        ag_hist = collections.deque(state[1][0])
+        location = state[2][0]
+        goal = state[3][0]
+        agent_can_grow = state[4]
+        agent_max_length = state[5]
+        dimensions = state[6][0]
+        matrix = Utils.convert_text_matrix_to_object(dimensions[0], dimensions[1], textmatrix)
+        things = []
+        goal_dir_x = goal[0] - location[0]
+        goal_dir_y = goal[1] - location[1]
+        goal = [goal_dir_x, goal_dir_y]
+        percepts = {}
+        percepts["matrix"] = matrix
+        percepts["agent_history"] = ag_hist
+        percepts["location"] = location
+        percepts["goal_direction"] = goal
+        percepts["agent_can_grow"] = agent_can_grow
+        percepts["agent_max_length"] = agent_max_length
+        percepts["dimensions"] = dimensions
+        percepts["things"] = Utils.create_things_array_from_text_matrix(dimensions[0], dimensions[1], textmatrix)
+        return percepts
+
+    """
+    Sequence of actions performed in execute_action
+    1. Convert the move to the newrow, newcol
+    2. Set the matrix position at curent row, col to None (agent was there till nwo)
+    3. If old-row, old-col are not already in history, add them to the history
+    4. Trim the history to size if required
+    5. Restore the stashed object in the matrix at row, col if applicable
+    6. Stash the object at newrow, newcol for later
+    7. Update the matrix to reflect the agent at newrow, newcol
+    8. Update the agent's internal location and other parameters
+    9. If we stepped on a square that grows or shrinks us, change the length of the history dequeue
+    """
+class MazeSearchProblem(Problem):
+    """
+    Sequence of actions:
+    1. Get candidate locations
+    2. Discard walls from candidate locations
+    3. Update the history and trim if required
+    4. Update the agent's location to the new location
+    6. If we stepped on a square that grows/shrinks, change the length of history deque
+    """
+
+
+    def actions(self, state):
+        """
+            state["matrix"]             - matrix of all objects (shallow copy)
+            state["agent_history"]      - deque of locations of history (deep copy)
+            state["location"]           - current location
+            state["goal"]               - goal
+            state["agent_can_grow"]     - can the agent grow?
+            state["agent_max_length"]   - maximum length of the agent
+            state["dimensions"]         - dimensions of the matrix
+        """
+        state = SearchHelper.convert_state_to_percepts(state)
+        ag_location = state["location"]
+        (oldrow, oldcol) = tuple(ag_location)
+        mt_dimensions = state["dimensions"]
+        history = state["agent_history"]
+        matrix = state["matrix"]
+        candidate_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
+        candidate_moves = []
+        for pos in candidate_positions:
+            (row, col) = tuple(pos)
+            if not isinstance(matrix[row][col], Wall):
+                candidate_moves.append(NextMoveHelper.get_move_string2(oldrow, oldcol, row, col))
+        return candidate_moves
+
+    def result(self, state, action):
+        state = SearchHelper.convert_state_to_percepts(state)
+        # def get_new_location(move, x, y):
+        (curx, cury) = tuple(state["location"])
+        (newx, newy) = NextMoveHelper.get_new_location(action, curx, cury)
+        state["location"] = [newx, newy]
+        return SearchHelper.convert_percepts_to_state(state)
+
+    def goal_test(self, state):
+        state = SearchHelper.convert_state_to_percepts(state)
+        matrix = state["matrix"]
+        (curx, cury) = tuple(state["location"])
+        if (isinstance(matrix[curx][cury], Door)):
+            return True
+        return False
+
+def SearchBasedAgentProgram():
+
+    search_results = None
+    search_results_deque = collections.deque()
+    search_completed = False
+
+    def get_state_for_search(percepts):
+        return SearchHelper.convert_percepts_to_state(percepts)
 
     def heuristic(state):
         return 0
@@ -1088,16 +1190,19 @@ def SearchBasedAgentProgram():
         nonlocal search_results_deque
         nonlocal search_completed
         action = None
+        for k, v in percepts.items():
+            print(k, )
         if (not search_completed):
-            search_results_deque = collections.deque()
-            search_results = astar_search(MazeSearchProblem(get_state_for_search(percepts), None), heuristic)
-            search_results = None if None == search_results else search_results
-            if (None != search_results):
-                try:
-                    for i in search_results:
-                        search_results_deque.append(i)
-                except:
-                    search_results_deque.append(search_results)
+            state = SearchHelper.convert_percepts_to_state(percepts)
+            srch = astar_search(MazeSearchProblem(state), heuristic)
+            if None != srch and None != srch.solution():
+                search_results_dequeue = collections.deque(srch.solution())
+                print(search_results_deque)
+                print(srch)
+            else:
+                print("srch is null or srch.solution() is null")
+                print(srch)
+                search_results_deque = collections.deque()
         try:
             action = search_results_deque.popleft()
         except IndexError:
@@ -1137,7 +1242,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     RunAgentAlgorithm(SearchBasedAgentProgram(), largeMaze)
 
 def main():
