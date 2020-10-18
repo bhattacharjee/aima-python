@@ -54,7 +54,7 @@ smallMaze = """
 ##############################
 #G        #              #   #
 #o####    ########       #   #
-#G   #    #              #   #
+#GS  #    #              #   #
 #    ###     #####  ######   #
 #      #     #   #  #      ###
 #     #####    #    #  # x   #
@@ -435,8 +435,9 @@ class SimpleGraphics():
         time.sleep(g_graphics_sleep_time)
 
 class SimpleGraphicsTkinter():
-    SQUARE_SIZE = 20
+    SQUARE_SIZE = 10
     RADIUS = SQUARE_SIZE // 2
+
     def __init__(self, rows, cols):
         global g_state_refresh_sleep
         global g_state_print_same_place_loop_count
@@ -445,6 +446,7 @@ class SimpleGraphicsTkinter():
         self.cols = cols
         self.is_inited = False
         self.master = tkinter.Tk()
+        self.labels = []
         print("Tkinter ", self.master)
         if (None != self.master):
             self.canvas = tkinter.Canvas(self.master,\
@@ -487,6 +489,11 @@ class SimpleGraphicsTkinter():
         self.canvas.create_rectangle(x, y, x + width + 1, y + width + 1, fill=self.get_color_string(color), outline="")
         #rect = pygame.Rect(x, y, width, width)
 
+    def clear_labels(self):
+        for i in self.labels:
+            i.destroy()
+        self.labels = []
+
     def update(self, m):
         global g_graphics_sleep_time
         if not self.is_inited:
@@ -495,21 +502,32 @@ class SimpleGraphicsTkinter():
         self.canvas.delete("all")
         if not self.is_valid_matrix(m):
             return
+        self.clear_labels()
         for i in range(len(m)):
             for j in range(len(m[i])):
                 c = m[i][j]
-                xoff = SimpleGraphics.SQUARE_SIZE * (i + 1);
-                yoff = SimpleGraphics.SQUARE_SIZE * (j + 1);
-                if ('#' == c):
-                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 255))
-                if ('*' == c):
-                    self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (255, 0, 0))
-                if ('D' == c):
-                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 0))
-                if ('G' == c):
-                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0xef, 0xfa, 0x11))
-                if ('S' == c):
-                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0x53, 0xef, 0x21))
+                xoff = SimpleGraphicsTkinter.SQUARE_SIZE * (i + 1);
+                yoff = SimpleGraphicsTkinter.SQUARE_SIZE * (j + 1);
+                if ('*' == c or '-' == c or '|' == c or '/' == c or '\\' == c):
+                    color = (0, 0, 0) if '*' != c else (255, 0, 0)
+                    self.draw_circle(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, color)
+                elif ('#' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0, 0, 255))
+                elif ('D' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0, 0, 0))
+                    l = tkinter.Label(self.master, text = c, fg="white", bg="black")
+                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    self.labels.append(l)
+                elif ('G' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0xef, 0xfa, 0x11))
+                    l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string((0xef, 0xfa, 0x11)))
+                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    self.labels.append(l)
+                elif ('S' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0x53, 0xef, 0x21))
+                    l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string((0x53, 0xef, 0x21)))
+                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    self.labels.append(l)
         self.canvas.pack()
         self.canvas.update()
         self.master.update()
@@ -770,13 +788,13 @@ class TwoDEnvironment(Environment):
                 if (g_use_pygame and g_pygame_available):
                     self.graphics = SimpleGraphics(len(m), len(m[0]))
         if (None == self.graphics or not self.graphics.is_inited):
-            print("Graphics failed, not going to use graphics")
+            print("0. Graphics failed, not going to use graphics")
             self.graphics_failed = True
         try:
             if not self.graphics_failed:
                 self.graphics.update(m)
         except:
-            print("Graphics failed. not goint to use graphics")
+            print("1. Graphics failed. not goint to use graphics")
             self.graphics_failed = True
 
     def print_state(self):
@@ -1557,10 +1575,10 @@ def process():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
-    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
 
