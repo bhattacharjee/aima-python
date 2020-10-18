@@ -13,6 +13,8 @@ g_search_should_consider_history = False
 g_pygame_available = False
 g_use_pygame = False
 g_graphics_sleep_time = 0.25
+g_use_tkinter = False
+g_tkinter_available = False
 
 
 try:
@@ -20,6 +22,12 @@ try:
     g_pygame_available = True
 except:
     print("PyGame is not available, running in text mode")
+
+try:
+    import tkinter
+    g_tkinter_available = True
+except:
+    print("Tkinter is not available, running in text mode")
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -420,6 +428,82 @@ class SimpleGraphics():
         pygame.display.flip()
         time.sleep(g_graphics_sleep_time)
 
+class SimpleGraphicsTkinter():
+    SQUARE_SIZE = 20
+    RADIUS = SQUARE_SIZE // 2
+    def __init__(self, rows, cols):
+        global g_state_refresh_sleep
+        global g_state_print_same_place_loop_count
+        (rows, cols) = (cols, rows)
+        self.rows = rows
+        self.cols = cols
+        self.is_inited = False
+        self.master = tkinter.Tk()
+        print("Tkinter ", self.master)
+        if (None != self.master):
+            self.canvas = tkinter.Canvas(self.master,\
+                    width=((rows + 5)*SimpleGraphicsTkinter.SQUARE_SIZE),\
+                    height=((cols + 5) * SimpleGraphicsTkinter.SQUARE_SIZE))
+            self.is_inited = True
+            g_state_print_same_place_loop_count = 1
+            self.canvas.update()
+
+    def is_initialized(self):
+        return self.is_inited
+
+    def is_valid_matrix(self, m):
+        rows = len(m);
+        cols = 0;
+        for i in range(rows):
+            if cols < len(m[i]):
+                cols = len(m[i])
+        (rows, cols) = (cols, rows)
+        if rows > self.rows or cols > self.cols:
+            return False
+        return True
+
+    def fill_screen(self):
+        self.screen.fill((255, 255, 255))
+
+    def draw_circle(self, x, y, diameter, color):
+        (x, y) = (y, x)
+        self.canvas.create_oval(x, y, x + diameter + 1, y + diameter + 1, fill=self.get_color_string(color))
+
+    def get_color_string(self, color: tuple):
+        stringcolor = "#"
+        for i in color:
+            tempstr = "%.2x" % i
+            stringcolor = stringcolor + tempstr
+        return stringcolor
+
+    def draw_square(self, x, y, width, color):
+        (x, y) = (y, x)
+        self.canvas.create_rectangle(x, y, x + width + 1, y + width + 1, fill=self.get_color_string(color))
+        #rect = pygame.Rect(x, y, width, width)
+
+    def update(self, m):
+        global g_graphics_sleep_time
+        if not self.is_inited:
+            return
+        assert(isinstance(m, list))
+        if not self.is_valid_matrix(m):
+            return
+        for i in range(len(m)):
+            for j in range(len(m[i])):
+                c = m[i][j]
+                xoff = SimpleGraphics.SQUARE_SIZE * (i + 1);
+                yoff = SimpleGraphics.SQUARE_SIZE * (j + 1);
+                if ('#' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 255))
+                if ('*' == c):
+                    self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (255, 0, 0))
+                if ('D' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 0))
+        self.canvas.pack()
+        self.canvas.update()
+        self.master.update()
+        time.sleep(g_graphics_sleep_time)
+
 
 counter = 0
 # Create our own 2D environment
@@ -667,7 +751,7 @@ class TwoDEnvironment(Environment):
     def display_graphics(self):
         m = self.get_print_matrix()
         if (None == self.graphics):
-            self.graphics = SimpleGraphics(len(m), len(m[0]))
+            self.graphics = SimpleGraphicsTkinter(len(m), len(m[0]))
         self.graphics.update(m)
 
     def print_state(self):
@@ -676,10 +760,11 @@ class TwoDEnvironment(Environment):
         global g_state_print_same_place_loop_count
         global g_curses_available
         global g_pygame_available, g_use_pygame
+        global g_tkinter_available
         if g_suppress_state_printing:
             return
         global g_curses_available
-        if g_pygame_available and g_use_pygame:
+        if (g_pygame_available and g_use_pygame) or g_tkinter_available:
             self.display_graphics()
         if g_curses_available:
             self.print_state_curses()
