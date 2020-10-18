@@ -1221,13 +1221,24 @@ class MazeSearchProblem(Problem):
             return True
         return False
 
-def SearchBasedAgentProgram():
+def SearchBasedAgentProgram(algorithm=astar_search):
 
     search_results = None
     search_results_deque = collections.deque()
     search_completed = False
     stats = None
+    search_algorithm = algorithm
+    perf_string = ""
 
+
+    def time_and_run_algorithm(problem, heuristic):
+        nonlocal search_algorithm
+        nonlocal perf_string
+        time1 = time.perf_counter()
+        srch = algorithm(problem, heuristic)
+        time2 = time.perf_counter()
+        perf_string = f"Time taken by {algorithm}: {time2 - time1}\n"
+        return srch
 
     def get_state_for_search(percepts):
         return SearchHelper.convert_percepts_to_state(percepts)
@@ -1245,14 +1256,19 @@ def SearchBasedAgentProgram():
         nonlocal search_results_deque
         nonlocal search_completed
         nonlocal stats
+        nonlocal algorithm
+        nonlocal perf_string
         if (get_stats):
-            return stats if None != stats else "STATS NOT AVAILABLE"
+            if (None == stats):
+                stats = ""
+            if (None != perf_string):
+                stats = stats + "\n" + perf_string + "\n"
+            return stats
         action = None
         if (not search_completed):
             state = SearchHelper.convert_percepts_to_state(percepts)
             problem = MazeSearchProblem(state)
-            #srch = astar_search(problem, heuristic)
-            srch = astar_search(problem, heuristic)
+            srch = time_and_run_algorithm(problem, heuristic)
             stats = problem.__repr__()
             if None != srch and None != srch.solution():
                 solution = srch.solution()
