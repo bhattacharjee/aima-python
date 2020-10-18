@@ -573,21 +573,22 @@ class TwoDEnvironment(Environment):
             for j, c in enumerate(arr):
                 self.window.addstr(i, j, c)
         self.window.refresh()
+        return 0
 
     def print_state(self):
         global g_suppress_state_printing
         global g_state_refresh_sleep
         global g_state_print_same_place_loop_count
+        global g_curses_available
         if g_suppress_state_printing:
             return
         global g_curses_available
         if g_curses_available:
             self.print_state_curses()
-            if (self.is_stuck and not self.stuck_banner_completed):
-                for i in g_state_print_same_place_loop_count:
+            if (not self.is_stuck or not self.stuck_banner_completed):
+                for i in range(g_state_print_same_place_loop_count):
                     self.print_state_curses()
                     if (0 != g_state_refresh_sleep):
-                        #print(f"Sleeping for {g_state_refresh_sleep}")
                         time.sleep(g_state_refresh_sleep)
                 self.stuck_banner_completed = True
             return
@@ -995,7 +996,7 @@ def GoalDrivenAgentProgram():
         move = get_random_move(matrix, [a_row, a_col], history)
         assert(None == move or validate_move(move, a_row, a_col, rows, cols))
         return move
-    
+
     return program
 
 # Utility based agent program. This program calculates the utility function
@@ -1282,7 +1283,6 @@ def RunAgentAlgorithm(program, mazeString: str):
         for i in range(loop_count):
             env.print_state()
             if (0 != g_state_refresh_sleep):
-                #print(f"sleeping for {g_state_refresh_sleep}")
                 time.sleep(g_state_refresh_sleep)
     stuck = env.got_stuck()
     dist = env.goal_distance
@@ -1310,7 +1310,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing", help="Do not print the board matrix after each step", action="store_true")
-    parser.add_argument("-rd", "--refresh-delay",default=0.0, help="Number of seconds between refreshes", type=float)
+    parser.add_argument("-rd", "--refresh-delay",default=0.005, help="Number of seconds between refreshes", type=float)
     parser.add_argument("-ac", "--allow-crossing-self", help="Allow crossing over one's body", action="store_true")
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
