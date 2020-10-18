@@ -7,11 +7,11 @@ import time
 g_curses_available = True
 g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
-g_state_refresh_sleep = 0.4
+g_state_refresh_sleep = 0.05
 g_self_crossing_not_allowed = True
 g_search_should_consider_history = False
 g_pygame_available = False
-g_use_pygame = True
+g_use_pygame = False
 g_graphics_sleep_time = 0.25
 
 
@@ -352,14 +352,26 @@ class SimpleGraphics():
     SQUARE_SIZE = 20
     RADIUS = SQUARE_SIZE // 2
     def __init__(self, rows, cols):
+        global g_state_refresh_sleep
+        global g_state_print_same_place_loop_count
         (rows, cols) = (cols, rows)
         self.rows = rows
         self.cols = cols
-        pygame.init()
+        self.numpass, self.numfail = pygame.init()
+        self.is_inited = False
+        if (self.numfail <= 1):
+            #g_state_refresh_sleep = 0
+            g_state_print_same_place_loop_count = 1
+            self.is_inited = True
+        else:
+            print(f"Failed to initialize pygame graphics: numfail = {self.numfail}")
         self.screen = pygame.display.set_mode(\
                 [(rows + 5) * SimpleGraphics.SQUARE_SIZE,\
                 (cols + 5) * SimpleGraphics.SQUARE_SIZE])
         self.screen.fill((255, 255, 255))
+
+    def is_initialized(self):
+        return self.is_inited
 
     def is_valid_matrix(self, m):
         rows = len(m);
@@ -388,6 +400,8 @@ class SimpleGraphics():
 
     def update(self, m):
         global g_graphics_sleep_time
+        if not self.is_inited:
+            return
         assert(isinstance(m, list))
         if not self.is_valid_matrix(m):
             return
@@ -673,7 +687,8 @@ class TwoDEnvironment(Environment):
                 for i in range(g_state_print_same_place_loop_count):
                     self.print_state_curses()
                     if (0 != g_state_refresh_sleep):
-                        time.sleep(g_state_refresh_sleep)
+                        if (None == self.graphics or False == self.graphics.is_initialized()):
+                            time.sleep(g_state_refresh_sleep)
                 self.stuck_banner_completed = True
             return
         else:
@@ -1402,7 +1417,6 @@ def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
     global g_state_refresh_sleep
     global g_curses_available
-    loop_count = g_state_print_same_place_loop_count if g_curses_available else 1
     env = TwoDMaze(mazeString)
     agent = TwoDAgent(program)
     ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
@@ -1410,6 +1424,7 @@ def RunAgentAlgorithm(program, mazeString: str):
     env.add_thing(agent, (ag_x,ag_y))
     while not env.is_done():
         env.step()
+        loop_count = g_state_print_same_place_loop_count if g_curses_available else 1
         for i in range(loop_count):
             env.print_state()
             if (0 != g_state_refresh_sleep):
