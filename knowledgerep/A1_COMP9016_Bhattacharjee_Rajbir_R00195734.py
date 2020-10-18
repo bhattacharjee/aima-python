@@ -17,7 +17,8 @@ try:
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir)
     from agents import Environment, Thing, Direction, Agent
-    from search import Problem, astar_search
+    from search import Problem, astar_search, depth_first_graph_search
+    from search import depth_first_tree_search, breadth_first_graph_search
 except:
     print("Could not import from parent folder... Exiting")
     sys.exit(1)
@@ -174,6 +175,7 @@ class Utils:
     def manhattan_distance(l1, l2):
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
+        #print(l1[0], l1[1], l2[0], l2[1], abs(l1[0] - l2[0]), abs(l1[1] - l2[1]))
         return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
 
     def euclidean_distance(l1, l2):
@@ -812,7 +814,7 @@ def SimpleReflexProgram(weighted_rand_sel=False):
             else:
                 del cp[i]
         return rowCandidate, colCandidate
-        
+
     def get_goal_directions(percepts):
         goal_direction = percepts["goal_direction"]
         dx = goal_direction[0]
@@ -1083,10 +1085,13 @@ class SearchHelper:
         things = percepts["things"]
         (maxrow, maxcol) = tuple(percepts["dimensions"])
         return Utils.get_matrix_for_program(maxrow, maxcol, things, True)
-    
+
     def convert_percepts_to_state(percepts:dict):
+        global g_search_should_consider_history
         matrix = SearchHelper.get_text_matrix_for_search(percepts)
-        ag_hist = list(percepts["agent_history"])
+        ag_hist = []
+        if g_search_should_consider_history:
+            ag_hist = list(percepts["agent_history"])
         (curx, cury) = tuple(percepts["location"])
         (goalx, goaly) = tuple(percepts["goal_direction"])
         goalx += curx
@@ -1099,9 +1104,12 @@ class SearchHelper:
         return tup
 
     def convert_state_to_percepts(state):
+        global g_search_should_consider_history
+        ag_hist = None
         state = pickle.loads(state)
         textmatrix = state[0][0]
-        ag_hist = collections.deque(state[1][0])
+        if g_search_should_consider_history:
+            ag_hist = collections.deque(state[1][0])
         location = state[2][0]
         goal = state[3][0]
         agent_can_grow = state[4]
@@ -1113,7 +1121,8 @@ class SearchHelper:
         goal = [goal_dir_x, goal_dir_y]
         percepts = {}
         percepts["matrix"] = matrix
-        percepts["agent_history"] = ag_hist
+        if g_search_should_consider_history:
+            percepts["agent_history"] = ag_hist
         percepts["location"] = location
         percepts["goal_direction"] = goal
         percepts["agent_can_grow"] = agent_can_grow
@@ -1147,6 +1156,7 @@ class MazeSearchProblem(Problem):
         return string
 
     def actions(self, state):
+        global g_search_should_consider_history
         """
             state["matrix"]             - matrix of all objects (shallow copy)
             state["agent_history"]      - deque of locations of history (deep copy)
@@ -1160,7 +1170,10 @@ class MazeSearchProblem(Problem):
         ag_location = state["location"]
         (oldrow, oldcol) = tuple(ag_location)
         mt_dimensions = state["dimensions"]
-        history = state["agent_history"]
+        if (g_search_should_consider_history):
+            history = state["agent_history"]
+        else:
+            history = []
         matrix = state["matrix"]
         #print(state["agent_max_length"])
         candidate_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
@@ -1172,6 +1185,7 @@ class MazeSearchProblem(Problem):
                 candidate_moves.append(NextMoveHelper.get_move_string2(oldrow, oldcol, row, col))
         self.succs += 1
         self.cand_moves += len(candidate_moves)
+        #print(oldrow, oldcol, candidate_moves)
         return candidate_moves
 
     """
@@ -1189,18 +1203,30 @@ class MazeSearchProblem(Problem):
         agent_max_length = state["agent_max_length"]
         agent_can_grow = state["agent_can_grow"]
         matrix = state["matrix"]
+        #print(type(state["goal_direction"]))
+        # Get the old goal direction, this will be updated
+        (goaldx, goaldy) = tuple(state["goal_direction"])
+        #print(f"Initial: {goaldx}, {goaldy}")
         # def get_new_location(move, x, y):
         (curx, cury) = tuple(state["location"])
         (newx, newy) = NextMoveHelper.get_new_location(action, curx, cury)
-        history = state["agent_history"]
-        #print("history = ", history)
+        #print(f"{action} : ({curx}, {cury}) --> ({newx}, {newy})")
+        # Calculate the absolute goal
+        (goalx, goaly) = (curx + goaldx, cury + goaldy)
+        # Get the new goal directions
+        (goaldx, goaldy) = (goalx - newx, goaly - newy)
+        state["goal_direction"] = [goaldx, goaldy]
+        #print(f"Final: {goaldx}, {goaldy}")
+        (offx, offy) = (newx - curx, newy - cury)
         if (g_search_should_consider_history and agent_can_grow):
+            history = state["agent_history"]
+            #print("history = ", history)
             if (len(history) > 0 and (curx, cury) != history[len(history) - 1]) or (0 == len(history)):
                 history.append((curx, cury))
                 while(len(history) > agent_max_length):
                     history.popleft()
+            state["agent_history"] = history
         state["location"] = [newx, newy]
-        state["agent_history"] = history
         if None != matrix[newx][newy]:
             direction = 0
             if isinstance(matrix[newx][newy], Grow):
@@ -1221,7 +1247,7 @@ class MazeSearchProblem(Problem):
             return True
         return False
 
-def SearchBasedAgentProgram(algorithm=astar_search):
+def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
 
     search_results = None
     search_results_deque = collections.deque()
@@ -1229,13 +1255,18 @@ def SearchBasedAgentProgram(algorithm=astar_search):
     stats = None
     search_algorithm = algorithm
     perf_string = ""
+    use_heuristic = useheuristic
 
 
     def time_and_run_algorithm(problem, heuristic):
         nonlocal search_algorithm
         nonlocal perf_string
+        nonlocal use_heuristic
         time1 = time.perf_counter()
-        srch = algorithm(problem, heuristic)
+        if (use_heuristic):
+            srch = algorithm(problem, heuristic)
+        else:
+            srch = algorithm(problem)
         time2 = time.perf_counter()
         perf_string = f"Time taken by {algorithm}: {time2 - time1}\n"
         return srch
@@ -1249,6 +1280,7 @@ def SearchBasedAgentProgram(algorithm=astar_search):
         (goalx, goaly) = tuple(percept["goal_direction"])
         goalx += curx
         goaly += cury
+        #print("Heuristic returned: ", Utils.manhattan_distance([curx, cury], [goalx, goaly]))
         return Utils.manhattan_distance([curx, cury], [goalx, goaly])
 
     def program(percepts, get_stats=False):
@@ -1319,10 +1351,12 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(), smallMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), largeMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
+    global g_state_print_same_place_loop_count
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing", help="Do not print the board matrix after each step", action="store_true")
@@ -1333,6 +1367,10 @@ def main():
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
     g_state_refresh_sleep = 0 if args.refresh_delay < 0.0001 else args.refresh_delay
     g_self_crossing_not_allowed = not args.allow_crossing_self
+    if g_suppress_state_printing:
+        g_state_refresh_sleep = 0
+        g_state_print_same_place_loop_count
+
     process()
 
 if "__main__" == __name__:
