@@ -11,9 +11,9 @@ g_state_refresh_sleep = 0.05
 g_self_crossing_not_allowed = True
 g_search_should_consider_history = False
 g_pygame_available = False
-g_use_pygame = False
+g_use_pygame = True
 g_graphics_sleep_time = 0.25
-g_use_tkinter = False
+g_use_tkinter = True
 g_tkinter_available = False
 
 
@@ -21,12 +21,14 @@ try:
     import pygame
     g_pygame_available = True
 except:
+    g_use_pygame = False
     print("PyGame is not available, running in text mode")
 
 try:
     import tkinter
     g_tkinter_available = True
 except:
+    g_use_tkinter = False
     print("Tkinter is not available, running in text mode")
 
 # Import the AIMA libraries from the parent directory
@@ -425,6 +427,10 @@ class SimpleGraphics():
                     self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (255, 0, 0))
                 if ('D' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 0))
+                if ('G' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0xef, 0xfa, 0x11))
+                if ('S' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0x53, 0xef, 0x21))
         pygame.display.flip()
         time.sleep(g_graphics_sleep_time)
 
@@ -467,7 +473,7 @@ class SimpleGraphicsTkinter():
 
     def draw_circle(self, x, y, diameter, color):
         (x, y) = (y, x)
-        self.canvas.create_oval(x, y, x + diameter + 1, y + diameter + 1, fill=self.get_color_string(color))
+        self.canvas.create_oval(x, y, x + diameter + 1, y + diameter + 1, fill=self.get_color_string(color), outline="")
 
     def get_color_string(self, color: tuple):
         stringcolor = "#"
@@ -478,7 +484,7 @@ class SimpleGraphicsTkinter():
 
     def draw_square(self, x, y, width, color):
         (x, y) = (y, x)
-        self.canvas.create_rectangle(x, y, x + width + 1, y + width + 1, fill=self.get_color_string(color))
+        self.canvas.create_rectangle(x, y, x + width + 1, y + width + 1, fill=self.get_color_string(color), outline="")
         #rect = pygame.Rect(x, y, width, width)
 
     def update(self, m):
@@ -486,6 +492,7 @@ class SimpleGraphicsTkinter():
         if not self.is_inited:
             return
         assert(isinstance(m, list))
+        self.canvas.delete("all")
         if not self.is_valid_matrix(m):
             return
         for i in range(len(m)):
@@ -499,6 +506,10 @@ class SimpleGraphicsTkinter():
                     self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (255, 0, 0))
                 if ('D' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 0))
+                if ('G' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0xef, 0xfa, 0x11))
+                if ('S' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0x53, 0xef, 0x21))
         self.canvas.pack()
         self.canvas.update()
         self.master.update()
@@ -525,6 +536,7 @@ class TwoDEnvironment(Environment):
         self.agent_history = collections.deque()
         self.matrix = [[None for i in range(cols)] for j in range(rows)] # 2D array
         self.graphics = None
+        self.graphics_failed = False
         if g_curses_available:
             self.window = curses.initscr()
 
@@ -749,10 +761,23 @@ class TwoDEnvironment(Environment):
         return 0
 
     def display_graphics(self):
+        global g_use_tkinter, g_tkinter_available, g_use_pygame, g_pygame_available
         m = self.get_print_matrix()
         if (None == self.graphics):
-            self.graphics = SimpleGraphicsTkinter(len(m), len(m[0]))
-        self.graphics.update(m)
+            if (g_use_tkinter and g_tkinter_available):
+                self.graphics = SimpleGraphicsTkinter(len(m), len(m[0]))
+            else:
+                if (g_use_pygame and g_pygame_available):
+                    self.graphics = SimpleGraphics(len(m), len(m[0]))
+        if (None == self.graphics or not self.graphics.is_inited):
+            print("Graphics failed, not going to use graphics")
+            self.graphics_failed = True
+        try:
+            if not self.graphics_failed:
+                self.graphics.update(m)
+        except:
+            print("Graphics failed. not goint to use graphics")
+            self.graphics_failed = True
 
     def print_state(self):
         global g_suppress_state_printing
@@ -1533,7 +1558,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), mediumMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
 
 def main():
