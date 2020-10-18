@@ -522,12 +522,17 @@ class TwoDEnvironment(Environment):
 
     def print_stuck_banner(self, m):
         global g_stuck_banner, g_stuck_banner1
-        self.last_banner_used = 0 if self.last_banner_used != 0 else 1
-        banner = g_stuck_banner if 0 == self.last_banner_used else g_stuck_banner1
-        assert(None != m and isinstance(m, list))
-        for i, line in enumerate(banner.split('\n')):
-            for j, c in enumerate(list(line)):
-                m[i][j] = c
+        try:
+            self.last_banner_used = 0 if self.last_banner_used != 0 else 1
+            banner = g_stuck_banner if 0 == self.last_banner_used else g_stuck_banner1
+            assert(None != m and isinstance(m, list))
+            for i, line in enumerate(banner.split('\n')):
+                for j, c in enumerate(list(line)):
+                    m[i][j] = c
+        except:
+            if not is_recursing:
+                m = [[' ' for i in range(200)] for j in range(200)]
+                return self(self, m, is_recursing=True)
 
     def get_print_matrix(self):
         theAgent = None
