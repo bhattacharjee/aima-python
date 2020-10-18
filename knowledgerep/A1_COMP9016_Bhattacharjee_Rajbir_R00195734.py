@@ -1542,7 +1542,10 @@ def RunAgentAlgorithm(program, mazeString: str):
     stuck = env.got_stuck()
     dist = env.goal_distance
     del env
-    print(program(None, get_stats=True))
+    try:
+        print(program(None, get_stats=True))
+    except:
+        print("Stats not available")
     if (stuck):
         print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
@@ -1554,7 +1557,7 @@ def process():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
+    RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
@@ -1564,16 +1567,21 @@ def process():
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
     global g_state_print_same_place_loop_count
+    global g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing", help="Do not print the board matrix after each step", action="store_true")
     parser.add_argument("-rd", "--refresh-delay",default=0.005, help="Number of seconds between refreshes", type=float)
     parser.add_argument("-ac", "--allow-crossing-self", help="Allow crossing over one's body", action="store_true")
+    parser.add_argument("-ng", "--no-graphics", help="Do not use graphics", action="store_true")
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
     g_state_refresh_sleep = 0 if args.refresh_delay < 0.0001 else args.refresh_delay
     g_self_crossing_not_allowed = not args.allow_crossing_self
+    if args.no_graphics:
+        g_tkinter_available = g_use_tkinter = False
+        g_pygame_available = g_use_pygame = False
     if g_suppress_state_printing:
         g_state_refresh_sleep = 0
         g_state_print_same_place_loop_count
