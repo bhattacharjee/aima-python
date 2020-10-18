@@ -10,6 +10,16 @@ g_state_print_same_place_loop_count = 6
 g_state_refresh_sleep = 0.4
 g_self_crossing_not_allowed = True
 g_search_should_consider_history = False
+g_pygame_available = False
+g_use_pygame = True
+g_graphics_sleep_time = 0.25
+
+
+try:
+    import pygame
+    g_pygame_available = True
+except:
+    print("PyGame is not available, running in text mode")
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -338,6 +348,65 @@ class Shrink(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'S')
 
+class SimpleGraphics():
+    SQUARE_SIZE = 20
+    RADIUS = SQUARE_SIZE // 2
+    def __init__(self, rows, cols):
+        (rows, cols) = (cols, rows)
+        self.rows = rows
+        self.cols = cols
+        pygame.init()
+        self.screen = pygame.display.set_mode(\
+                [(rows + 5) * SimpleGraphics.SQUARE_SIZE,\
+                (cols + 5) * SimpleGraphics.SQUARE_SIZE])
+        self.screen.fill((255, 255, 255))
+
+    def is_valid_matrix(self, m):
+        rows = len(m);
+        cols = 0;
+        for i in range(rows):
+            if cols < len(m[i]):
+                cols = len(m[i])
+        (rows, cols) = (cols, rows)
+        if rows > self.rows or cols > self.cols:
+            return False
+        return True
+
+    def fill_screen(self):
+        self.screen.fill((255, 255, 255))
+
+    def draw_circle(self, x, y, diameter, color):
+        (x, y) = (y, x)
+        radius = diameter // 2
+        (rx, ry) = (x + radius, y + radius)
+        pygame.draw.circle(self.screen, color, (rx, ry), radius)
+
+    def draw_square(self, x, y, width, color):
+        (x, y) = (y, x)
+        #rect = pygame.Rect(x, y, width, width)
+        pygame.draw.rect(self.screen, color, (x, y, width, width))
+
+    def update(self, m):
+        global g_graphics_sleep_time
+        assert(isinstance(m, list))
+        if not self.is_valid_matrix(m):
+            return
+        self.screen.fill((255, 255, 255))
+        for i in range(len(m)):
+            for j in range(len(m[i])):
+                c = m[i][j]
+                xoff = SimpleGraphics.SQUARE_SIZE * (i + 1);
+                yoff = SimpleGraphics.SQUARE_SIZE * (j + 1);
+                if ('#' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 255))
+                if ('*' == c):
+                    self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (255, 0, 0))
+                if ('D' == c):
+                    self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 0))
+        pygame.display.flip()
+        time.sleep(g_graphics_sleep_time)
+
+
 counter = 0
 # Create our own 2D environment
 class TwoDEnvironment(Environment):
@@ -357,6 +426,7 @@ class TwoDEnvironment(Environment):
         self.restore_power = restore_power # Powers once taken should reappear
         self.agent_history = collections.deque()
         self.matrix = [[None for i in range(cols)] for j in range(rows)] # 2D array
+        self.graphics = None
         if g_curses_available:
             self.window = curses.initscr()
 
@@ -580,14 +650,23 @@ class TwoDEnvironment(Environment):
         self.window.refresh()
         return 0
 
+    def display_graphics(self):
+        m = self.get_print_matrix()
+        if (None == self.graphics):
+            self.graphics = SimpleGraphics(len(m), len(m[0]))
+        self.graphics.update(m)
+
     def print_state(self):
         global g_suppress_state_printing
         global g_state_refresh_sleep
         global g_state_print_same_place_loop_count
         global g_curses_available
+        global g_pygame_available, g_use_pygame
         if g_suppress_state_printing:
             return
         global g_curses_available
+        if g_pygame_available and g_use_pygame:
+            self.display_graphics()
         if g_curses_available:
             self.print_state_curses()
             if (not self.is_stuck or not self.stuck_banner_completed):
@@ -1355,7 +1434,7 @@ def process():
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), mediumMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
