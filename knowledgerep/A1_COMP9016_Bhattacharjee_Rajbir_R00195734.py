@@ -359,7 +359,7 @@ class Shrink(TwoDThing):
         super().__init__(x, y, 'S')
 
 class SimpleGraphics():
-    SQUARE_SIZE = 20
+    SQUARE_SIZE = 10
     RADIUS = SQUARE_SIZE // 2
     def __init__(self, rows, cols):
         global g_state_refresh_sleep
@@ -423,13 +423,16 @@ class SimpleGraphics():
                 yoff = SimpleGraphics.SQUARE_SIZE * (j + 1);
                 if ('#' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 255))
-                if ('*' == c):
+                elif ('*' == c or '-' == c or '|' == c or '/' == c or '\\' == c):
+                    color = (0, 0, 0) if '*' != c else (255, 0, 0)
+                    self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, color)
+                elif ('*' == c):
                     self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (255, 0, 0))
-                if ('D' == c):
+                elif ('D' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0, 0, 0))
-                if ('G' == c):
+                elif ('G' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0xef, 0xfa, 0x11))
-                if ('S' == c):
+                elif ('S' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0x53, 0xef, 0x21))
         pygame.display.flip()
         time.sleep(g_graphics_sleep_time)
