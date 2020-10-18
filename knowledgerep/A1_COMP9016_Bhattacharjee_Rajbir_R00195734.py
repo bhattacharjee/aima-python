@@ -9,6 +9,7 @@ g_suppress_state_printing = False
 g_state_print_same_place_loop_count = 6
 g_state_refresh_sleep = 0.4
 g_self_crossing_not_allowed = True
+g_search_should_consider_history = False
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -30,9 +31,9 @@ except:
 
 smallMaze = """
 ##############################
-#         #              #   #
+#G        #              #   #
 #o####    ########       #   #
-#    #    #              #   #
+#G   #    #              #   #
 #    ###     #####  ######   #
 #      #     #   #  #      ###
 #     #####    #    #  # x   #
@@ -247,6 +248,12 @@ class Utils:
                 matrix[r][c] = thing
         return matrix
 
+    def get_new_max_length(agent_max_length, direction):
+        agent_max_length += (5 * direction)
+        #agent_max_length += (1 * direction)
+        if (agent_max_length < 0):
+            agent_max_length = 0
+        return agent_max_length
 
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
@@ -355,12 +362,10 @@ class TwoDEnvironment(Environment):
     def process_agent_grow_shrink(self, direction):
         if not self.agent_can_grow:
             return
-        self.agent_max_length += direction * 5
+        self.agent_max_length = Utils.get_new_max_length(self.agent_max_length, direction)
         if (direction != 0):
             global counter
             counter = counter + 1
-        if (self.agent_max_length < 0):
-            self.agent_max_length = 0
         self.trim_history()
     
     def process_agent_grow_shrink2(self, should_grow, should_shrink):
@@ -1072,7 +1077,7 @@ class SearchHelper:
         (maxrow, maxcol) = tuple(percepts["dimensions"])
         return Utils.get_matrix_for_program(maxrow, maxcol, things, True)
     
-    def convert_percepts_to_state(percepts):
+    def convert_percepts_to_state(percepts:dict):
         matrix = SearchHelper.get_text_matrix_for_search(percepts)
         ag_hist = list(percepts["agent_history"])
         (curx, cury) = tuple(percepts["location"])
@@ -1140,8 +1145,10 @@ class MazeSearchProblem(Problem):
         mt_dimensions = state["dimensions"]
         history = state["agent_history"]
         matrix = state["matrix"]
+        #print(state["agent_max_length"])
         candidate_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
         candidate_moves = []
+        #print(state["location"], "---->", candidate_positions)
         for pos in candidate_positions:
             (row, col) = tuple(pos)
             if not isinstance(matrix[row][col], Wall):
@@ -1157,11 +1164,32 @@ class MazeSearchProblem(Problem):
     6. If we stepped on a square that grows/shrinks, change the length of history deque
     """
     def result(self, state, action):
+        global g_search_should_consider_history
         state = SearchHelper.convert_state_to_percepts(state)
+        agent_max_length = state["agent_max_length"]
+        agent_can_grow = state["agent_can_grow"]
+        matrix = state["matrix"]
         # def get_new_location(move, x, y):
         (curx, cury) = tuple(state["location"])
         (newx, newy) = NextMoveHelper.get_new_location(action, curx, cury)
+        history = state["agent_history"]
+        #print("history = ", history)
+        if (g_search_should_consider_history and agent_can_grow):
+            if (len(history) > 0 and (curx, cury) != history[len(history) - 1]) or (0 == len(history)):
+                history.append((curx, cury))
+                while(len(history) > agent_max_length):
+                    history.popleft()
         state["location"] = [newx, newy]
+        state["agent_history"] = history
+        if None != matrix[newx][newy]:
+            direction = 0
+            if isinstance(matrix[newx][newy], Grow):
+                direction = 1
+            if isinstance(matrix[newx][newy], Shrink):
+                direction = -1
+            if (0 != direction):
+                agent_max_length = Utils.get_new_max_length(agent_max_length, direction)
+                state["agent_max_length"] = agent_max_length
         return SearchHelper.convert_percepts_to_state(state)
 
     def goal_test(self, state):
@@ -1245,7 +1273,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(), largeMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(), smallMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
