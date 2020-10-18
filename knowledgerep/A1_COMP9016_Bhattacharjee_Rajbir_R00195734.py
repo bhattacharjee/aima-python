@@ -175,7 +175,7 @@ class Utils:
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
         return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
-    
+
     def euclidean_distance(l1, l2):
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
@@ -209,7 +209,7 @@ class Utils:
                 if 'D' == tmatrix[i][j]:
                     matrix[i][j] = Door(i, j)
         return matrix
-    
+
     def create_things_array_from_text_matrix(rows, cols, tmatrix):
         things = []
         for i in range(rows):
@@ -367,7 +367,7 @@ class TwoDEnvironment(Environment):
             global counter
             counter = counter + 1
         self.trim_history()
-    
+
     def process_agent_grow_shrink2(self, should_grow, should_shrink):
         direction = 0
         direction = 1 if should_grow else direction
@@ -520,7 +520,7 @@ class TwoDEnvironment(Environment):
             x, y = thing.get_location()
             self.agent_history.append((x, y))
 
-    def print_stuck_banner(self, m):
+    def print_stuck_banner(self, m, is_recursing=False):
         global g_stuck_banner, g_stuck_banner1
         try:
             self.last_banner_used = 0 if self.last_banner_used != 0 else 1
@@ -587,6 +587,7 @@ class TwoDEnvironment(Environment):
                 for i in g_state_print_same_place_loop_count:
                     self.print_state_curses()
                     if (0 != g_state_refresh_sleep):
+                        #print(f"Sleeping for {g_state_refresh_sleep}")
                         time.sleep(g_state_refresh_sleep)
                 self.stuck_banner_completed = True
             return
@@ -691,7 +692,7 @@ class TwoDAgent(Agent):
 
     def get_location(self):
         return self.location[0], self.location[1]
-    
+
     def get_display(self):
         next_item = list("-\\|/")
         next_item = list("-*\\*|*/*")
@@ -746,10 +747,10 @@ class NextMoveHelper(object):
         x = x + delta[0]
         y = y + delta[1]
         return x, y
-    
+
     def get_move_string2(oldx, oldy, newx, newy):
         return NextMoveHelper.get_move_string(newx - oldx, newy - oldy)
-    
+
     def get_move_string3(old, new):
         assert((isinstance(old, list) or isinstance(old, tuple)) and 2 == len(old))
         assert((isinstance(new, list) or isinstance(new, tuple)) and 2 == len(new))
@@ -1095,7 +1096,7 @@ class SearchHelper:
         tup = ([matrix], [ag_hist], [[curx, cury]], [[goalx, goaly]], agent_can_grow, agent_max_length, [[dimx, dimy]])
         tup = pickle.dumps(tup)
         return tup
-    
+
     def convert_state_to_percepts(state):
         state = pickle.loads(state)
         textmatrix = state[0][0]
@@ -1133,6 +1134,16 @@ class SearchHelper:
     9. If we stepped on a square that grows or shrinks us, change the length of the history dequeue
     """
 class MazeSearchProblem(Problem):
+    def __init__(self, initial, goal=None):
+        self.cand_moves = self.succs = self.goal_tests = self.states = 0
+        self.found = None
+        super().__init__(initial, goal)
+
+    # This function has been copied from search.py
+    def __repr__(self):
+        string = "%15.15s %25.25s %15.15s %15.15s\n" % ("n_Sccessors", "n_CandidatesConsidered", "n_GoalTests", "n_States")
+        string += "%15d %25d %15d %15d" % (self.succs, self.cand_moves, self.goal_tests, self.states)
+        return string
 
     def actions(self, state):
         """
@@ -1158,6 +1169,8 @@ class MazeSearchProblem(Problem):
             (row, col) = tuple(pos)
             if not isinstance(matrix[row][col], Wall):
                 candidate_moves.append(NextMoveHelper.get_move_string2(oldrow, oldcol, row, col))
+        self.succs += 1
+        self.cand_moves += len(candidate_moves)
         return candidate_moves
 
     """
@@ -1170,6 +1183,7 @@ class MazeSearchProblem(Problem):
     """
     def result(self, state, action):
         global g_search_should_consider_history
+        self.states += 1
         state = SearchHelper.convert_state_to_percepts(state)
         agent_max_length = state["agent_max_length"]
         agent_can_grow = state["agent_can_grow"]
@@ -1198,6 +1212,7 @@ class MazeSearchProblem(Problem):
         return SearchHelper.convert_percepts_to_state(state)
 
     def goal_test(self, state):
+        self.goal_tests += 1
         state = SearchHelper.convert_state_to_percepts(state)
         matrix = state["matrix"]
         (curx, cury) = tuple(state["location"])
@@ -1210,6 +1225,8 @@ def SearchBasedAgentProgram():
     search_results = None
     search_results_deque = collections.deque()
     search_completed = False
+    stats = None
+
 
     def get_state_for_search(percepts):
         return SearchHelper.convert_percepts_to_state(percepts)
@@ -1222,14 +1239,20 @@ def SearchBasedAgentProgram():
         goaly += cury
         return Utils.manhattan_distance([curx, cury], [goalx, goaly])
 
-    def program(percepts):
+    def program(percepts, get_stats=False):
         nonlocal search_results
         nonlocal search_results_deque
         nonlocal search_completed
+        nonlocal stats
+        if (get_stats):
+            return stats if None != stats else "STATS NOT AVAILABLE"
         action = None
         if (not search_completed):
             state = SearchHelper.convert_percepts_to_state(percepts)
-            srch = astar_search(MazeSearchProblem(state), heuristic)
+            problem = MazeSearchProblem(state)
+            #srch = astar_search(problem, heuristic)
+            srch = astar_search(problem, heuristic)
+            stats = problem.__repr__()
             if None != srch and None != srch.solution():
                 solution = srch.solution()
                 if None != solution:
@@ -1241,7 +1264,7 @@ def SearchBasedAgentProgram():
         except IndexError:
             action = None
         return action
-            
+
     return program
 
 def RunAgentAlgorithm(program, mazeString: str):
@@ -1259,10 +1282,12 @@ def RunAgentAlgorithm(program, mazeString: str):
         for i in range(loop_count):
             env.print_state()
             if (0 != g_state_refresh_sleep):
+                #print(f"sleeping for {g_state_refresh_sleep}")
                 time.sleep(g_state_refresh_sleep)
     stuck = env.got_stuck()
     dist = env.goal_distance
     del env
+    print(program(None, get_stats=True))
     if (stuck):
         print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
