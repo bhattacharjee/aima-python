@@ -44,5 +44,16 @@ def question_b():
             print(tt_entails(to_cnf(expr(i[0])), to_cnf(expr(i[1]))))
 
 
+    print("Checking satisfiability of (A | B) & (~(A ==> B))")
+    print(dpll_satisfiable(expr("(A | B) & (~(A ==> B))")))
+
+    print("checking satisfiability of ((A ==> B) & (A <== B)) & (~A | B)")
+    print(dpll_satisfiable(expr("((A ==> B) & (A <== B)) & (~A | B)")))
+
+    n1 = dpll_satisfiable(expr("(((A ==> B) & (A <== B)) ==> C) & (((A ==> B) & (A <== B)) <== C)"))
+    n2 = dpll_satisfiable(expr("(A ==> B) & (A <== B)"))
+    if (len(n1) == (len(n2) * 2)):
+        print("Both of them have the same number of models")
+    print("---->", len(n1), f"\n{n1}", len(n2), f"\n{n2}")
 
 question_b()
