@@ -162,13 +162,16 @@ g_stuck_banner1 = """
 '##::: ##::::::: ##::::::: ##:::: ##:::: ##::: ##:::: ##:. ##:::::'####:
 . ######:::::::: ##:::::::. #######:::::. ######::::: ##::. ##:::: ####:
 :......:::::::::..:::::::::.......:::::::......::::::..::::..:::::....::"""
-g_stuck_banner2= """
-███████╗    ████████╗    ██╗   ██╗     ██████╗    ██╗  ██╗    ██╗
-██╔════╝    ╚══██╔══╝    ██║   ██║    ██╔════╝    ██║ ██╔╝    ██║
-███████╗       ██║       ██║   ██║    ██║         █████╔╝     ██║
-╚════██║       ██║       ██║   ██║    ██║         ██╔═██╗     ╚═╝
-███████║       ██║       ╚██████╔╝    ╚██████╗    ██║  ██╗    ██╗
-╚══════╝       ╚═╝        ╚═════╝      ╚═════╝    ╚═╝  ╚═╝    ╚═╝"""
+
+g_stuck_banner2 = """
+  ********       **********       **     **         ******        **   **       **
+ **//////       /////**///       /**    /**        **////**      /**  **       /**
+/**                 /**          /**    /**       **    //       /** **        /**
+/*********          /**          /**    /**      /**             /****         /**
+////////**          /**          /**    /**      /**             /**/**        /**
+       /**          /**          /**    /**      //**    **      /**//**       // 
+ ********           /**          //*******        //******       /** //**       **
+////////            //            ///////          //////        //   //       // """
 
 
 class Utils:
@@ -1294,7 +1297,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
             if (None == stats):
                 stats = ""
             if (None != perf_string):
-                stats = stats + "\n" + perf_string + "\n"
+                stats = "\n\n" + perf_string + stats + "\n"
             return stats
         action = None
         if (not search_completed):
@@ -1351,8 +1354,8 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), mediumMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
@@ -1370,7 +1373,6 @@ def main():
     if g_suppress_state_printing:
         g_state_refresh_sleep = 0
         g_state_print_same_place_loop_count
-
     process()
 
 if "__main__" == __name__:
