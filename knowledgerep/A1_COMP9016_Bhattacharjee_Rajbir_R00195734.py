@@ -825,7 +825,10 @@ class TwoDEnvironment(Environment):
             assert(None != m and isinstance(m, list))
             for i, line in enumerate(banner.split('\n')):
                 for j, c in enumerate(list(line)):
-                    m[i][j] = c
+                    try:
+                        m[i][j] = c
+                    except:
+                        pass
         except:
             if not is_recursing:
                 m = [[' ' for i in range(200)] for j in range(200)]
@@ -1684,6 +1687,14 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                     clause = "(%s) ==> %s" % (reverse1, nothawk_symbol)
                     print(clause)
                 self.kb.tell(expr(clause))
+                notshreik_symbol = Utils.get_logic_symbol("NOTSHREIK", (i, j))
+                adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
+                if None != adj and len(adj) > 0:
+                    adjsyms = [Utils.get_logic_symbol("NOTHAWK", a) for a in adj]
+                    for nh in adjsyms:
+                        clause = "%s ==> %s" % (notshreik_symbol, nh)
+                        print(clause)
+                        self.kb.tell(expr(clause))
 
     def create_hawk_wall_rules(self):
         for i in range(self.rows):
