@@ -575,7 +575,8 @@ class SimpleGraphicsTkinter():
                 elif ('H' == c):
                     color = (111, 179, 247)
                     self.draw_circle(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, color)
-                    l = tkinter.Label(self.master, text = c, fg="blue", bg=self.get_color_string(color))
+                    l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string(color))
+                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
                     self.labels.append(l)
         self.canvas.pack()
         self.canvas.update()
