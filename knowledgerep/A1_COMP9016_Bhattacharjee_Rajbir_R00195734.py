@@ -106,9 +106,9 @@ mediumMaze2= """
 #     ##     ##########         #         #
 #                         ############    #
 #   ##             #            #         #
-#    #########     ########               #
-#    #             #           #########  #
-#o                                        #
+#HHHH#########     ########               #
+#   H#             #           #########  #
+#o  H                                     #
 ###########################################"""
 
 largeMaze = """
@@ -280,6 +280,12 @@ class Utils:
             agent_max_length = 0
         return agent_max_length
 
+    def verify_agent_view_doesnt_have_hawk(things):
+        for thing in things:
+            if thing.is_hidden_from_agent():
+                return False
+        return True
+
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
 # Which the environment can use to print a board if required
@@ -295,6 +301,8 @@ class TwoDThing(Thing):
         super().__init__()
         self.location = [x, y]
         self.display = display
+        self.agent_cannot_see_me = False
+        self.i_can_kill_agent = False
 
     def get_location(self):
         """get the location for this item
@@ -319,6 +327,18 @@ class TwoDThing(Thing):
             str: character to display on the board corresponding to this object
         """
         return self.display
+
+    def is_hidden_from_agent(self):
+        return self.agent_cannot_see_me
+
+    def can_kill_agent(self, ag_location):
+        if self.i_can_kill_agent and tuple(self.location) == tuple(ag_location):
+            return True
+        return False
+
+    def get_agent_feelings(self, ag_loc):
+        return None
+
 
 # Class power
 class Power(TwoDThing):
@@ -365,8 +385,16 @@ square directly left, or right or above or below the hawk's
 """
 class Hawk(TwoDThing):
     def __init__(self, x, y):
-        super().__init__(x, y, 'S')
+        super().__init__(x, y, 'H')
         self.is_alive = True
+        self.agent_can_grow = True
+        self.i_can_kill_agent = True
+        self.agent_cannot_see_me = True
+
+    def get_agent_feelings(self, ag_loc):
+        if 1 == Utils.manhattan_distance(ag_loc, self.get_location()):
+            return "shriek"
+
 
 class SimpleGraphics():
     SQUARE_SIZE = 10
@@ -444,6 +472,9 @@ class SimpleGraphics():
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0xef, 0xfa, 0x11))
                 elif ('S' == c):
                     self.draw_square(xoff, yoff, SimpleGraphics.SQUARE_SIZE, (0x53, 0xef, 0x21))
+                elif ('H' == c):
+                    color = (111, 179, 247)
+                    self.draw_circle(xoff, yoff, SimpleGraphics.SQUARE_SIZE, color)
         pygame.display.flip()
         time.sleep(g_graphics_sleep_time)
 
@@ -541,6 +572,11 @@ class SimpleGraphicsTkinter():
                     l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string((0x53, 0xef, 0x21)))
                     l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
                     self.labels.append(l)
+                elif ('H' == c):
+                    color = (111, 179, 247)
+                    self.draw_circle(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, color)
+                    l = tkinter.Label(self.master, text = c, fg="blue", bg=self.get_color_string(color))
+                    self.labels.append(l)
         self.canvas.pack()
         self.canvas.update()
         self.master.update()
@@ -594,6 +630,10 @@ class TwoDEnvironment(Environment):
     # If the agent is stuck, or the agent has reached the door, return true
     def is_done(self):
         if self.is_stuck:
+            return True
+        if not self.agents[0].is_alive:
+            print("Agent is not alive, game over")
+            self.agent_died = True
             return True
         dr_row = dr_col = -1
         ag_row, ag_col = self.agents[0].get_location()
@@ -697,6 +737,10 @@ class TwoDEnvironment(Environment):
         self.stash_old_object(old_object)
         # 4. Do the actual growing/shrinking
         self.process_agent_grow_shrink2(should_grow, should_shrink)
+        for thing in self.things:
+            if thing.can_kill_agent(agent.get_location()):
+                agent.is_alive = False
+                print(f"Agent is now dead, {thing} killed it at location {agent.get_location()}")
 
     # "dimensions" : dimensions of board
     # "location" : location of agent
@@ -717,11 +761,18 @@ class TwoDEnvironment(Environment):
         percept["agent_can_grow"] =  self.agent_can_grow
         percept["agent_max_length"] = self.agent_max_length
         percept["history"] = copy.deepcopy(self.agent_history)
+        percept["feelings"] = []
         [percept["agent_history"].append(l) for l in self.agent_history]
         for thing in self.things:
-            percept["things"].append(thing)
+            if not thing.is_hidden_from_agent():
+                percept["things"].append(thing)
             if (isinstance(thing, Door)):
                 thedoor = thing
+            if thing.is_hidden_from_agent():
+                feelings = thing.get_agent_feelings(agent.get_location())
+                if (None != feelings):
+                    print(f"Agent at location {x}, {y} felt {feelings} from {thing} at {thing.get_location()}")
+                    percept["feelings"].append(feelings)
         assert(None != thedoor)
         dx, dy = thedoor.get_location()
         assert(None != dx and None != dy)
@@ -863,6 +914,9 @@ class TwoDMaze(TwoDEnvironment):
                 if 'S' == mazeString[i][j]:
                     shrink = Shrink(i, j)
                     self.add_thing(shrink, [i, j])
+                if 'H' == mazeString[i][j]:
+                    hawk = Hawk(i, j)
+                    self.add_thing(hawk, [i, j])
 
     def is_deque_stuck(self, d):
         if (0 == len(d) or 1 == len(d) or None == d):
@@ -941,6 +995,15 @@ class TwoDAgent(Agent):
         self.current_display += 1
         self.current_display = self.current_display  % len(next_item)
         return next_item[self.current_display]
+
+    def is_hidden_from_agent(self):
+        return False
+
+    def can_kill_agent(self, ag_loc):
+        return False
+
+    def get_agent_feelings(self, ag_loc):
+        return None
 
 class NextMoveHelper(object):
     move_table = {
@@ -1075,12 +1138,14 @@ def SimpleReflexProgram(weighted_rand_sel=False):
     def program(percepts):
         nonlocal matrix
         nonlocal use_weighted_random_selection
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         rowCandidate = colCandidate = -1
         mt_dimensions = percepts["dimensions"]
         ag_location = percepts["location"]
         things = percepts["things"]
         history = percepts["agent_history"]
         dx, dy = get_goal_directions(percepts)
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         # First recreate the matrix
         matrix = recreate_board(percepts)
         # Get the candidate positions
@@ -1207,6 +1272,7 @@ def GoalDrivenAgentProgram():
     def program(percepts):
         nonlocal visited_matrix
         nonlocal doing_random
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         rows = percepts["dimensions"][0]
         cols = percepts["dimensions"][1]
         a_row = percepts["location"][0]
@@ -1214,6 +1280,7 @@ def GoalDrivenAgentProgram():
         dx = percepts["goal_direction"][0]
         dy = percepts["goal_direction"][1]
         history = percepts["agent_history"]
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         assert(None != history)
         dx = dx if 0 == dx else dx // abs(dx)
         dy = dy if 0 == dy else dy // abs(dy)
@@ -1305,6 +1372,7 @@ def UtilityBasedAgentProgram():
 
     def program(percepts):
         nonlocal memories
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         (row, col) = tuple(percepts["dimensions"])
         matrix = Utils.get_matrix_for_program(row, col, percepts["things"], include_grow_shrink=True)
         if None == memories:
@@ -1529,6 +1597,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
         nonlocal stats
         nonlocal algorithm
         nonlocal perf_string
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         if (get_stats):
             if (None == stats):
                 stats = ""
@@ -1573,6 +1642,7 @@ def RunAgentAlgorithm(program, mazeString: str):
                 time.sleep(g_state_refresh_sleep)
     stuck = env.got_stuck()
     dist = env.goal_distance
+    agent_died = env.agent_died
     del env
     try:
         print(program(None, get_stats=True))
@@ -1580,7 +1650,7 @@ def RunAgentAlgorithm(program, mazeString: str):
         print("Stats not available")
     if (stuck):
         print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
-    print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power}")
+    print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power} killed = {agent_died}")
 
 def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
@@ -1588,12 +1658,12 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
     #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
 
 def main():
