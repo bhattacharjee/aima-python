@@ -1655,20 +1655,20 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
 
 """
 1. The symbols are of two types, and have the forms:
-    HAWK_055_021
-    SHREIK_001_002
-2. For every piece of the wall, assert that it is not a snake, example
+    NOTHAWK_055_021
+    NOTSHREIK_001_002
+    WALL_001_002
+2. For every piece of the wall, assert that it is not a hawk, example
    if there is a wall at 2, 2, assert:
-       ~HAWK_02_02
+       WALL_001_002 ==> NOTHAWK_001_002
 3. For every position (i, j) Assert:
-    HAWK_i_j ==> SHREIK_m_n where m, n are adjacent squares in the same row,
-      or column as i, j, (and not diagonal)
+    (NOTSHREIK_UP & NOTSHREIK_DOWN & NOTSHREIK_LEFT & NOTSHREIK_RIGHT) ==> NOTHAWK
 """
 class SnakeKnowledgeBaseToDetectHawk(object):
     def __init__(self, initial_matrix, dimensions, algorithm):
         self.matrix = initial_matrix
         (self.rows, self.cols) = tuple(dimensions)
-        self.kb = FolKB()
+        self.kb = PropDefiniteKB()
         self.create_base_rules()
         self.algorithm = algorithm
         self.create_base_rules()
@@ -1676,6 +1676,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def create_hawk_shreik_rules(self):
         for i in range(self.rows):
             for j in range(self.cols):
+                # TODO: Fix this
                 hawk_symbol = Utils.get_logic_symbol("HAWK", (i, j))
                 adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
                 adjsyms = [Utils.get_logic_symbol("SHREIK", a) for a in adj]
@@ -1694,6 +1695,15 @@ class SnakeKnowledgeBaseToDetectHawk(object):
 
     def get_clauses(self):
         return self.kb.clauses
+
+    def tell_current_location_shreik(self, location):
+        """
+        - Current location has a shreik
+            - tell that the current location has a shreik
+            - tell that the current location does not have a snake
+        """
+        shreik_symbol = Utils.get_logic_symbol("SHREIK", location)
+        self.kb.add(expr(shreik_symbol))
 
 # Utility based agent function that also uses the knowledge base
 def UtilityBasedAgentProgramWithKnowledgeBase():
