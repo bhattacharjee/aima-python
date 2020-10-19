@@ -13,7 +13,7 @@ g_search_should_consider_history = False
 g_pygame_available = False
 g_use_pygame = True
 g_graphics_sleep_time = 0.25
-g_use_tkinter = 
+g_use_tkinter = True
 g_tkinter_available = False
 
 
@@ -39,6 +39,7 @@ try:
     from agents import Environment, Thing, Direction, Agent
     from search import Problem, astar_search, depth_first_graph_search
     from search import depth_first_tree_search, breadth_first_graph_search
+    from logic import *
 except:
     print("Could not import from parent folder... Exiting")
     sys.exit(1)
@@ -303,7 +304,7 @@ class Utils:
         (r, c) = tuple(dimensions)
         candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
         ret = []
-        for i candidates:
+        for i in candidates:
             (x, y) = i
             if x >= 0 and x < r and y >=0 and y < c:
                 ret.append(i)
@@ -1652,15 +1653,47 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
 
     return program
 
+"""
+1. The symbols are of two types, and have the forms:
+    HAWK_055_021
+    SHREIK_001_002
+2. For every piece of the wall, assert that it is not a snake, example
+   if there is a wall at 2, 2, assert:
+       ~HAWK_02_02
+3. For every position (i, j) Assert:
+    HAWK_i_j ==> SHREIK_m_n where m, n are adjacent squares in the same row,
+      or column as i, j, (and not diagonal)
+"""
 class SnakeKnowledgeBaseToDetectHawk(object):
-    def __init__(self, initial_matrix, dimensions):
+    def __init__(self, initial_matrix, dimensions, algorithm):
         self.matrix = initial_matrix
         (self.rows, self.cols) = tuple(dimensions)
         self.kb = FolKB()
         self.create_base_rules()
+        self.algorithm = algorithm
+        self.create_base_rules()
+
+    def create_hawk_shreik_rules(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                hawk_symbol = Utils.get_logic_symbol("HAWK", (i, j))
+                adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
+                adjsyms = [Utils.get_logic_symbol("SHREIK", a) for a in adj]
+                # H ==> S1, H ==> S2, H ==> S3, H ==> S4
+                for a in adjsyms:
+                    clause = "%s ==> %s" % (hawk_symbol, a)
+                    self.kb.tell(expr(clause))
+                reverse1 = " & ".join(adjsyms)
+                # (S1 & S2 & S3 & S4) ==> H
+                clause = "(%s) ==> %s" % (reverse1, hawk_symbol)
+                self.kb.tell(expr(clause))
 
     def create_base_rules(self):
+        self.create_hawk_shreik_rules()
         pass
+
+    def get_clauses(self):
+        return self.kb.clauses
 
 # Utility based agent function that also uses the knowledge base
 def UtilityBasedAgentProgramWithKnowledgeBase():
@@ -1669,6 +1702,7 @@ def UtilityBasedAgentProgramWithKnowledgeBase():
     # To the utility function because a negative score must be associated
     # with places we've visited so that we don't get stuck in a loop
     memories = None
+    kb = None
 
     def utility_function(percepts, location, goal, matrix):
         nonlocal memories
@@ -1725,9 +1759,13 @@ def UtilityBasedAgentProgramWithKnowledgeBase():
 
     def program(percepts):
         nonlocal memories
+        nonlocal kb
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         (row, col) = tuple(percepts["dimensions"])
         matrix = Utils.get_matrix_for_program(row, col, percepts["things"], include_grow_shrink=True)
+        if not kb:
+            kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), fol_fc_ask)
+            print(kb.get_clauses())
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
         candidates = get_candidate_positions(percepts, matrix)
@@ -1779,8 +1817,9 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
+    RunAgentAlgorithm(UtilityBasedAgentProgramWithKnowledgeBase(), smallMazeForceToHawk);
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
