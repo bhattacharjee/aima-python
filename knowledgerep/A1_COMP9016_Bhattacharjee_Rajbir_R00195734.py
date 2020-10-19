@@ -298,6 +298,21 @@ class Utils:
                 return False
         return True
 
+    def get_adjacent_squares(loc, dimensions):
+        (x, y) = tuple(loc)
+        (r, c) = tuple(dimensions)
+        candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
+        ret = []
+        for i candidates:
+            (x, y) = i
+            if x >= 0 and x < r and y >=0 and y < c:
+                ret.append(i)
+        return ret
+
+    def get_logic_symbol(prefix, location):
+        (x, y) = tuple(location)
+        return "%s_%0.3d_%0.3d" % (prefix, x, y)
+
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
 # Which the environment can use to print a board if required
