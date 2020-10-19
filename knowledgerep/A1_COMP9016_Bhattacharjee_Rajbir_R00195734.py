@@ -1652,6 +1652,94 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
 
     return program
 
+class SnakeKnowledgeBaseToDetectHawk(object):
+    def __init__(self, initial_matrix, dimensions):
+        self.matrix = initial_matrix
+        (self.rows, self.cols) = tuple(dimensions)
+        self.kb = FolKB()
+        self.create_base_rules()
+
+    def create_base_rules(self):
+        pass
+
+# Utility based agent function that also uses the knowledge base
+def UtilityBasedAgentProgramWithKnowledgeBase():
+
+    # Agent program's memories of places visited, this becomes important
+    # To the utility function because a negative score must be associated
+    # with places we've visited so that we don't get stuck in a loop
+    memories = None
+
+    def utility_function(percepts, location, goal, matrix):
+        nonlocal memories
+        GOAL_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
+        HISTORY_SCALING_FACTOR = 100
+        MEMORY_SCALING_FACTOR = -10
+        GROWTH_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
+        SHRINK_SCALING_FACTOR = 200 * (len(percepts["history"]) + 1)
+        assert((isinstance(location, tuple) or isinstance(location, list)) and 2 == len(location))
+        assert(None != memories and None != matrix and isinstance(matrix, list))
+        (row, col) = tuple(location)
+        utility_score = 0
+        # The further the goal is the less should be the score (goal_direction is already an offset, so this should be minimized)
+        utility_score += Utils.manhattan_distance(location, goal) * GOAL_SCALING_FACTOR
+        # The closer you get to your body, the less you score.
+        for loc in percepts["agent_history"]:
+            utility_score += Utils.manhattan_distance(loc, location) * HISTORY_SCALING_FACTOR
+        try:
+            utility_score += MEMORY_SCALING_FACTOR * memories[row][col]
+        except IndexError:
+            pass
+        if 'G' == matrix[row][col]:
+            utility_score += GROWTH_SCALING_FACTOR
+        if 'S' == matrix[row][col]:
+            utility_score += SHRINK_SCALING_FACTOR
+        return utility_score
+
+    def get_candidate_positions(percepts, matrix):
+        import sys
+        a_loc = percepts['location']
+        mt_dim = percepts["dimensions"]
+        history = percepts["history"]
+        gd = percepts["goal_direction"]
+        goal = (a_loc[0] + gd[0], a_loc[1] + gd[1])
+        candidates = NextMoveHelper.get_candidate_positions(a_loc, mt_dim, history)
+        matrix = Utils.get_matrix_for_program(mt_dim[0], mt_dim[1], percepts["things"])
+        max_utility = -1 * sys.maxsize - 1
+        candidates_not_walls = []
+        for candidate in candidates:
+            (r, c) = candidate
+            if ('#' == matrix[r][c]):
+                continue
+            candidates_not_walls.append(candidate)
+        if (None == candidates_not_walls or 0 == len(candidates_not_walls)):
+            return candidates_not_walls
+        utility_socres = [utility_function(percepts, candidate, goal, matrix) for candidate in candidates_not_walls]
+        max_utility = max(utility_socres)
+        selected_candidates = []
+        for candidate in candidates_not_walls:
+            utility = utility_function(percepts, candidate, goal, matrix)
+            if (utility == max_utility):
+                selected_candidates.append(candidate)
+        return selected_candidates
+
+    def program(percepts):
+        nonlocal memories
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
+        (row, col) = tuple(percepts["dimensions"])
+        matrix = Utils.get_matrix_for_program(row, col, percepts["things"], include_grow_shrink=True)
+        if None == memories:
+            memories = [[0 for i in range(col)] for j in range(row)]
+        candidates = get_candidate_positions(percepts, matrix)
+        if (None == candidates or 0 == len(candidates)):
+            return None
+        candidate = random.choice(candidates)
+        if (None != candidate):
+            memories[candidate[0]][candidate[1]] += 1
+        return NextMoveHelper.get_move_string3(percepts["location"], candidate)
+
+    return program
+
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
     global g_state_refresh_sleep
