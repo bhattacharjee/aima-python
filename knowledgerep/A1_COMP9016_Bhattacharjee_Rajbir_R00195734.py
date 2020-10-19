@@ -13,7 +13,7 @@ g_search_should_consider_history = False
 g_pygame_available = False
 g_use_pygame = True
 g_graphics_sleep_time = 0.25
-g_use_tkinter = True
+g_use_tkinter = 
 g_tkinter_available = False
 
 
@@ -60,6 +60,18 @@ smallMaze = """
 #     #####    #    #  # x   #
 #              #       #     #
 ##############################"""
+
+smallMazeForceToHawk = """
+##############################
+#     H   #              #   #
+#o####    ########       #   #
+###  #    #              #   #
+#    ###     #####  ######   #
+#      #     #   #  #      ###
+#     #####    #    #  # x   #
+#              #       #     #
+##############################"""
+
 
 smallMazeWithPower = """
 ##############################
@@ -1659,12 +1671,12 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
     #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
 
 def main():
