@@ -1733,6 +1733,10 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         print(notshreik)
         print(nothawk)
 
+    def tell_location_nothawk(self, location):
+        nothawk = Utils.get_logic_symbol("NOTHAWK", location)
+        self.kb.tell(expr(nothawk))
+
     def ask_if_location_not_hawk(self, location):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         print("checking for ", nothawk)
@@ -1747,6 +1751,8 @@ def UtilityBasedAgentProgramWithKnowledgeBase():
     memories = None
     kb = None
 
+    # TODO: If there is a shreik in the current location, then check
+    # for all locations and assign a score to ones that we know are not hawks
     def utility_function(percepts, location, goal, matrix):
         nonlocal memories
         GOAL_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
@@ -1809,6 +1815,8 @@ def UtilityBasedAgentProgramWithKnowledgeBase():
         matrix = Utils.get_matrix_for_program(row, col, percepts["things"], include_grow_shrink=True)
         if not kb:
             kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), fol_fc_ask)
+        # FIXME: we don't know if location is safe, it might be safe or it might
+        # be nothawk.
         kb.tell_location_safe(tuple(location))
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
