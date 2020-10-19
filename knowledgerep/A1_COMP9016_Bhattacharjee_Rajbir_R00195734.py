@@ -64,7 +64,7 @@ smallMaze = """
 
 smallMazeForceToHawk = """
 ##############################
-#     H   #              #   #
+# ### H   #              #   #
 #o####    ########       #   #
 ###  #    #              #   #
 #    ###     #####  ######   #
@@ -1682,6 +1682,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                     adjsyms = [Utils.get_logic_symbol("NOTSHREIK", a) for a in adj]
                     reverse1 = " & ".join(adjsyms)
                     clause = "(%s) ==> %s" % (reverse1, nothawk_symbol)
+                    print(clause)
                 self.kb.tell(expr(clause))
 
     def create_hawk_wall_rules(self):
@@ -1690,11 +1691,14 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                 nothawk_symbol = Utils.get_logic_symbol("NOTHAWK", (i, j))
                 wall_symbol = Utils.get_logic_symbol("WALL", (i, j))
                 self.kb.tell(expr("%s ==> %s" % (wall_symbol, nothawk_symbol)))
+                print("%s ==> %s" % (wall_symbol, nothawk_symbol))
                 if self.matrix[i][j] == '#':
                     self.kb.tell(expr(wall_symbol))
+                    print(wall_symbol)
                 # For our purpose we can treat a door as a wall
                 if self.matrix[i][j] == 'D':
                     self.kb.tell(expr(wall_symbol))
+                    print(wall_symbol)
 
     def create_base_rules(self):
         self.create_hawk_shreik_rules()
@@ -1703,7 +1707,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def get_clauses(self):
         return self.kb.clauses
 
-    def tell_current_location_safe(self, location):
+    def tell_location_safe(self, location):
         """
         - Current location doesn't have a shreik
         - tell that the current location does not have a hawk
@@ -1712,10 +1716,14 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         self.kb.tell(expr(notshreik))
         self.kb.tell(expr(nothawk))
+        print("Telling location is safe")
+        print(notshreik)
+        print(nothawk)
 
     def ask_if_location_not_hawk(self, location):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
-        return pl_fc_entails(kb, expr(nothawk))
+        print("checking for ", nothawk)
+        return pl_fc_entails(self.kb, expr(nothawk))
 
 # Utility based agent function that also uses the knowledge base
 def UtilityBasedAgentProgramWithKnowledgeBase():
@@ -1784,15 +1792,18 @@ def UtilityBasedAgentProgramWithKnowledgeBase():
         nonlocal kb
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         (row, col) = tuple(percepts["dimensions"])
+        location = percepts["location"]
         matrix = Utils.get_matrix_for_program(row, col, percepts["things"], include_grow_shrink=True)
         if not kb:
             kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), fol_fc_ask)
-            print(kb.get_clauses())
+        kb.tell_location_safe(tuple(location))
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
         candidates = get_candidate_positions(percepts, matrix)
         if (None == candidates or 0 == len(candidates)):
             return None
+        for candidate in candidates:
+            print(f"Is Candidate Not Hawk Definitely? {candidate} {kb.ask_if_location_not_hawk(tuple(candidate))}")
         candidate = random.choice(candidates)
         if (None != candidate):
             memories[candidate[0]][candidate[1]] += 1
