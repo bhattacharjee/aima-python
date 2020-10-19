@@ -358,6 +358,16 @@ class Shrink(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'S')
 
+"""
+Hawks eat snakes. However, the snake cannot see the Hawk.
+But the snake can hear the hawk's shriek only if its head is in a
+square directly left, or right or above or below the hawk's
+"""
+class Hawk(TwoDThing):
+    def __init__(self, x, y):
+        super().__init__(x, y, 'S')
+        self.is_alive = True
+
 class SimpleGraphics():
     SQUARE_SIZE = 10
     RADIUS = SQUARE_SIZE // 2
@@ -558,6 +568,7 @@ class TwoDEnvironment(Environment):
         self.matrix = [[None for i in range(cols)] for j in range(rows)] # 2D array
         self.graphics = None
         self.graphics_failed = False
+        self.agent_died = False
         if g_curses_available:
             self.window = curses.initscr()
 
