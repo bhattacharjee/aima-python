@@ -1679,6 +1679,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def create_hawk_shreik_rules(self):
         for i in range(self.rows):
             for j in range(self.cols):
+                """
                 nothawk_symbol = Utils.get_logic_symbol("NOTHAWK", (i, j))
                 adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
                 if (None != adj and len(adj) > 0):
@@ -1687,6 +1688,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                     clause = "(%s) ==> %s" % (reverse1, nothawk_symbol)
                     print(clause)
                 self.kb.tell(expr(clause))
+                """
                 notshreik_symbol = Utils.get_logic_symbol("NOTSHREIK", (i, j))
                 adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
                 if None != adj and len(adj) > 0:
