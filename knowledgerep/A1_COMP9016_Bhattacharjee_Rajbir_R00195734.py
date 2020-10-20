@@ -17,6 +17,7 @@ g_use_pygame = True
 g_graphics_sleep_time = 0.25
 g_use_tkinter = True
 g_tkinter_available = False
+g_kb_print_profile_information = True
 
 
 try:
@@ -1735,14 +1736,20 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
 class SnakeKnowledgeBaseToDetectHawk(object):
     USE_DEFAULT_ALGORITHM = 0
     USE_FOL_BC = 1
-    USE_FOL_FC = 2
+    USE_FOL_FC = 2 # This is very very slow
     def __init__(self, initial_matrix, dimensions, algorithm=USE_DEFAULT_ALGORITHM):
+        algorithm = SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM
         self.matrix = initial_matrix
         (self.rows, self.cols) = tuple(dimensions)
-        self.kb = PropDefiniteKB()
+        if SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM == algorithm:
+            self.kb = PropDefiniteKB()
+        else:
+            self.kb = FolKB()
         self.create_base_rules()
         self.algorithm = algorithm
         self.create_base_rules()
+        self.total_perf = 0
+        self.total_count = 0
 
     def create_hawk_shreik_rules(self):
         for i in range(self.rows):
@@ -1804,7 +1811,19 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         self.kb.tell(expr(nothawk))
 
-    def ask_if_location_not_hawk(self, location):
+    def ask_if_location_not_hawk_fol(self, location, fn=fol_bc_ask):
+        assert(isinstance(self.kb, FolKB))
+        nothawk = Utils.get_logic_symbol("NOTHAWK", location)
+        logging.info(f"Using usin fol_fc: symbol = {nothawk}")
+        g = fn(self.kb, expr(nothawk))
+        retval = False
+        for i in g:
+            retval = True
+        print("Done...")
+        return retval
+
+    def ask_if_location_not_hawk_pl_fc(self, location):
+        assert(isinstance(self.kb, PropDefiniteKB))
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         logging.debug("checking for {}".format(nothawk))
         if (self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM):
@@ -1812,6 +1831,40 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         else:
             logging.warning(f"Unrecognized algorithm {self.algorithm}, using pl_fc_entails")
             return pl_fc_entails(self.kb, expr(nothawk))
+
+    def ask_if_location_not_hawk(self, location):
+        global g_kb_print_profile_information
+        time1 = None
+        time2 = None
+        retval = False
+        if g_kb_print_profile_information:
+            time1 = time.perf_counter()
+        if SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM == self.algorithm:
+            retval = self.ask_if_location_not_hawk_pl_fc(location)
+        elif SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC == self.algorithm:
+            retval = self.ask_if_location_not_hawk_fol(location, fol_bc_ask)
+        elif SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC == self.algorithm:
+            retval = self.ask_if_location_not_hawk_fol(location, fol_fc_ask)
+        else:
+            assert(False)
+        if g_kb_print_profile_information:
+            time2 = time.perf_counter()
+            temp = time2 - time1
+            self.total_perf += temp
+            self.total_count += 1
+            if SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC == self.algorithm:
+                print(f"Total time taken for inference checks: {self.total_perf}" +
+                    f" n = {self.total_count}, Average = {self.total_perf / self.total_count}")
+        return retval
+
+    def __del__(self):
+        global g_kb_print_profile_information
+        if 0 == self.total_count:
+            logging.warn(f"Total count = 0, {self.total_count} {self.total_perf}")
+            self.total_count = 1
+        if g_kb_print_profile_information:
+            print(f"Total time taken for inference checks: {self.total_perf}" +
+                    f" n = {self.total_count}, Average = {self.total_perf / self.total_count}")
 
     def ask_if_location_definitely_hawk(self, shreik_heard, self_loc, new_loc, dimensions):
         if not shreik_heard:
