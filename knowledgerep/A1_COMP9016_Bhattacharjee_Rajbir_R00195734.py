@@ -213,7 +213,7 @@ class Utils:
     def manhattan_distance(l1, l2):
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
-        #print(l1[0], l1[1], l2[0], l2[1], abs(l1[0] - l2[0]), abs(l1[1] - l2[1]))
+        logging.debug(f"{l1[0]} {l1[1]} {l2[0]} {l2[1]} {abs(l1[0] - l2[0])} {abs(l1[1] - l2[1])}")
         return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
 
     def euclidean_distance(l1, l2):
