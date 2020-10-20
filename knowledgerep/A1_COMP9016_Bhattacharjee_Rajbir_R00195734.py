@@ -1820,6 +1820,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         assert(tuple(new_loc) in adj)
         adj_not_hawk = [self.ask_if_location_not_hawk(a) for a in adj]
         n_not_hawk = sum(adj_not_hawk)
+        logging.debug(f"HAWKS NEAR ME {self.get_hawk_near_me(shreik_heard, self_loc, dimensions)}")
         # If all but one adjacent squares are definitely not a hawk
         # then we can determine whether this is a hawk or not
         if n_not_hawk == (len(adj_not_hawk) - 1):
@@ -1829,7 +1830,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def get_hawk_near_me(self, shreik_heard, self_loc, dimensions):
         if not shreik_heard:
             None
-        adj = utils.get_adjacent_square(tuple(self_loc), tuple(dimensions))
+        adj = Utils.get_adjacent_squares(tuple(self_loc), tuple(dimensions))
         adj_not_hawk = [self.ask_if_location_not_hawk(a) for a in adj]
         n_not_hawk = sum(adj_not_hawk)
         if n_not_hawk == (len(adj_not_hawk) - 1):
