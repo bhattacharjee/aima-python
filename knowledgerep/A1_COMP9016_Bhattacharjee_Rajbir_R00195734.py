@@ -3,7 +3,7 @@ import os,sys,inspect, random, collections, copy, pickle
 import argparse
 import time
 import logging
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.WARNING)
 
 # Is curses available or not?
 g_curses_available = True
@@ -1436,7 +1436,7 @@ def UtilityBasedAgentProgram(usekb=False):
                 percepts["things"], include_grow_shrink=True)
         if use_kb and None == kb:
             kb = SnakeKnowledgeBaseToDetectHawk(matrix,\
-                    (len(matrix), len(matrix[0])), fol_fc_ask)
+                    (len(matrix), len(matrix[0])), SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
         if None != kb:
             feelings = percepts["feelings"]
             if None != feelings and len(feelings) > 0:
@@ -1716,7 +1716,10 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
     (NOTSHREIK_UP & NOTSHREIK_DOWN & NOTSHREIK_LEFT & NOTSHREIK_RIGHT) ==> NOTHAWK
 """
 class SnakeKnowledgeBaseToDetectHawk(object):
-    def __init__(self, initial_matrix, dimensions, algorithm):
+    USE_DEFAULT_ALGORITHM = 0
+    USE_FOL_BC = 1
+    USE_FOL_FC = 2
+    def __init__(self, initial_matrix, dimensions, algorithm=USE_DEFAULT_ALGORITHM):
         self.matrix = initial_matrix
         (self.rows, self.cols) = tuple(dimensions)
         self.kb = PropDefiniteKB()
@@ -1787,7 +1790,11 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def ask_if_location_not_hawk(self, location):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         logging.debug("checking for {}".format(nothawk))
-        return pl_fc_entails(self.kb, expr(nothawk))
+        if (self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM):
+            return pl_fc_entails(self.kb, expr(nothawk))
+        else:
+            logging.warning(f"Unrecognized algorithm {self.algorithm}, using pl_fc_entails")
+            return pl_fc_entails(self.kb, expr(nothawk))
 
     def ask_if_location_definitely_hawk(self, shreik_heard, self_loc, new_loc, dimensions):
         if not shreik_heard:
