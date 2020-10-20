@@ -1409,6 +1409,7 @@ def UtilityBasedAgentProgram(usekb=False):
     def program(percepts):
         nonlocal memories
         nonlocal use_kb, kb
+        shreik_heard = False
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         (row, col) = tuple(percepts["dimensions"])
         (row, col) = tuple(percepts["dimensions"])
@@ -1421,8 +1422,10 @@ def UtilityBasedAgentProgram(usekb=False):
         if None != kb:
             feelings = percepts["feelings"]
             if None != feelings and len(feelings) > 0:
+                # We heard a shreik here
                 kb.tell_location_nothawk(tuple(location))
                 print(f"Feelings are {feelings}")
+                shreik_heard = True
             else:
                 kb.tell_location_safe(tuple(location))
         if None == memories:
@@ -1432,6 +1435,11 @@ def UtilityBasedAgentProgram(usekb=False):
             return None
         for candidate in candidates:
             print(f"Is Candidate Not Hawk Definitely? {candidate} {kb.ask_if_location_not_hawk(tuple(candidate))}")
+        if shreik_heard:
+            for candidate in candidates:
+                is_definitely_hawk = kb.ask_if_location_definitely_hawk(\
+                    shreik_heard, tuple(location), tuple(candidate), (row, col))
+                print(f"{candidate} is hawk for sure? {is_definitely_hawk}")
         candidate = random.choice(candidates)
         if (None != candidate):
             memories[candidate[0]][candidate[1]] += 1
@@ -1761,6 +1769,20 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         print("checking for ", nothawk)
         return pl_fc_entails(self.kb, expr(nothawk))
+
+    def ask_if_location_definitely_hawk(self, shreik_heard, self_loc, new_loc, dimensions):
+        if not shreik_heard:
+            return False
+        adj = Utils.get_adjacent_squares(tuple(self_loc), tuple(dimensions))
+        assert(tuple(new_loc) in adj)
+        adj_not_hawk = [self.ask_if_location_not_hawk(a) for a in adj]
+        n_not_hawk = sum(adj_not_hawk)
+        # If all but one adjacent squares are definitely not a hawk
+        # then we can determine whether this is a hawk or not
+        if n_not_hawk == (len(adj_not_hawk) - 1):
+            return not self.ask_if_location_not_hawk(tuple(new_loc))
+        return False
+
 
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
