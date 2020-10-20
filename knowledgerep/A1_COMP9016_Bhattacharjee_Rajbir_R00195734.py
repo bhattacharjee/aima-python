@@ -1826,6 +1826,20 @@ class SnakeKnowledgeBaseToDetectHawk(object):
             return not self.ask_if_location_not_hawk(tuple(new_loc))
         return False
 
+    def get_hawk_near_me(self, shreik_heard, self_loc, dimensions):
+        if not shreik_heard:
+            None
+        adj = utils.get_adjacent_square(tuple(self_loc), tuple(dimensions))
+        adj_not_hawk = [self.ask_if_location_not_hawk(a) for a in adj]
+        n_not_hawk = sum(adj_not_hawk)
+        if n_not_hawk == (len(adj_not_hawk) - 1):
+            for i, elm in enumerate(adj_not_hawk):
+                if False == elm: # nothawk is false
+                    return adj[i]
+        return None
+
+
+
 
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
