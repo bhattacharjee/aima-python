@@ -588,23 +588,27 @@ class SimpleGraphicsTkinter():
                 elif ('D' == c):
                     self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0, 0, 0))
                     l = tkinter.Label(self.master, text = c, fg="white", bg="black")
-                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    l.place(y=xoff, x=yoff,\
+                            width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
                     self.labels.append(l)
                 elif ('G' == c):
                     self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0xef, 0xfa, 0x11))
                     l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string((0xef, 0xfa, 0x11)))
-                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    l.place(y=xoff, x=yoff,\
+                            width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
                     self.labels.append(l)
                 elif ('S' == c):
                     self.draw_square(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, (0x53, 0xef, 0x21))
                     l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string((0x53, 0xef, 0x21)))
-                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    l.place(y=xoff, x=yoff,\
+                            width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
                     self.labels.append(l)
                 elif ('H' == c):
                     color = (111, 179, 247)
                     self.draw_circle(xoff, yoff, SimpleGraphicsTkinter.SQUARE_SIZE, color)
                     l = tkinter.Label(self.master, text = c, fg="black", bg=self.get_color_string(color))
-                    l.place(y=xoff, x=yoff, width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
+                    l.place(y=xoff, x=yoff,\
+                            width=SimpleGraphicsTkinter.SQUARE_SIZE, height=SimpleGraphicsTkinter.SQUARE_SIZE)
                     self.labels.append(l)
         self.canvas.pack()
         self.canvas.update()
@@ -1362,7 +1366,8 @@ def UtilityBasedAgentProgram(usekb=False):
         assert(None != memories and None != matrix and isinstance(matrix, list))
         (row, col) = tuple(location)
         utility_score = 0
-        # The further the goal is the less should be the score (goal_direction is already an offset, so this should be minimized)
+        # The further the goal is the less should be the score
+        # (goal_direction is already an offset, so this should be minimized)
         utility_score += Utils.manhattan_distance(location, goal) * GOAL_SCALING_FACTOR
         # The closer you get to your body, the less you score.
         for loc in percepts["agent_history"]:
@@ -1518,7 +1523,8 @@ class MazeSearchProblem(Problem):
 
     # This function has been copied from search.py
     def __repr__(self):
-        string = "%15.15s %25.25s %15.15s %15.15s\n" % ("n_Sccessors", "n_CandidatesConsidered", "n_GoalTests", "n_States")
+        string = "%15.15s %25.25s %15.15s %15.15s\n" %\
+                ("n_Sccessors", "n_CandidatesConsidered", "n_GoalTests", "n_States")
         string += "%15d %25d %15d %15d" % (self.succs, self.cand_moves, self.goal_tests, self.states)
         return string
 
@@ -1833,7 +1839,8 @@ def main():
     global g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
-    parser.add_argument("-ssp", "--suppress-state-printing", help="Do not print the board matrix after each step", action="store_true")
+    parser.add_argument("-ssp", "--suppress-state-printing",\
+            help="Do not print the board matrix after each step", action="store_true")
     parser.add_argument("-rd", "--refresh-delay",default=0.005, help="Number of seconds between refreshes", type=float)
     parser.add_argument("-ac", "--allow-crossing-self", help="Allow crossing over one's body", action="store_true")
     parser.add_argument("-ng", "--no-graphics", help="Do not use graphics", action="store_true")
