@@ -341,6 +341,20 @@ class Utils:
         kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), algorithm)
         return kb
 
+    def trim_candidate_if_hawk(kb, shreik_heard, candidates, a_loc, mt_dim):
+        if shreik_heard and kb:
+            temp = []
+            for cand in candidates:
+                hawk = kb.ask_if_location_definitely_hawk(\
+                        shreik_heard, tuple(a_loc), tuple(cand), tuple(mt_dim))
+                if not hawk:
+                    temp.append(cand)
+                else:
+                    logging.info(f"{cand} is definitely a hawk. skipping...")
+            return temp
+        else:
+            return candidates
+
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
 # Which the environment can use to print a board if required
@@ -1427,16 +1441,7 @@ def UtilityBasedAgentProgram(usekb=False):
             if ('#' == matrix[r][c]):
                 continue
             candidates_not_walls.append(candidate)
-        if shreik_heard and kb:
-            temp = []
-            for cand in candidates_not_walls:
-                hawk = kb.ask_if_location_definitely_hawk(\
-                        shreik_heard, tuple(a_loc), tuple(cand), tuple(mt_dim))
-                if not hawk:
-                    temp.append(cand)
-                else:
-                    logging.info(f"{cand} is definitely a hawk. skipping...")
-            candidates_not_walls = temp
+        candidates_not_walls = Utils.trim_candidate_if_hawk(kb, shreik_heard, candidates_not_walls, a_loc, mt_dim)
         if (None == candidates_not_walls or 0 == len(candidates_not_walls)):
             return candidates_not_walls
         utility_socres = [utility_function(percepts, candidate, goal, matrix)\
