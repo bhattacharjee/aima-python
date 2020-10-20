@@ -2,6 +2,8 @@
 import os,sys,inspect, random, collections, copy, pickle
 import argparse
 import time
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 # Is curses available or not?
 g_curses_available = True
@@ -519,7 +521,7 @@ class SimpleGraphicsTkinter():
         self.is_inited = False
         self.master = tkinter.Tk()
         self.labels = []
-        print("Tkinter ", self.master)
+        logging.info("Tkinter {}".format(self.master))
         if (None != self.master):
             self.canvas = tkinter.Canvas(self.master,\
                     width=((rows + 5)*SimpleGraphicsTkinter.SQUARE_SIZE),\
@@ -804,7 +806,7 @@ class TwoDEnvironment(Environment):
             if thing.is_hidden_from_agent():
                 feelings = thing.get_agent_feelings(agent.get_location())
                 if (None != feelings):
-                    print(f"Agent at location {x}, {y} felt {feelings} from {thing} at {thing.get_location()}")
+                    logging.info(f"Agent at location {x}, {y} felt {feelings} from {thing} at {thing.get_location()}")
                     percept["feelings"].append(feelings)
         assert(None != thedoor)
         dx, dy = thedoor.get_location()
@@ -1382,8 +1384,9 @@ def UtilityBasedAgentProgram(usekb=False):
             utility_score += SHRINK_SCALING_FACTOR
         return utility_score
 
-    def get_candidate_positions(percepts, matrix):
+    def get_candidate_positions(percepts, matrix, shreik_heard):
         import sys
+        nonlocal kb, use_kb
         a_loc = percepts['location']
         mt_dim = percepts["dimensions"]
         history = percepts["history"]
@@ -1399,6 +1402,16 @@ def UtilityBasedAgentProgram(usekb=False):
             if ('#' == matrix[r][c]):
                 continue
             candidates_not_walls.append(candidate)
+        if shreik_heard and kb:
+            temp = []
+            for cand in candidates_not_walls:
+                hawk = kb.ask_if_location_definitely_hawk(\
+                        shreik_heard, tuple(a_loc), tuple(cand), tuple(mt_dim))
+                if not hawk:
+                    temp.append(cand)
+                else:
+                    logging.debug(f"{cand} is definitely a hawk. skipping...")
+            candidates_not_walls = temp
         if (None == candidates_not_walls or 0 == len(candidates_not_walls)):
             return candidates_not_walls
         utility_socres = [utility_function(percepts, candidate, goal, matrix)\
@@ -1429,17 +1442,18 @@ def UtilityBasedAgentProgram(usekb=False):
             if None != feelings and len(feelings) > 0:
                 # We heard a shreik here
                 kb.tell_location_nothawk(tuple(location))
-                print(f"Feelings are {feelings}")
+                logging.debug(f"Feelings are {feelings}")
                 shreik_heard = True
             else:
                 kb.tell_location_safe(tuple(location))
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
-        candidates = get_candidate_positions(percepts, matrix)
+        candidates = get_candidate_positions(percepts, matrix, shreik_heard)
         if (None == candidates or 0 == len(candidates)):
             return None
         for candidate in candidates:
-            print(f"Is Candidate Not Hawk Definitely? {candidate} {kb.ask_if_location_not_hawk(tuple(candidate))}")
+            logging.debug(f"Is Candidate Not Hawk Definitely? {candidate} "+
+                            f"{kb.ask_if_location_not_hawk(tuple(candidate))}")
         if shreik_heard:
             for candidate in candidates:
                 is_definitely_hawk = kb.ask_if_location_definitely_hawk(\
@@ -1548,17 +1562,17 @@ class MazeSearchProblem(Problem):
         else:
             history = []
         matrix = state["matrix"]
-        #print(state["agent_max_length"])
+        logging.debug(f"{state['agent_max_length']}")
         candidate_positions = NextMoveHelper.get_candidate_positions(ag_location, mt_dimensions, history)
         candidate_moves = []
-        #print(state["location"], "---->", candidate_positions)
+        logging.debug(f"{state['location']}" + "---->" + f"{candidate_positions}")
         for pos in candidate_positions:
             (row, col) = tuple(pos)
             if not isinstance(matrix[row][col], Wall):
                 candidate_moves.append(NextMoveHelper.get_move_string2(oldrow, oldcol, row, col))
         self.succs += 1
         self.cand_moves += len(candidate_moves)
-        #print(oldrow, oldcol, candidate_moves)
+        logging.debug(f"{oldrow}, {oldcol}, {candidate_moves}")
         return candidate_moves
 
     """
@@ -1576,24 +1590,24 @@ class MazeSearchProblem(Problem):
         agent_max_length = state["agent_max_length"]
         agent_can_grow = state["agent_can_grow"]
         matrix = state["matrix"]
-        #print(type(state["goal_direction"]))
+        logging.debug(type(state["goal_direction"]))
         # Get the old goal direction, this will be updated
         (goaldx, goaldy) = tuple(state["goal_direction"])
-        #print(f"Initial: {goaldx}, {goaldy}")
+        logging.debug(f"Initial: {goaldx}, {goaldy}")
         # def get_new_location(move, x, y):
         (curx, cury) = tuple(state["location"])
         (newx, newy) = NextMoveHelper.get_new_location(action, curx, cury)
-        #print(f"{action} : ({curx}, {cury}) --> ({newx}, {newy})")
+        logging.debug(f"{action} : ({curx}, {cury}) --> ({newx}, {newy})")
         # Calculate the absolute goal
         (goalx, goaly) = (curx + goaldx, cury + goaldy)
         # Get the new goal directions
         (goaldx, goaldy) = (goalx - newx, goaly - newy)
         state["goal_direction"] = [goaldx, goaldy]
-        #print(f"Final: {goaldx}, {goaldy}")
+        logging.debug(f"Final: {goaldx}, {goaldy}")
         (offx, offy) = (newx - curx, newy - cury)
         if (g_search_should_consider_history and agent_can_grow):
             history = state["agent_history"]
-            #print("history = ", history)
+            logging.debug(f"history = {history}")
             if (len(history) > 0 and (curx, cury) != history[len(history) - 1]) or (0 == len(history)):
                 history.append((curx, cury))
                 while(len(history) > agent_max_length):
@@ -1653,7 +1667,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
         (goalx, goaly) = tuple(percept["goal_direction"])
         goalx += curx
         goaly += cury
-        #print("Heuristic returned: ", Utils.manhattan_distance([curx, cury], [goalx, goaly]))
+        logging.debug(f"Heuristic returned: {Utils.manhattan_distance([curx, cury], [goalx, goaly])}")
         return Utils.manhattan_distance([curx, cury], [goalx, goaly])
 
     def program(percepts, get_stats=False):
@@ -1729,7 +1743,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                     adjsyms = [Utils.get_logic_symbol("NOTHAWK", a) for a in adj]
                     for nh in adjsyms:
                         clause = "%s ==> %s" % (notshreik_symbol, nh)
-                        print(clause)
+                        logging.debug(f"{clause}")
                         self.kb.tell(expr(clause))
 
     def create_hawk_wall_rules(self):
@@ -1738,14 +1752,14 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                 nothawk_symbol = Utils.get_logic_symbol("NOTHAWK", (i, j))
                 wall_symbol = Utils.get_logic_symbol("WALL", (i, j))
                 self.kb.tell(expr("%s ==> %s" % (wall_symbol, nothawk_symbol)))
-                print("%s ==> %s" % (wall_symbol, nothawk_symbol))
+                logging.debug("%s ==> %s" % (wall_symbol, nothawk_symbol))
                 if self.matrix[i][j] == '#':
                     self.kb.tell(expr(wall_symbol))
-                    print(wall_symbol)
+                    logging.debug(f"{wall_symbol}")
                 # For our purpose we can treat a door as a wall
                 if self.matrix[i][j] == 'D':
                     self.kb.tell(expr(wall_symbol))
-                    print(wall_symbol)
+                    logging.debug(f"{wall_symbol}")
 
     def create_base_rules(self):
         self.create_hawk_shreik_rules()
@@ -1763,9 +1777,8 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         self.kb.tell(expr(notshreik))
         self.kb.tell(expr(nothawk))
-        print("Telling location is safe")
-        print(notshreik)
-        print(nothawk)
+        logging.debug("Telling location is safe")
+        logging.debug(f"{notshreik} {nothawk}")
 
     def tell_location_nothawk(self, location):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
@@ -1773,7 +1786,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
 
     def ask_if_location_not_hawk(self, location):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
-        print("checking for ", nothawk)
+        logging.debug("checking for {}".format(nothawk))
         return pl_fc_entails(self.kb, expr(nothawk))
 
     def ask_if_location_definitely_hawk(self, shreik_heard, self_loc, new_loc, dimensions):
@@ -1829,7 +1842,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
     RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMazeForceToHawk);
 
