@@ -1754,9 +1754,9 @@ class SnakeKnowledgeBaseToDetectHawk(object):
             self.kb = PropDefiniteKB()
         else:
             self.kb = FolKB()
-        self.create_base_rules()
         self.algorithm = algorithm
-        self.create_base_rules()
+        if None != self.kb:
+            self.create_base_rules()
         self.total_perf = 0
         self.total_count = 0
 
@@ -1800,6 +1800,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def create_base_rules(self):
         self.create_hawk_shreik_rules()
         self.create_hawk_wall_rules()
+        print(f"Num Clauses = {len(self.kb.clauses)}")
 
     def get_clauses(self):
         return self.kb.clauses
@@ -1945,7 +1946,7 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze);
+    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMaze);
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
