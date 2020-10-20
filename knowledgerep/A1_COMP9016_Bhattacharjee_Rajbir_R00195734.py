@@ -3,7 +3,7 @@ import os,sys,inspect, random, collections, copy, pickle
 import argparse
 import time
 import logging
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
 # Is curses available or not?
 g_curses_available = True
@@ -315,6 +315,31 @@ class Utils:
     def get_logic_symbol(prefix, location):
         (x, y) = tuple(location)
         return "%s_%0.3d_%0.3d" % (prefix, x, y)
+
+    def update_kb_for_location(kb, percepts):
+        assert(isinstance(kb, SnakeKnowledgeBaseToDetectHawk))
+        location = percepts["location"]
+        feelings = percepts["feelings"]
+        shreik_heard = False
+        if None != feelings and len(feelings) > 0:
+            shreik_heard = True
+        if None != kb:
+            if shreik_heard:
+                kb.tell_location_nothawk(tuple(location))
+                logging.debug(f"Feelings are {feelings}")
+            else:
+                kb.tell_location_safe(tuple(location))
+        return shreik_heard
+
+    def create_initial_kb(percepts, algorithm):
+        shreik_heard = False
+        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
+        (row, col) = tuple(percepts["dimensions"])
+        location = percepts["location"]
+        matrix = Utils.get_matrix_for_program(row, col,\
+                percepts["things"], include_grow_shrink=True)
+        kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), algorithm)
+        return kb
 
 # Super-class for all things in 2-D environment
 # An additional get_display() method returns a character
@@ -1410,7 +1435,7 @@ def UtilityBasedAgentProgram(usekb=False):
                 if not hawk:
                     temp.append(cand)
                 else:
-                    logging.debug(f"{cand} is definitely a hawk. skipping...")
+                    logging.info(f"{cand} is definitely a hawk. skipping...")
             candidates_not_walls = temp
         if (None == candidates_not_walls or 0 == len(candidates_not_walls)):
             return candidates_not_walls
@@ -1435,17 +1460,9 @@ def UtilityBasedAgentProgram(usekb=False):
         matrix = Utils.get_matrix_for_program(row, col,\
                 percepts["things"], include_grow_shrink=True)
         if use_kb and None == kb:
-            kb = SnakeKnowledgeBaseToDetectHawk(matrix,\
-                    (len(matrix), len(matrix[0])), SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
-        if None != kb:
-            feelings = percepts["feelings"]
-            if None != feelings and len(feelings) > 0:
-                # We heard a shreik here
-                kb.tell_location_nothawk(tuple(location))
-                logging.debug(f"Feelings are {feelings}")
-                shreik_heard = True
-            else:
-                kb.tell_location_safe(tuple(location))
+            kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
+        shreik_heard = Utils.update_kb_for_location(kb, percepts)
+        logging.info(f"shreik_heard = {shreik_heard}")
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
         candidates = get_candidate_positions(percepts, matrix, shreik_heard)
@@ -1454,11 +1471,6 @@ def UtilityBasedAgentProgram(usekb=False):
         for candidate in candidates:
             logging.debug(f"Is Candidate Not Hawk Definitely? {candidate} "+
                             f"{kb.ask_if_location_not_hawk(tuple(candidate))}")
-        if shreik_heard:
-            for candidate in candidates:
-                is_definitely_hawk = kb.ask_if_location_definitely_hawk(\
-                    shreik_heard, tuple(location), tuple(candidate), (row, col))
-                print(f"{candidate} is hawk for sure? {is_definitely_hawk}")
         candidate = random.choice(candidates)
         if (None != candidate):
             memories[candidate[0]][candidate[1]] += 1
@@ -1849,7 +1861,7 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
     RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMazeForceToHawk);
 
