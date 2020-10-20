@@ -54,6 +54,16 @@ except:
     g_curses_available = False
     print("Curses is not available, continuing without it...")
 
+smallHawkTestMaze= """
+##############################
+# x       #                  #
+# ####                       #
+#HHHHHHHHHHHHHHHHHHHHHHHHH   #
+#    ###     #####  ######   #
+#                          ###
+#    HHHHHHHHHHHHHHHHHHHHHHHH#
+#                           o#
+##############################"""
 smallMaze = """
 ##############################
 #G        #              #   #
@@ -1170,7 +1180,7 @@ class NextMoveHelper(object):
 
 # SimpleReflexProgram randomly chooses a move in any direction
 # as long as it doesn't hit a wall
-def SimpleReflexProgram(weighted_rand_sel=False):
+def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
     # Percepts are of the form
     # {
     #    "dimensions" = [row, col],
@@ -1738,7 +1748,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     USE_FOL_BC = 1
     USE_FOL_FC = 2 # This is very very slow
     def __init__(self, initial_matrix, dimensions, algorithm=USE_DEFAULT_ALGORITHM):
-        algorithm = SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM
         self.matrix = initial_matrix
         (self.rows, self.cols) = tuple(dimensions)
         if SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM == algorithm:
@@ -1936,7 +1945,7 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMazeForceToHawk);
+    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze);
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
