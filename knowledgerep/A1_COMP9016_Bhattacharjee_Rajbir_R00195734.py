@@ -1749,6 +1749,9 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     USE_FOL_FC = 2 # This is very very slow
     def __init__(self, initial_matrix, dimensions, algorithm=USE_DEFAULT_ALGORITHM):
         self.matrix = initial_matrix
+        self.total_perf = 0
+        self.total_count = 0
+        self.clauses = []
         (self.rows, self.cols) = tuple(dimensions)
         if SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM == algorithm:
             self.kb = PropDefiniteKB()
@@ -1757,8 +1760,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         self.algorithm = algorithm
         if None != self.kb:
             self.create_base_rules()
-        self.total_perf = 0
-        self.total_count = 0
 
     def create_hawk_shreik_rules(self):
         for i in range(self.rows):
@@ -1797,9 +1798,71 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                     self.kb.tell(expr(wall_symbol))
                     logging.debug(f"{wall_symbol}")
 
+    def append_clause(self, clause):
+        if clause not in self.clauses:
+            logging.info("Adding " + clause)
+            self.clauses.append(expr(clause))
+
+    def create_simple_rules(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                hawk = Utils.get_logic_symbol("HAWK", (i, j))
+                nothawk = Utils.get_logic_symbol("NOTHAWK", (i, j))
+                shreik = Utils.get_logic_symbol("SHREIK", (i, j))
+                notshreik = Utils.get_logic_symbol("NOTSHREIK", (i, j))
+                wall = Utils.get_logic_symbol("WALL", (i, j))
+                # WALL ==> NOTHAWK
+                self.append_clause("%s ==> %s" % (wall, nothawk))
+                # SHREIK ==> NOTHAWK
+                self.append_clause("%s ==> %s" % (shreik, nothawk))
+                # NOTSHREIK ==> NOTHAWK
+                self.append_clause("%s ==> %s" % (notshreik, nothawk))
+
+    def create_compound_clauses1_helper(self, array):
+        ret = []
+        for i in range(len(array)):
+            a = copy.deepcopy(array)
+            b = a[i]
+            del(a[i])
+            ret.append((b, a,))
+        return ret
+
+    def create_compound_clauses1(self):
+        for i in range(self.rows):
+            for j in range(self.cols):
+                hawk = Utils.get_logic_symbol("HAWK", (i, j))
+                nothawk = Utils.get_logic_symbol("NOTHAWK", (i, j))
+                shreik = Utils.get_logic_symbol("SHREIK", (i, j))
+                notshreik = Utils.get_logic_symbol("NOTSHREIK", (i, j))
+                wall = Utils.get_logic_symbol("WALL", (i, j))
+                adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
+                # HAWK ==> SHREIK1, HAWK ==> SHREIK2 ...
+                for a in adj:
+                    a_shreik = Utils.get_logic_symbol("SHREIK", a)
+                    self.append_clause("%s ==> %s" % (hawk, a_shreik))
+                # NOTSHREIK ==> NOTHAWK1, NOTSHREIK => NOTHAWK2, ...
+                for a in adj:
+                    a_nothawk = Utils.get_logic_symbol("NOTHAWK", a)
+                    self.append_clause("%s ==> %s" % (notshreik, nothawk))
+                # NOTHAWK1 & NOTHAWK2 & NOTHAWK3 & SHREIK ==> HAWK4
+                for (hk, nthkarr) in self.create_compound_clauses1_helper(adj):
+                    hk = Utils.get_logic_symbol("SHREIK", hk)
+                    nthkarr = [Utils.get_logic_symbol("NOTHAWK", i) for i in nthkarr]
+                    nthkarr.append(shreik)
+                    lhs = " & ".join(nthkarr)
+                    clause = "%s ==> %s" % (lhs, hk)
+                    self.append_clause(clause)
+                # NOTSHREIK1 & NOTSHREIK2 & NOTSHREIK3 & NOTSHREIK4 ==> NOTHAWK
+                nshrk = [Utils.get_logic_symbol("NOTSHREIK", a) for a in adj]
+                nshrk = " & ".join(nshrk)
+                self.append_clause("%s ==> %s" % (nshrk, nothawk)
+
+
     def create_base_rules(self):
-        self.create_hawk_shreik_rules()
-        self.create_hawk_wall_rules()
+        #self.create_hawk_shreik_rules()
+        #self.create_hawk_wall_rules()
+        self.create_simple_rules()
+        self.create_compound_clauses1()
         print(f"Num Clauses = {len(self.kb.clauses)}")
 
     def get_clauses(self):
@@ -1832,63 +1895,19 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         print("Done...")
         return retval
 
-    def ask_if_location_not_hawk_pl_fc(self, location):
-        assert(isinstance(self.kb, PropDefiniteKB))
-        nothawk = Utils.get_logic_symbol("NOTHAWK", location)
-        logging.debug("checking for {}".format(nothawk))
-        if (self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM):
-            return pl_fc_entails(self.kb, expr(nothawk))
-        else:
-            logging.warning(f"Unrecognized algorithm {self.algorithm}, using pl_fc_entails")
-            return pl_fc_entails(self.kb, expr(nothawk))
+    def ask_if_location_hawk(self, location):
+        hwk = Utils.get_logic_symbol("HAWK", location)
+        fn = pl_fc_entails
+        fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
+        fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
+        return fn(self.kb, hwk)
 
-    def ask_if_location_not_hawk(self, location):
-        global g_kb_print_profile_information
-        time1 = None
-        time2 = None
-        retval = False
-        if g_kb_print_profile_information:
-            time1 = time.perf_counter()
-        if SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM == self.algorithm:
-            retval = self.ask_if_location_not_hawk_pl_fc(location)
-        elif SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC == self.algorithm:
-            retval = self.ask_if_location_not_hawk_fol(location, fol_bc_ask)
-        elif SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC == self.algorithm:
-            retval = self.ask_if_location_not_hawk_fol(location, fol_fc_ask)
-        else:
-            assert(False)
-        if g_kb_print_profile_information:
-            time2 = time.perf_counter()
-            temp = time2 - time1
-            self.total_perf += temp
-            self.total_count += 1
-            if SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC == self.algorithm:
-                print(f"Total time taken for inference checks: {self.total_perf}" +
-                    f" n = {self.total_count}, Average = {self.total_perf / self.total_count}")
-        return retval
-
-    def __del__(self):
-        global g_kb_print_profile_information
-        if 0 == self.total_count:
-            logging.warn(f"Total count = 0, {self.total_count} {self.total_perf}")
-            self.total_count = 1
-        if g_kb_print_profile_information:
-            print(f"Total time taken for inference checks: {self.total_perf}" +
-                    f" n = {self.total_count}, Average = {self.total_perf / self.total_count}")
-
-    def ask_if_location_definitely_hawk(self, shreik_heard, self_loc, new_loc, dimensions):
-        if not shreik_heard:
-            return False
-        adj = Utils.get_adjacent_squares(tuple(self_loc), tuple(dimensions))
-        assert(tuple(new_loc) in adj)
-        adj_not_hawk = [self.ask_if_location_not_hawk(a) for a in adj]
-        n_not_hawk = sum(adj_not_hawk)
-        logging.debug(f"HAWKS NEAR ME {self.get_hawk_near_me(shreik_heard, self_loc, dimensions)}")
-        # If all but one adjacent squares are definitely not a hawk
-        # then we can determine whether this is a hawk or not
-        if n_not_hawk == (len(adj_not_hawk) - 1):
-            return not self.ask_if_location_not_hawk(tuple(new_loc))
-        return False
+    def ask_if_location_nothawk(self, location):
+        nhwk = Utils.get_logic_symbol("NOTHAWK", location)
+        fn = pl_fc_entails
+        fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
+        fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
+        return fn(self.kb, hwk)
 
     def get_hawk_near_me(self, shreik_heard, self_loc, dimensions):
         if not shreik_heard:
