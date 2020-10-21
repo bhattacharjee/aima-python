@@ -1282,20 +1282,28 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
 # not visited previously.
 # Once it visits a node that it hasn't visited previously, then it resumes
 # the goal-driven approach once again
-def GoalDrivenAgentProgram():
+def GoalDrivenAgentProgram(use_inference=False):
     # Gaol driven greedy search may get stuck. If it does
     # We need to randomly go to a new node which we haven't visited earlier
     doing_random = False
     visited_matrix = None
+    use_kb = use_inference
+    kb = None
+    shreik_heard = False
 
     def get_matrix(rows, cols, things):
         return Utils.get_matrix_for_program(rows, cols, things)
 
     def get_random_move(matrix, a_loc, history):
+        nonlocal kb, shreik_heard
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
         mt_dim = [len(matrix), len(matrix[0])]
         rowCandidate = colCandidate = -1
         candidate_positions = NextMoveHelper.get_candidate_positions(a_loc, mt_dim, history)
+        if shreik_heard and kb:
+            print("Trimming")
+            candidate_positions = Utils.trim_candidate_if_hawk(kb,\
+                    shreik_heard, candidate_positions, tuple(a_loc), tuple(mt_dim))
         while 0 != len(candidate_positions):
             i = random.randrange(0, len(candidate_positions))
             x, y = candidate_positions[i]
@@ -1316,7 +1324,7 @@ def GoalDrivenAgentProgram():
         return None
 
 
-    def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
+    def get_goal_directed_new_location_int(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
         # Sometimes, try moving rows first, at other times, try moving columns first
         assert(None != history)
         if random.choice([True, False]):
@@ -1351,6 +1359,15 @@ def GoalDrivenAgentProgram():
                         return newrow, newcol
         return -1, -1
 
+    def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
+        nonlocal kb, shreik_heard
+        r, c = get_goal_directed_new_location_int(matrix, m_rows, m_cols,\
+                a_row, a_col, dx, dy, history)
+        if shreik_heard and None != kb and (-1, -1) != (r, c) and kb.ask_if_location_hawk((r, c)):
+            return -1, -1
+        return r, c
+
+
     def get_action_string(n_r, n_c, o_r, o_c):
         dx = n_r - o_r
         dy = n_c - o_c
@@ -1371,8 +1388,8 @@ def GoalDrivenAgentProgram():
     # "things" : list of things
     # "goal_direction": direction of goal [dx, dy] dx/dy can be negative
     def program(percepts):
-        nonlocal visited_matrix
-        nonlocal doing_random
+        nonlocal visited_matrix, doing_random
+        nonlocal use_kb, kb, shreik_heard
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         rows = percepts["dimensions"][0]
         cols = percepts["dimensions"][1]
@@ -1381,6 +1398,10 @@ def GoalDrivenAgentProgram():
         dx = percepts["goal_direction"][0]
         dy = percepts["goal_direction"][1]
         history = percepts["agent_history"]
+        if use_kb and None == kb:
+            kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
+        if None != kb:
+            shreik_heard = Utils.update_kb_for_location(kb, percepts)
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         assert(None != history)
         dx = dx if 0 == dx else dx // abs(dx)
@@ -1490,7 +1511,8 @@ def UtilityBasedAgentProgram(usekb=False):
                 percepts["things"], include_grow_shrink=True)
         if use_kb and None == kb:
             kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
-        shreik_heard = Utils.update_kb_for_location(kb, percepts)
+        if None != kb:
+            shreik_heard = Utils.update_kb_for_location(kb, percepts)
         logging.info(f"shreik_heard = {shreik_heard}")
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
@@ -1715,6 +1737,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
         nonlocal search_results, search_results_deque, search_completed
         nonlocal stats, algorithm, perf_string, use_kb, kb, known_hawks
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
+        shreik_heard = False
         if (get_stats):
             if (None == stats):
                 stats = ""
@@ -1725,7 +1748,8 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
         (row, col) = tuple(location)
         if use_kb and None == kb and not recursed:
             kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
-        shreik_heard = Utils.update_kb_for_location(kb, percepts)
+        if None != kb:
+            shreik_heard = Utils.update_kb_for_location(kb, percepts)
         action = None
         if (not search_completed):
             # If we know there is a hawk at a location, treat it as a wall
@@ -1747,7 +1771,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
             search_completed = True
         try:
             action = search_results_deque.popleft()
-            if shreik_heard:
+            if None != kb and shreik_heard:
                 # If we heard a shreik, check if the candidate is not a known hawk
                 (newrow, newcol) = NextMoveHelper.get_updated_row_col(row, col, action)
                 if kb.ask_if_location_hawk((newrow, newcol)):
@@ -1941,7 +1965,8 @@ def process():
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
-    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=False), smallHawkTestMaze2)
+    RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
