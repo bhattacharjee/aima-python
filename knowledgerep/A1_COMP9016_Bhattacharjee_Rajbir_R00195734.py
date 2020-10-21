@@ -1924,6 +1924,7 @@ def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
     global g_state_print_same_place_loop_count
     global g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
+    global g_agent_can_grow, g_agent_initial_max_length
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing",\
@@ -1931,11 +1932,15 @@ def main():
     parser.add_argument("-rd", "--refresh-delay",default=0.005, help="Number of seconds between refreshes", type=float)
     parser.add_argument("-ac", "--allow-crossing-self", help="Allow crossing over one's body", action="store_true")
     parser.add_argument("-ng", "--no-graphics", help="Do not use graphics", action="store_true")
+    parser.add_argument("-acg", "--agent-cannot-grow", help="Agent cannot grow", action="store_true")
+    parser.add_argument("-amaxlen", "--agent-initial-max-length", type=int, help="Agent maximum lenth initially", default=8)
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
     g_state_refresh_sleep = 0 if args.refresh_delay < 0.0001 else args.refresh_delay
     g_self_crossing_not_allowed = not args.allow_crossing_self
+    g_agent_can_grow = False if args.agent_cannot_grow else g_agent_can_grow
+    g_agent_initial_max_length = args.agent_initial_max_length if args.agent_initial_max_length >= 0 else g_agent_initial_max_length
     if args.no_graphics:
         g_tkinter_available = g_use_tkinter = False
         g_pygame_available = g_use_pygame = False
