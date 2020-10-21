@@ -1486,7 +1486,7 @@ def UtilityBasedAgentProgram(usekb=False):
             return None
         for candidate in candidates:
             logging.debug(f"Is Candidate Not Hawk Definitely? {candidate} "+
-                            f"{kb.ask_if_location_not_hawk(tuple(candidate))}")
+                            f"{kb.ask_if_location_nothawk(tuple(candidate))}")
         candidate = random.choice(candidates)
         if (None != candidate):
             memories[candidate[0]][candidate[1]] += 1
@@ -1855,12 +1855,9 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                 # NOTSHREIK1 & NOTSHREIK2 & NOTSHREIK3 & NOTSHREIK4 ==> NOTHAWK
                 nshrk = [Utils.get_logic_symbol("NOTSHREIK", a) for a in adj]
                 nshrk = " & ".join(nshrk)
-                self.append_clause("%s ==> %s" % (nshrk, nothawk)
-
+                self.append_clause("%s ==> %s" % (nshrk, nothawk))
 
     def create_base_rules(self):
-        #self.create_hawk_shreik_rules()
-        #self.create_hawk_wall_rules()
         self.create_simple_rules()
         self.create_compound_clauses1()
         print(f"Num Clauses = {len(self.kb.clauses)}")
@@ -1884,17 +1881,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
         self.kb.tell(expr(nothawk))
 
-    def ask_if_location_not_hawk_fol(self, location, fn=fol_bc_ask):
-        assert(isinstance(self.kb, FolKB))
-        nothawk = Utils.get_logic_symbol("NOTHAWK", location)
-        logging.info(f"Using usin fol_fc: symbol = {nothawk}")
-        g = fn(self.kb, expr(nothawk))
-        retval = False
-        for i in g:
-            retval = True
-        print("Done...")
-        return retval
-
     def ask_if_location_hawk(self, location):
         hwk = Utils.get_logic_symbol("HAWK", location)
         fn = pl_fc_entails
@@ -1907,22 +1893,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         fn = pl_fc_entails
         fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
         fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
-        return fn(self.kb, hwk)
-
-    def get_hawk_near_me(self, shreik_heard, self_loc, dimensions):
-        if not shreik_heard:
-            None
-        adj = Utils.get_adjacent_squares(tuple(self_loc), tuple(dimensions))
-        adj_not_hawk = [self.ask_if_location_not_hawk(a) for a in adj]
-        n_not_hawk = sum(adj_not_hawk)
-        if n_not_hawk == (len(adj_not_hawk) - 1):
-            for i, elm in enumerate(adj_not_hawk):
-                if False == elm: # nothawk is false
-                    return adj[i]
-        return None
-
-
-
+        return fn(self.kb, nhwk)
 
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
