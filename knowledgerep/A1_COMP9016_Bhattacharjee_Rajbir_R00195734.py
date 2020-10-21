@@ -1201,6 +1201,8 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
     #    "things" : [thing1, thing2, thing3]
     # }
 
+    use_kb = use_inference
+    kb = None
     # Recreate the matrix from the percepts
     matrix = None
     use_weighted_random_selection = weighted_rand_sel
@@ -1237,14 +1239,18 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
         return matrix
 
     def program(percepts):
-        nonlocal matrix
-        nonlocal use_weighted_random_selection
+        nonlocal matrix, use_weighted_random_selection, use_kb, kb
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
+        shreik_heard = False
         rowCandidate = colCandidate = -1
         mt_dimensions = percepts["dimensions"]
         ag_location = percepts["location"]
         things = percepts["things"]
         history = percepts["agent_history"]
+        if use_kb and None == kb:
+            kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
+        if None != kb:
+            shreik_heard = Utils.update_kb_for_location(kb, percepts)
         dx, dy = get_goal_directions(percepts)
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         # First recreate the matrix
@@ -1262,6 +1268,10 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
                 weight = 1
             for i in range(weight):
                 candidate_positions.append(copy.deepcopy(item))
+        if shreik_heard and kb:
+            candidate_positions = Utils.trim_candidate_if_hawk(kb, \
+                    shreik_heard, candidate_positions, tuple(ag_location), \
+                    tuple(mt_dimensions))
         # Randomly select a new position
         rowCandidate, colCandidate = select_random(candidate_positions)
         # Convert position to move (eg. [0, 0] -> MoveUp)
@@ -1966,7 +1976,8 @@ def process():
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
     #RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=False), smallHawkTestMaze2)
-    RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
+    RunAgentAlgorithm(SimpleReflexProgram(use_inference=False), smallHawkTestMaze2)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
@@ -1998,5 +2009,4 @@ def main():
     process()
 
 if "__main__" == __name__:
-    random.seed(13)
     main()
