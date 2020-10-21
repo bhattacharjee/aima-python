@@ -1672,7 +1672,7 @@ class MazeSearchProblem(Problem):
             return True
         return False
 
-def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
+def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=False):
 
     search_results = None
     search_results_deque = collections.deque()
@@ -1681,6 +1681,8 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
     search_algorithm = algorithm
     perf_string = ""
     use_heuristic = useheuristic
+    use_kb = usekb
+    known_hawks = []
 
 
     def time_and_run_algorithm(problem, heuristic):
@@ -1709,12 +1711,8 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False):
         return Utils.manhattan_distance([curx, cury], [goalx, goaly])
 
     def program(percepts, get_stats=False):
-        nonlocal search_results
-        nonlocal search_results_deque
-        nonlocal search_completed
-        nonlocal stats
-        nonlocal algorithm
-        nonlocal perf_string
+        nonlocal search_results, search_results_deque, search_completed
+        nonlocal stats, algorithm, perf_string
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         if (get_stats):
             if (None == stats):
@@ -1918,7 +1916,8 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
+    RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=True), smallHawkTestMaze2)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
