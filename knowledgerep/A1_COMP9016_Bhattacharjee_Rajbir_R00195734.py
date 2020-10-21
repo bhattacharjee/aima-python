@@ -20,6 +20,7 @@ g_tkinter_available = False
 g_kb_print_profile_information = True
 g_agent_initial_max_length = 8
 g_agent_can_grow = True
+g_profile_knowledgebase = True
 
 
 try:
@@ -27,14 +28,14 @@ try:
     g_pygame_available = True
 except:
     g_use_pygame = False
-    print("PyGame is not available, running in text mode")
+    logging.error("PyGame is not available, running in text mode")
 
 try:
     import tkinter
     g_tkinter_available = True
 except:
     g_use_tkinter = False
-    print("Tkinter is not available, running in text mode")
+    logging.error("Tkinter is not available, running in text mode")
 
 # Import the AIMA libraries from the parent directory
 try:
@@ -46,7 +47,7 @@ try:
     from search import depth_first_tree_search, breadth_first_graph_search
     from logic import *
 except:
-    print("Could not import from parent folder... Exiting")
+    logging.error("Could not import from parent folder... Exiting")
     sys.exit(1)
 
 # Curses is only available in linux, in windows, continue without it
@@ -54,7 +55,7 @@ try:
     import curses
 except:
     g_curses_available = False
-    print("Curses is not available, continuing without it...")
+    logging.error("Curses is not available, continuing without it...")
 
 smallHawkTestMaze= """
 ##############################
@@ -502,7 +503,7 @@ class SimpleGraphics():
             g_state_print_same_place_loop_count = 1
             self.is_inited = True
         else:
-            print(f"Failed to initialize pygame graphics: numfail = {self.numfail}")
+            logging.error(f"Failed to initialize pygame graphics: numfail = {self.numfail}")
         self.screen = pygame.display.set_mode(\
                 [(rows + 5) * SimpleGraphics.SQUARE_SIZE,\
                 (cols + 5) * SimpleGraphics.SQUARE_SIZE])
@@ -951,13 +952,13 @@ class TwoDEnvironment(Environment):
                 if (g_use_pygame and g_pygame_available):
                     self.graphics = SimpleGraphics(len(m), len(m[0]))
         if (None == self.graphics or not self.graphics.is_inited):
-            print("0. Graphics failed, not going to use graphics")
+            logging.error("0. Graphics failed, not going to use graphics")
             self.graphics_failed = True
         try:
             if not self.graphics_failed:
                 self.graphics.update(m)
         except:
-            print("1. Graphics failed. not goint to use graphics")
+            logging.error("1. Graphics failed. not goint to use graphics")
             self.graphics_failed = True
 
     def print_state(self):
@@ -1311,7 +1312,7 @@ def GoalDrivenAgentProgram(use_inference=False):
         rowCandidate = colCandidate = -1
         candidate_positions = NextMoveHelper.get_candidate_positions(a_loc, mt_dim, history)
         if shreik_heard and kb:
-            print("Trimming")
+            logging.debug("Trimming")
             candidate_positions = Utils.trim_candidate_if_hawk(kb,\
                     shreik_heard, candidate_positions, tuple(a_loc), tuple(mt_dim))
         while 0 != len(candidate_positions):
@@ -1763,13 +1764,13 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
         action = None
         if (not search_completed):
             # If we know there is a hawk at a location, treat it as a wall
-            print(percepts)
+            logging.debug(percepts)
             copy_of_percepts = copy.deepcopy(percepts)
             for hawk in known_hawks:
                 (x, y) = tuple(hawk)
                 copy_of_percepts["things"].append(Wall(x, y))
             state = SearchHelper.convert_percepts_to_state(copy_of_percepts)
-            print(state)
+            logging.debug(state)
             problem = MazeSearchProblem(state)
             srch = time_and_run_algorithm(problem, heuristic)
             stats = problem.__repr__()
@@ -1818,6 +1819,10 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         self.total_perf = 0
         self.total_count = 0
         self.clauses = []
+        self.tell_count = 0
+        self.tell_perf = 0
+        self.ask_perf = 0
+        self.ask_count = 0
         (self.rows, self.cols) = tuple(dimensions)
         if SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM == algorithm:
             self.kb = PropDefiniteKB()
@@ -1827,11 +1832,38 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         if None != self.kb:
             self.create_base_rules()
 
+    def __del__(self):
+        if not g_profile_knowledgebase:
+            return
+        if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM:
+            print("Using pl_fc_entails")
+        elif self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC:
+            print("Using fol_fc_ask")
+        elif self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC:
+            print("Using fol_bc_ask")
+        else:
+            assert(False)
+        if self.ask_count > 0:
+            avg = self.ask_perf / self.ask_count
+            print(f"ask() called {self.ask_count} times with average {avg} seconds")
+        if self.tell_count > 0:
+            avg = self.tell_perf / self.tell_count
+            print(f"tell() called {self.ask_count} times with average {avg} seconds")
+        print(f"n(Clauses) = {len(self.kb.clauses)}")
+
     def append_clause(self, clause):
         if clause not in self.clauses:
-            logging.info("Adding " + clause)
+            logging.debug("Adding " + clause)
             self.clauses.append(clause)
+            if g_profile_knowledgebase:
+                time1 = time.perf_counter()
             self.kb.tell(expr(clause))
+            if g_profile_knowledgebase:
+                time2 = time.perf_counter()
+                time2 = time2 - time1
+                self.tell_perf += time2
+                self.tell_count += 1
+
 
     def create_simple_rules(self):
         for i in range(self.rows):
@@ -1897,7 +1929,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
     def create_base_rules(self):
         self.create_simple_rules()
         self.create_compound_clauses1()
-        print(f"Num Clauses = {len(self.kb.clauses)}")
+        logging.debug(f"Num Clauses = {len(self.kb.clauses)}")
 
     def get_clauses(self):
         return self.kb.clauses
@@ -1923,7 +1955,15 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         fn = pl_fc_entails
         fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
         fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
+        if g_profile_knowledgebase:
+            time1 = time.perf_counter()
         gen = fn(self.kb, hwk)
+        if g_profile_knowledgebase:
+            time2 = time.perf_counter()
+            time2 = time2 - time1
+            self.ask_perf += time2
+            self.ask_count += 1
+
         ret = False
         if (isinstance(gen, bool)):
             ret = gen
@@ -1956,7 +1996,7 @@ def RunAgentAlgorithm(program, mazeString: str):
     try:
         print(program(None, get_stats=True))
     except:
-        print("Stats not available")
+        logging.error("Stats not available")
     if (stuck):
         print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power} killed = {agent_died}")
@@ -1977,13 +2017,13 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=False), smallHawkTestMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(use_inference=False), smallHawkTestMaze2)
+    RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
     global g_state_print_same_place_loop_count
     global g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
-    global g_agent_can_grow, g_agent_initial_max_length
+    global g_agent_can_grow, g_agent_initial_max_length, g_profile_knowledgebase
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing",\
@@ -1992,14 +2032,19 @@ def main():
     parser.add_argument("-ac", "--allow-crossing-self", help="Allow crossing over one's body", action="store_true")
     parser.add_argument("-ng", "--no-graphics", help="Do not use graphics", action="store_true")
     parser.add_argument("-acg", "--agent-cannot-grow", help="Agent cannot grow", action="store_true")
-    parser.add_argument("-amaxlen", "--agent-initial-max-length", type=int, help="Agent maximum lenth initially", default=8)
+    parser.add_argument("-amaxlen", "--agent-initial-max-length", type=int, help="Agent maximum lenth initially",\
+                            default=8)
+    parser.add_argument("-profkb", "--profile-knowledge-base", help="Print profiling information of knowledgebase",\
+                            action="store_true")
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
     g_state_refresh_sleep = 0 if args.refresh_delay < 0.0001 else args.refresh_delay
     g_self_crossing_not_allowed = not args.allow_crossing_self
     g_agent_can_grow = False if args.agent_cannot_grow else g_agent_can_grow
-    g_agent_initial_max_length = args.agent_initial_max_length if args.agent_initial_max_length >= 0 else g_agent_initial_max_length
+    g_agent_initial_max_length = args.agent_initial_max_length if args.agent_initial_max_length >= 0\
+            else g_agent_initial_max_length
+    g_profile_knowledgebase = True if args.profile_knowledge_base else g_profile_knowledgebase
     if args.no_graphics:
         g_tkinter_available = g_use_tkinter = False
         g_pygame_available = g_use_pygame = False
