@@ -1682,6 +1682,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
     perf_string = ""
     use_heuristic = useheuristic
     use_kb = usekb
+    kb = None
     known_hawks = []
 
 
@@ -1710,9 +1711,9 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
         logging.debug(f"Heuristic returned: {Utils.manhattan_distance([curx, cury], [goalx, goaly])}")
         return Utils.manhattan_distance([curx, cury], [goalx, goaly])
 
-    def program(percepts, get_stats=False):
+    def program(percepts, get_stats=False, recursed=False):
         nonlocal search_results, search_results_deque, search_completed
-        nonlocal stats, algorithm, perf_string
+        nonlocal stats, algorithm, perf_string, use_kb, kb, known_hawks
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         if (get_stats):
             if (None == stats):
@@ -1720,9 +1721,21 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
             if (None != perf_string):
                 stats = "\n\n" + perf_string + stats + "\n"
             return stats
+        location = percepts["location"]
+        (row, col) = tuple(location)
+        if use_kb and None == kb and not recursed:
+            kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
+        shreik_heard = Utils.update_kb_for_location(kb, percepts)
         action = None
         if (not search_completed):
-            state = SearchHelper.convert_percepts_to_state(percepts)
+            # If we know there is a hawk at a location, treat it as a wall
+            print(percepts)
+            copy_of_percepts = copy.deepcopy(percepts)
+            for hawk in known_hawks:
+                (x, y) = tuple(hawk)
+                copy_of_percepts["things"].append(Wall(x, y))
+            state = SearchHelper.convert_percepts_to_state(copy_of_percepts)
+            print(state)
             problem = MazeSearchProblem(state)
             srch = time_and_run_algorithm(problem, heuristic)
             stats = problem.__repr__()
@@ -1734,6 +1747,17 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
             search_completed = True
         try:
             action = search_results_deque.popleft()
+            if shreik_heard:
+                # If we heard a shreik, check if the candidate is not a known hawk
+                (newrow, newcol) = NextMoveHelper.get_updated_row_col(row, col, action)
+                if kb.ask_if_location_hawk((newrow, newcol)):
+                    # If we hit a known hawk, then just treat the hawk as if it
+                    # was a wall, and rerun the search
+                    logging.info(f"Location {newrow}, {newcol} is a hawk, replanning")
+                    known_hawks.append((newrow, newcol,))
+                    search_completed = False
+                    search_results_deque.clear()
+                    return program(copy.deepcopy(percepts), get_stats=False, recursed=True)
         except IndexError:
             action = None
         return action
