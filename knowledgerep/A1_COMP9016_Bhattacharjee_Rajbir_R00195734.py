@@ -18,6 +18,8 @@ g_graphics_sleep_time = 0.25
 g_use_tkinter = True
 g_tkinter_available = False
 g_kb_print_profile_information = True
+g_agent_initial_max_length = 8
+g_agent_can_grow = True
 
 
 try:
@@ -63,6 +65,16 @@ smallHawkTestMaze= """
 #                          ###
 #    HHHHHHHHHHHHHHHHHHHHHHHH#
 #                           o#
+##############################"""
+smallHawkTestMaze2= """
+##############################
+# x       #                  #
+# ####                       #
+#HHHHHHHHHHHHHHHHHHHHHHHHH   #
+#    ###     #####  ######   #
+#                          ###
+#    H  H  H  H  H  H  H # H #
+#                       H   o#
 ##############################"""
 smallMaze = """
 ##############################
@@ -466,7 +478,6 @@ class Hawk(TwoDThing):
     def __init__(self, x, y):
         super().__init__(x, y, 'H')
         self.is_alive = True
-        self.agent_can_grow = True
         self.i_can_kill_agent = True
         self.agent_cannot_see_me = True
 
@@ -977,11 +988,14 @@ class TwoDEnvironment(Environment):
 class TwoDMaze(TwoDEnvironment):
     NUM_NULL_MOVES_TILL_STUCK = 2
     def __init__(self, mazeString=str):
+        global g_agent_can_grow
+        global g_agent_initial_max_length
         mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
         self.stuck_detect = collections.deque()
         rows = len(mazeString)
         cols = len(mazeString[0])
-        super().__init__(rows, cols)
+        super().__init__(rows, cols, ag_can_grow=g_agent_can_grow,\
+                initial_agent_max_length=g_agent_initial_max_length)
         for i in range(rows):
             for j in range(cols):
                 if '#' == mazeString[i][j]:
@@ -1904,7 +1918,7 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMazeForceToHawk);
+    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
@@ -1931,4 +1945,5 @@ def main():
     process()
 
 if "__main__" == __name__:
+    random.seed(13)
     main()
