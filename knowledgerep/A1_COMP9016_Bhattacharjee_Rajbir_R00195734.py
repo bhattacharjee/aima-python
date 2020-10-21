@@ -356,8 +356,7 @@ class Utils:
         if shreik_heard and kb:
             temp = []
             for cand in candidates:
-                hawk = kb.ask_if_location_definitely_hawk(\
-                        shreik_heard, tuple(a_loc), tuple(cand), tuple(mt_dim))
+                hawk = kb.ask_if_location_hawk(tuple(cand))
                 if not hawk:
                     temp.append(cand)
                 else:
@@ -1484,9 +1483,6 @@ def UtilityBasedAgentProgram(usekb=False):
         candidates = get_candidate_positions(percepts, matrix, shreik_heard)
         if (None == candidates or 0 == len(candidates)):
             return None
-        for candidate in candidates:
-            logging.debug(f"Is Candidate Not Hawk Definitely? {candidate} "+
-                            f"{kb.ask_if_location_nothawk(tuple(candidate))}")
         candidate = random.choice(candidates)
         if (None != candidate):
             memories[candidate[0]][candidate[1]] += 1
@@ -1761,47 +1757,11 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         if None != self.kb:
             self.create_base_rules()
 
-    def create_hawk_shreik_rules(self):
-        for i in range(self.rows):
-            for j in range(self.cols):
-                """
-                nothawk_symbol = Utils.get_logic_symbol("NOTHAWK", (i, j))
-                adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
-                if (None != adj and len(adj) > 0):
-                    adjsyms = [Utils.get_logic_symbol("NOTSHREIK", a) for a in adj]
-                    reverse1 = " & ".join(adjsyms)
-                    clause = "(%s) ==> %s" % (reverse1, nothawk_symbol)
-                    print(clause)
-                self.kb.tell(expr(clause))
-                """
-                notshreik_symbol = Utils.get_logic_symbol("NOTSHREIK", (i, j))
-                adj = Utils.get_adjacent_squares((i, j), (self.rows, self.cols))
-                if None != adj and len(adj) > 0:
-                    adjsyms = [Utils.get_logic_symbol("NOTHAWK", a) for a in adj]
-                    for nh in adjsyms:
-                        clause = "%s ==> %s" % (notshreik_symbol, nh)
-                        logging.debug(f"{clause}")
-                        self.kb.tell(expr(clause))
-
-    def create_hawk_wall_rules(self):
-        for i in range(self.rows):
-            for j in range(self.cols):
-                nothawk_symbol = Utils.get_logic_symbol("NOTHAWK", (i, j))
-                wall_symbol = Utils.get_logic_symbol("WALL", (i, j))
-                self.kb.tell(expr("%s ==> %s" % (wall_symbol, nothawk_symbol)))
-                logging.debug("%s ==> %s" % (wall_symbol, nothawk_symbol))
-                if self.matrix[i][j] == '#':
-                    self.kb.tell(expr(wall_symbol))
-                    logging.debug(f"{wall_symbol}")
-                # For our purpose we can treat a door as a wall
-                if self.matrix[i][j] == 'D':
-                    self.kb.tell(expr(wall_symbol))
-                    logging.debug(f"{wall_symbol}")
-
     def append_clause(self, clause):
         if clause not in self.clauses:
             logging.info("Adding " + clause)
-            self.clauses.append(expr(clause))
+            self.clauses.append(clause)
+            self.kb.tell(expr(clause))
 
     def create_simple_rules(self):
         for i in range(self.rows):
@@ -1817,6 +1777,13 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                 self.append_clause("%s ==> %s" % (shreik, nothawk))
                 # NOTSHREIK ==> NOTHAWK
                 self.append_clause("%s ==> %s" % (notshreik, nothawk))
+                # Create rules for walls, doors, and grow/shrink
+                c = self.matrix[i][j]
+                if c in list("#DGS"):
+                    clause = Utils.get_logic_symbol("WALL", (i, j))
+                    self.append_clause(clause)
+                    clause = Utils.get_logic_symbol("NOTHAWK", (i, j))
+                    self.append_clause(clause)
 
     def create_compound_clauses1_helper(self, array):
         ret = []
@@ -1846,7 +1813,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                     self.append_clause("%s ==> %s" % (notshreik, nothawk))
                 # NOTHAWK1 & NOTHAWK2 & NOTHAWK3 & SHREIK ==> HAWK4
                 for (hk, nthkarr) in self.create_compound_clauses1_helper(adj):
-                    hk = Utils.get_logic_symbol("SHREIK", hk)
+                    hk = Utils.get_logic_symbol("HAWK", hk)
                     nthkarr = [Utils.get_logic_symbol("NOTHAWK", i) for i in nthkarr]
                     nthkarr.append(shreik)
                     lhs = " & ".join(nthkarr)
@@ -1872,28 +1839,29 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         """
         notshreik = Utils.get_logic_symbol("NOTSHREIK", location)
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
-        self.kb.tell(expr(notshreik))
-        self.kb.tell(expr(nothawk))
-        logging.debug("Telling location is safe")
-        logging.debug(f"{notshreik} {nothawk}")
+        self.append_clause(notshreik)
+        self.append_clause(nothawk)
 
     def tell_location_nothawk(self, location):
         nothawk = Utils.get_logic_symbol("NOTHAWK", location)
-        self.kb.tell(expr(nothawk))
+        shreik = Utils.get_logic_symbol("SHREIK", location)
+        self.append_clause(nothawk)
+        self.append_clause(shreik)
 
     def ask_if_location_hawk(self, location):
-        hwk = Utils.get_logic_symbol("HAWK", location)
+        hwk = expr(Utils.get_logic_symbol("HAWK", location))
         fn = pl_fc_entails
         fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
         fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
-        return fn(self.kb, hwk)
-
-    def ask_if_location_nothawk(self, location):
-        nhwk = Utils.get_logic_symbol("NOTHAWK", location)
-        fn = pl_fc_entails
-        fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
-        fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
-        return fn(self.kb, nhwk)
+        gen = fn(self.kb, hwk)
+        ret = False
+        if (isinstance(gen, bool)):
+            ret = gen
+        else:
+            for i in gen:
+                ret = True
+        logging.info(f"checking if location is hawk {location} = {ret}")
+        return ret
 
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
@@ -1936,7 +1904,7 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMaze);
+    RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallMazeForceToHawk);
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
