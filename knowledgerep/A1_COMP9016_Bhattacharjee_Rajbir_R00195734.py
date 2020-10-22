@@ -1070,7 +1070,6 @@ class TwoDMaze(TwoDEnvironment):
         print("=" * 120)
         stuck = self.got_stuck()
         agent = self.agents[0]
-        print("Printing results")
         print(f"Dimensions = {self.dimensions}")
         print(f"Agent = {agent}")
         print(f"IsAgentStuck = {stuck}")
@@ -2114,6 +2113,7 @@ def main():
         eval(i)
         time1 = time.perf_counter() - time1
         print(f"TimeToRun = {time1}")
+    print('*' * 120)
 
 if "__main__" == __name__:
     main()
