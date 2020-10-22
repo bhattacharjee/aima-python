@@ -1064,6 +1064,16 @@ class TwoDMaze(TwoDEnvironment):
         self.goal_distance = Utils.manhattan_distance((x1, y1), (x2, y2))
         return self.is_stuck
 
+    def __del__(self):
+        print("=" * 120)
+        stuck = self.got_stuck()
+        agent = self.agents[0]
+        print("Printing results")
+        print(f"Agent = {agent}")
+        print(f"IsAgentStuck = {stuck}")
+        print(f"DidAgentDie = {False == agent.is_alive}")
+        print(f"AgentNumMoves = {agent.num_moves}")
+
 def get_agent_location_from_maze_string(mazeString=str):
     mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
     rows = len(mazeString)
