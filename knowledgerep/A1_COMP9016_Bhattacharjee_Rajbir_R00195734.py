@@ -1454,6 +1454,7 @@ def GoalDrivenAgentProgram(use_inference=False):
                 assert(None == move or validate_move(move, a_row, a_col, rows, cols))
                 return move
             else:
+                # TODO: RB: Remove randomness and see what happens
                 doing_random = True
         assert(True == doing_random)
         move = get_random_move(matrix, [a_row, a_col], history)
