@@ -1061,7 +1061,7 @@ class TwoDMaze(TwoDEnvironment):
                 the_door = thing
         x1, y1 = the_door.get_location()
         x2, y2 = the_agent.get_location()
-        self.goal_distance = ((x1 - x2) ** 2) + ((y1 - y2) ** 2)
+        self.goal_distance = Utils.manhattan_distance((x1, y1), (x2, y2))
         return self.is_stuck
 
 def get_agent_location_from_maze_string(mazeString=str):
@@ -1998,7 +1998,7 @@ def RunAgentAlgorithm(program, mazeString: str):
     except:
         logging.error("Stats not available")
     if (stuck):
-        print(f"Got Stuck, didn't complete. Remaining square-distance to goal: {dist}")
+        print(f"Got Stuck, didn't complete. Remaining manhattan to goal: {dist}")
     print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power} killed = {agent_died}")
 
 def process():
