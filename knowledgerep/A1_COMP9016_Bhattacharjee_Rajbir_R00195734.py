@@ -995,6 +995,7 @@ class TwoDMaze(TwoDEnvironment):
         self.stuck_detect = collections.deque()
         rows = len(mazeString)
         cols = len(mazeString[0])
+        self.dimensions = (rows, cols)
         super().__init__(rows, cols, ag_can_grow=g_agent_can_grow,\
                 initial_agent_max_length=g_agent_initial_max_length)
         for i in range(rows):
@@ -1019,6 +1020,7 @@ class TwoDMaze(TwoDEnvironment):
                 if 'H' == mazeString[i][j]:
                     hawk = Hawk(i, j)
                     self.add_thing(hawk, [i, j])
+        print(f"StartingRun with MazeSize = ({rows}, {cols})")
 
     def is_deque_stuck(self, d):
         if (0 == len(d) or 1 == len(d) or None == d):
@@ -1069,10 +1071,13 @@ class TwoDMaze(TwoDEnvironment):
         stuck = self.got_stuck()
         agent = self.agents[0]
         print("Printing results")
+        print(f"Dimensions = {self.dimensions}")
         print(f"Agent = {agent}")
         print(f"IsAgentStuck = {stuck}")
         print(f"DidAgentDie = {False == agent.is_alive}")
         print(f"AgentNumMoves = {agent.num_moves}")
+        print(f"RemainingDistanceToGoal = {self.goal_distance}")
+        print(f"AgentLenth = {len(self.agent_history) + 1}")
 
 def get_agent_location_from_maze_string(mazeString=str):
     mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
@@ -1186,7 +1191,7 @@ class NextMoveHelper(object):
         if (dx == gdx):
             score += 1
         return score
- 
+
     def get_updated_row_col(x, y, action):
         row = x
         col = y
@@ -1999,17 +2004,11 @@ def RunAgentAlgorithm(program, mazeString: str):
             env.print_state()
             if (0 != g_state_refresh_sleep):
                 time.sleep(g_state_refresh_sleep)
-    stuck = env.got_stuck()
-    dist = env.goal_distance
-    agent_died = env.agent_died
     del env
     try:
         print(program(None, get_stats=True))
     except:
         logging.error("Stats not available")
-    if (stuck):
-        print(f"Got Stuck, didn't complete. Remaining manhattan to goal: {dist}")
-    print(f"Num_Moves: = {agent.num_moves} Power_Points = {agent.num_power} killed = {agent_died}")
 
 def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
@@ -2072,8 +2071,7 @@ def print_configuration_help():
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
-    global g_state_print_same_place_loop_count
-    global g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
+    global g_state_print_same_place_loop_count, g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
     global g_agent_can_grow, g_agent_initial_max_length, g_profile_knowledgebase
     global g_run_profiles
     parser = argparse.ArgumentParser()
@@ -2110,7 +2108,12 @@ def main():
         print_configuration_help()
     config = g_run_profiles[args.config__configuration]
     for i in config["commands"]:
+        print("-" * 120)
+        print(config["commands"])
+        time1 = time.perf_counter()
         eval(i)
+        time1 = time.perf_counter() - time1
+        print(f"TimeToRun = {time1}")
 
 if "__main__" == __name__:
     main()
