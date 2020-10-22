@@ -2005,7 +2005,6 @@ def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMazeWithPower)
     #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
     #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
@@ -2017,13 +2016,56 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=False), smallHawkTestMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
-    RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)
+    pass
+
+g_run_profiles = {
+            1: {
+                "description": "Simple reflex agent with small maze",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)"]
+                },
+            2: {
+                "description": "Simple reflex agent with medium maze",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze)"]
+                },
+            3: {
+                "description": "Simple reflex agent with medium maze 2",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)"]
+                },
+            4: {
+                "description": "Simple reflex agent with large maze with weighted randomized selection",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(), largeMaze)"]
+                },
+            5: {
+                "description": "Simple reflex agent with small maze with weighted randomized selection",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(weighted_rand_sel=True), smallMaze)"]
+                },
+            6: {
+                "description": "Simple reflex agent with medium maze with weihted randomized selection",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(weighted_rand_sel=True), mediumMaze)"]
+                },
+            7: {
+                "description": "Simple reflex agent with medium maze 2 with weighted randomized selection",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(weighted_rand_sel=True), mediumMaze2)"]
+                },
+            8: {
+                "description": "Simple reflex agent with large maze with weighted randomized selection",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(weighted_rand_sel=True), largeMaze)"]
+                },
+        }
+
+def print_configuration_help():
+    global g_run_profiles
+    for i, j in g_run_profiles.items():
+        print("%3d\t%s" % (i, j["description"]))
+    sys.exit(1)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
     global g_state_print_same_place_loop_count
     global g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
     global g_agent_can_grow, g_agent_initial_max_length, g_profile_knowledgebase
+    global g_run_profiles
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing",\
@@ -2036,6 +2078,8 @@ def main():
                             default=8)
     parser.add_argument("-profkb", "--profile-knowledge-base", help="Print profiling information of knowledgebase",\
                             action="store_true")
+    parser.add_argument("-config" "--configuration", type=int,\
+            help="The configuration of the run, mandatory", default=999)
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
@@ -2051,7 +2095,12 @@ def main():
     if g_suppress_state_printing:
         g_state_refresh_sleep = 0
         g_state_print_same_place_loop_count
-    process()
+    if 999 == args.config__configuration:
+        print("Please specify the configuration with the -config flag, legend below:")
+        print_configuration_help()
+    config = g_run_profiles[args.config__configuration]
+    for i in config["commands"]:
+        eval(i)
 
 if "__main__" == __name__:
     main()
