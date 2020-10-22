@@ -196,10 +196,10 @@ largeMaze = """
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
 #     #                      #                         #                  #                                        #
-#SGGGG#                      #                         #                  #                                        #
-#SGGGGG                      #                                            #                                        #
-#oGGGG                                                                                                             #
-#GGGGG                                                                                                             #
+#     #                      #                         #                  #                                        #
+#S                           #                                            #                                        #
+#o                                                                                                                 #
+#G                                                                                                                 #
 ####################################################################################################################"""
 
 g_stuck_banner = """
@@ -1067,6 +1067,12 @@ class TwoDMaze(TwoDEnvironment):
         return self.is_stuck
 
     def __del__(self):
+        the_door = None
+        for thing in self.things:
+            if isinstance(thing, Door):
+                the_door = thing
+        x1, y1 = the_door.get_location()
+        initial_goal_distance = Utils.manhattan_distance((x1, y1), self.initial_agent_location)
         print("=" * 120)
         stuck = self.got_stuck()
         agent = self.agents[0]
@@ -1075,7 +1081,9 @@ class TwoDMaze(TwoDEnvironment):
         print(f"IsAgentStuck = {stuck}")
         print(f"DidAgentDie = {False == agent.is_alive}")
         print(f"AgentNumMoves = {agent.num_moves}")
+        print(f"InitialDistanceToGoal = {initial_goal_distance}")
         print(f"RemainingDistanceToGoal = {self.goal_distance}")
+        print(f"DistanceCloserToGoal = {initial_goal_distance - self.goal_distance}")
         print(f"AgentLenth = {len(self.agent_history) + 1}")
 
 def get_agent_location_from_maze_string(mazeString=str):
@@ -1996,6 +2004,7 @@ def RunAgentAlgorithm(program, mazeString: str):
     ag_x, ag_y = get_agent_location_from_maze_string(mazeString)
     assert(-1 != ag_x and -1 != ag_y)
     env.add_thing(agent, (ag_x,ag_y))
+    env.initial_agent_location = (ag_x, ag_y)
     while not env.is_done():
         env.step()
         loop_count = g_state_print_same_place_loop_count if g_curses_available else 1
