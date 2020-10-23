@@ -1067,6 +1067,10 @@ class TwoDMaze(TwoDEnvironment):
         return self.is_stuck
 
     def __del__(self):
+        global g_curses_available
+        if g_curses_available:
+            curses.endwin()
+            g_curses_available = False
         the_door = None
         for thing in self.things:
             if isinstance(thing, Door):
