@@ -8,20 +8,25 @@ print(ax, type(ax), len(ax))
 
 # Number of Steps
 x = [16.43167673, 27.03701167, 76.15773106,]
-y1 = [111, 4058, 8117]
+
 ax[0].set(title="Avg n(Steps)", xlabel="sqrt(n_squares)", ylabel="Avg Steps")
-ax[0].plot(x, y1, label="Goal Driven", color="blue", marker='o')
+y1 = [40, 3235, 650]
+ax[0].plot(x, y1, label="Utility Based", color="blue", marker='o')
+y1 = [537.64, 3590, 1311]
+
 ax[0].set_ylim(bottom=0)
 ax[0].legend()
 
 
-
 # PEAK MEMORY
-y2 = [66.43, 66.43, 66.11]
-y2 = [66.42, 66.36, 67.99]
 ax[1].set(title="Peak Memory", xlabel="sqrt(n_squares)", ylabel="MB")
-ax[1].plot(x, y2, label="Goal Driven", color="blue", marker='o')
+ax[1].set_ylim(bottom=60)
+ax[1].set_ylim(top=70)
+
+y1 = [68.056, 66.45, 66.46]
+ax[1].plot(x, y1, label="Utility Based", color="blue", marker='o')
 ax[1].legend()
+
 
 
 
