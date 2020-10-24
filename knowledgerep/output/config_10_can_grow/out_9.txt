@@ -1,0 +1,15 @@
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(GoalDrivenAgentProgram(norandom=True), mediumMaze)']
+StartingRun with MazeSize = (17, 43)
+========================================================================================================================
+Dimensions = (17, 43)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 6
+InitialDistanceToGoal = 41
+RemainingDistanceToGoal = 35
+DistanceCloserToGoal = 6
+AgentLenth = 7
+TimeToRun = 0.006634999999732827
+************************************************************************************************************************

@@ -1,0 +1,15 @@
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(weighted_rand_sel=True), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.004709000000730157
+************************************************************************************************************************

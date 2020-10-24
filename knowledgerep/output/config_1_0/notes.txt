@@ -1,0 +1,1 @@
+Snake size zero, configuration 1

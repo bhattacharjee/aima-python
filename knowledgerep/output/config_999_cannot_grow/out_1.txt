@@ -1,0 +1,18 @@
+Please specify the configuration with the -config flag, legend below:
+  1	Simple reflex agent with small maze
+  2	Simple reflex agent with medium maze
+  3	Simple reflex agent with medium maze 2
+  4	Simple reflex agent with large maze with weighted randomized selection
+  5	Simple reflex agent with small maze with weighted randomized selection
+  6	Simple reflex agent with medium maze with weihted randomized selection
+  7	Simple reflex agent with medium maze 2 with weighted randomized selection
+  8	Simple reflex agent with large maze with weighted randomized selection
+  9	Goal Driven (norandom) with Small Maze
+ 10	Goal Driven (norandom) with Medium Maze
+ 11	Goal Driven (norandom) with Large Maze
+ 12	Goal Driven (with random) with Small Maze
+ 13	Goal Driven (with random) with Small Maze
+ 14	Goal Driven (with random) with Small Maze
+ 15	Utility based with Small Maze
+ 16	Utility based with Small Maze
+ 17	Utility based with Small Maze
