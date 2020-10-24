@@ -2160,40 +2160,40 @@ g_run_profiles = {
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), largeMaze)"]
                 },
             26: {
-                "description": "iterative-deepening-first search, tiny maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), tinyMaze)"]
+                "description": "breadth-first-graph search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), tinyMaze)"]
                 },
             27: {
-                "description": "iterative-deepening-first search, small maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), smallMaze)"]
+                "description": "breadth-first-graph search, small maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), smallMaze)"]
                 },
             28: {
-                "description": "iterative-deepening-first search, medium maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), mediumMaze)"]
+                "description": "breadth-first-graph search, medium maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)"]
                 },
             29: {
-                "description": "iterative-deepening-first search, large maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), largeMaze)"]
+                "description": "breadth-first-graph search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)"]
                 },
             30: {
                 "consider_history": True,
-                "description": "iterative-deepening-first search, tiny maze (history considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), tinyMaze)"]
+                "description": "breadth-first-graph search, tiny maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), tinyMaze)"]
                 },
             31: {
                 "consider_history": True,
-                "description": "iterative-deepening-first search, small maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), smallMaze)"]
+                "description": "breadth-first-graph search, small maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), smallMaze)"]
                 },
             32: {
                 "consider_history": True,
-                "description": "iterative-deepening-first search, medium maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), mediumMaze)"]
+                "description": "breadth-first-graph search, medium maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)"]
                 },
             33: {
                 "consider_history": True,
-                "description": "iterative-deepening-first search, large maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), largeMaze)"]
+                "description": "breadth-first-graph search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)"]
                 },
         }
 
