@@ -62,6 +62,13 @@ except:
     g_curses_available = False
     logging.error("Curses is not available, continuing without it...")
 
+tinyMaze = """
+#################
+#G           #  #
+#o####       #  #
+# #  #  #  # x  #
+#     #         #
+#################"""
 smallHawkTestMaze= """
 ##############################
 # x       #                  #
@@ -1782,7 +1789,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
     def program(percepts, get_stats=False, recursed=False):
         nonlocal search_results, search_results_deque, search_completed
         nonlocal stats, algorithm, perf_string, use_kb, kb, known_hawks
-        assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
+        assert(get_stats or Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         shreik_heard = False
         if (get_stats):
             if (None == stats):
@@ -2025,11 +2032,14 @@ def RunAgentAlgorithm(program, mazeString: str):
             env.print_state()
             if (0 != g_state_refresh_sleep):
                 time.sleep(g_state_refresh_sleep)
+    statsString = f"Stats = {program(None, get_stats=True)}"
     del env
     try:
         print(program(None, get_stats=True))
     except:
         logging.error("Stats not available")
+    print(statsString)
+    logging.error(statsString)
 
 def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
@@ -2118,10 +2128,39 @@ g_run_profiles = {
                 "description": "Utility based with Small Maze",
                 "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)"]
                 },
+            18: {
+                "description": "Depth-first search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), tinyMaze)"]
+                },
+            19: {
+                "description": "Depth-first search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
+                },
+            20: {
+                "description": "Depth-first search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), mediumMaze)"]
+                },
+            21: {
+                "consider_history": True,
+                "description": "Depth-first search, tiny maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), tinyMaze)"]
+                },
+            22: {
+                "consider_history": True,
+                "description": "Depth-first search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
+                },
+            23: {
+                "consider_history": True,
+                "description": "Depth-first search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), mediumMaze)"]
+                },
+
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
         }
 
 def print_configuration_help():
-    global g_run_profiles
+    global g_run_profiles, g_search_should_consider_history
     for i, j in g_run_profiles.items():
         print("%3d\t%s" % (i, j["description"]))
     sys.exit(1)
@@ -2130,7 +2169,7 @@ def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
     global g_state_print_same_place_loop_count, g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
     global g_agent_can_grow, g_agent_initial_max_length, g_profile_knowledgebase
-    global g_run_profiles
+    global g_run_profiles, g_search_should_consider_history
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing",\
@@ -2164,7 +2203,13 @@ def main():
         print("Please specify the configuration with the -config flag, legend below:")
         print_configuration_help()
     config = g_run_profiles[args.config__configuration]
+    try:
+        if config["consider_history"]:
+            g_search_should_consider_history = True
+    except:
+        g_search_should_consider_history = False
     for i in config["commands"]:
+        print(config["description"])
         print("-" * 120)
         print(config["commands"])
         time1 = time.perf_counter()
