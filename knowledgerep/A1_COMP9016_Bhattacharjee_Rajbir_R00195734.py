@@ -50,6 +50,7 @@ try:
     from agents import Environment, Thing, Direction, Agent
     from search import Problem, astar_search, depth_first_graph_search, iterative_deepening_search
     from search import depth_first_tree_search, breadth_first_graph_search, uniform_cost_search
+    from search import greedy_best_first_graph_search
     from logic import *
 except:
     logging.error("Could not import from parent folder... Exiting")
@@ -2233,6 +2234,42 @@ g_run_profiles = {
                 "consider_history": True,
                 "description": "uniform-cost-search search, large maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), largeMaze)"]
+                },
+            42: {
+                "description": "greedy_best_first_graph_search search, tiny maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), tinyMaze)"]
+                },
+            43: {
+                "description": "greedy_best_first_graph_search search, small maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), smallMaze)"]
+                },
+            44: {
+                "description": "greedy_best_first_graph_search search, medium maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), mediumMaze)"]
+                },
+            45: {
+                "description": "greedy_best_first_graph_search search, large maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), largeMaze)"]
+                },
+            46: {
+                "consider_history": True,
+                "description": "greedy_best_first_graph_search search, tiny maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), tinyMaze)"]
+                },
+            47: {
+                "consider_history": True,
+                "description": "greedy_best_first_graph_search search, small maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), smallMaze)"]
+                },
+            48: {
+                "consider_history": True,
+                "description": "greedy_best_first_graph_search search, medium maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), mediumMaze)"]
+                },
+            49: {
+                "consider_history": True,
+                "description": "greedy_best_first_graph_search search, large maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), largeMaze)"]
                 },
         }
 
