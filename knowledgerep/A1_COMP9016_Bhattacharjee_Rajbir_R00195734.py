@@ -21,7 +21,7 @@ g_kb_print_profile_information = True
 g_agent_initial_max_length = 8
 g_agent_can_grow = True
 g_profile_knowledgebase = True
-g_perf_run = True
+g_perf_run = False
 
 
 if not g_perf_run:
@@ -1559,7 +1559,7 @@ def UtilityBasedAgentProgram(usekb=False):
             kb = Utils.create_initial_kb(percepts, SnakeKnowledgeBaseToDetectHawk.USE_DEFAULT_ALGORITHM)
         if None != kb:
             shreik_heard = Utils.update_kb_for_location(kb, percepts)
-        logging.info(f"shreik_heard = {shreik_heard}")
+            logging.info(f"shreik_heard = {shreik_heard}")
         if None == memories:
             memories = [[0 for i in range(col)] for j in range(row)]
         candidates = get_candidate_positions(percepts, matrix, shreik_heard)
@@ -2105,6 +2105,18 @@ g_run_profiles = {
             14: {
                 "description": "Goal Driven (with random) with Small Maze",
                 "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)"]
+                },
+            15: {
+                "description": "Utility based with Small Maze",
+                "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(), smallMaze)"]
+                },
+            16: {
+                "description": "Utility based with Small Maze",
+                "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(), mediumMaze)"]
+                },
+            17: {
+                "description": "Utility based with Small Maze",
+                "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)"]
                 },
         }
 
