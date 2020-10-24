@@ -2127,111 +2127,111 @@ g_run_profiles = {
                 "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)"]
                 },
             18: {
-                "description": "Depth-first search, tiny maze (history not considered)",
+                "description": "Depth-first search, tiny maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), tinyMaze)"]
                 },
             19: {
-                "description": "Depth-first search, small maze (history not considered)",
+                "description": "Depth-first search, small maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
                 },
             20: {
-                "description": "Depth-first search, medium maze (history not considered)",
+                "description": "Depth-first search, medium maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), mediumMaze)"]
                 },
             21: {
-                "description": "Depth-first search, large maze (history not considered)",
+                "description": "Depth-first search, large maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), largeMaze)"]
                 },
             22: {
                 "consider_history": True,
-                "description": "Depth-first search, tiny maze (history considered)",
+                "description": "Depth-first search, tiny maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), tinyMaze)"]
                 },
             23: {
                 "consider_history": True,
-                "description": "Depth-first search, small maze (history not considered)",
+                "description": "Depth-first search, small maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
                 },
             24: {
                 "consider_history": True,
-                "description": "Depth-first search, medium maze (history not considered)",
+                "description": "Depth-first search, medium maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), mediumMaze)"]
                 },
             25: {
                 "consider_history": True,
-                "description": "Depth-first search, large maze (history not considered)",
+                "description": "Depth-first search, large maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), largeMaze)"]
                 },
             26: {
-                "description": "breadth-first-graph search, tiny maze (history not considered)",
+                "description": "breadth-first-graph search, tiny maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), tinyMaze)"]
                 },
             27: {
-                "description": "breadth-first-graph search, small maze (history not considered)",
+                "description": "breadth-first-graph search, small maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), smallMaze)"]
                 },
             28: {
-                "description": "breadth-first-graph search, medium maze (history not considered)",
+                "description": "breadth-first-graph search, medium maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)"]
                 },
             29: {
-                "description": "breadth-first-graph search, large maze (history not considered)",
+                "description": "breadth-first-graph search, large maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)"]
                 },
             30: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, tiny maze (history considered)",
+                "description": "breadth-first-graph search, tiny maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), tinyMaze)"]
                 },
             31: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, small maze (history considered)",
+                "description": "breadth-first-graph search, small maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), smallMaze)"]
                 },
             32: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, medium maze (history considered)",
+                "description": "breadth-first-graph search, medium maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)"]
                 },
             33: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, large maze (history considered)",
+                "description": "breadth-first-graph search, large maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)"]
                 },
             34: {
-                "description": "uniform-cost-search search, tiny maze (history not considered)",
+                "description": "uniform-cost-search search, tiny maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), tinyMaze)"]
                 },
             35: {
-                "description": "uniform-cost-search search, small maze (history not considered)",
+                "description": "uniform-cost-search search, small maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), smallMaze)"]
                 },
             36: {
-                "description": "uniform-cost-search search, medium maze (history not considered)",
+                "description": "uniform-cost-search search, medium maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), mediumMaze)"]
                 },
             37: {
-                "description": "uniform-cost-search search, large maze (history not considered)",
+                "description": "uniform-cost-search search, large maze (body-length not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), largeMaze)"]
                 },
             38: {
                 "consider_history": True,
-                "description": "uniform-cost-search search, tiny maze (history considered)",
+                "description": "uniform-cost-search search, tiny maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), tinyMaze)"]
                 },
             39: {
                 "consider_history": True,
-                "description": "uniform-cost-search search, small maze (history considered)",
+                "description": "uniform-cost-search search, small maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), smallMaze)"]
                 },
             40: {
                 "consider_history": True,
-                "description": "uniform-cost-search search, medium maze (history considered)",
+                "description": "uniform-cost-search search, medium maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), mediumMaze)"]
                 },
             41: {
                 "consider_history": True,
-                "description": "uniform-cost-search search, large maze (history considered)",
+                "description": "uniform-cost-search search, large maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), largeMaze)"]
                 },
         }
@@ -2240,7 +2240,6 @@ def print_configuration_help():
     global g_run_profiles, g_search_should_consider_history
     for i, j in g_run_profiles.items():
         print("%3d\t%s" % (i, j["description"]))
-    sys.exit(1)
 
 def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
@@ -2279,6 +2278,9 @@ def main():
     if 999 == args.config__configuration:
         print("Please specify the configuration with the -config flag, legend below:")
         print_configuration_help()
+        print("-" * 120)
+        parser.print_help()
+        sys.exit(1)
     config = g_run_profiles[args.config__configuration]
     try:
         if config["consider_history"]:
