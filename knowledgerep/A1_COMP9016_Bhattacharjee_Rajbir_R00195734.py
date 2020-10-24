@@ -48,7 +48,7 @@ try:
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir)
     from agents import Environment, Thing, Direction, Agent
-    from search import Problem, astar_search, depth_first_graph_search
+    from search import Problem, astar_search, depth_first_graph_search, iterative_deepening_search
     from search import depth_first_tree_search, breadth_first_graph_search
     from logic import *
 except:
@@ -2159,8 +2159,42 @@ g_run_profiles = {
                 "description": "Depth-first search, large maze (history not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), largeMaze)"]
                 },
-
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
+            26: {
+                "description": "iterative-deepening-first search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), tinyMaze)"]
+                },
+            27: {
+                "description": "iterative-deepening-first search, small maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), smallMaze)"]
+                },
+            28: {
+                "description": "iterative-deepening-first search, medium maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), mediumMaze)"]
+                },
+            29: {
+                "description": "iterative-deepening-first search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), largeMaze)"]
+                },
+            30: {
+                "consider_history": True,
+                "description": "iterative-deepening-first search, tiny maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), tinyMaze)"]
+                },
+            31: {
+                "consider_history": True,
+                "description": "iterative-deepening-first search, small maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), smallMaze)"]
+                },
+            32: {
+                "consider_history": True,
+                "description": "iterative-deepening-first search, medium maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), mediumMaze)"]
+                },
+            33: {
+                "consider_history": True,
+                "description": "iterative-deepening-first search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=iterative_deepening_search), largeMaze)"]
+                },
         }
 
 def print_configuration_help():
