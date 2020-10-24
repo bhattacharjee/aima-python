@@ -21,7 +21,7 @@ g_kb_print_profile_information = True
 g_agent_initial_max_length = 8
 g_agent_can_grow = True
 g_profile_knowledgebase = True
-g_perf_run = False
+g_perf_run = True
 
 
 if not g_perf_run:
@@ -2034,12 +2034,7 @@ def RunAgentAlgorithm(program, mazeString: str):
                 time.sleep(g_state_refresh_sleep)
     statsString = f"Stats = {program(None, get_stats=True)}"
     del env
-    try:
-        print(program(None, get_stats=True))
-    except:
-        logging.error("Stats not available")
     print(statsString)
-    logging.error(statsString)
 
 def process():
     #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
@@ -2133,27 +2128,36 @@ g_run_profiles = {
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), tinyMaze)"]
                 },
             19: {
-                "description": "Depth-first search, tiny maze (history not considered)",
+                "description": "Depth-first search, small maze (history not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
                 },
             20: {
-                "description": "Depth-first search, tiny maze (history not considered)",
+                "description": "Depth-first search, medium maze (history not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), mediumMaze)"]
                 },
             21: {
+                "description": "Depth-first search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), largeMaze)"]
+                },
+            22: {
                 "consider_history": True,
                 "description": "Depth-first search, tiny maze (history considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), tinyMaze)"]
                 },
-            22: {
-                "consider_history": True,
-                "description": "Depth-first search, tiny maze (history not considered)",
-                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
-                },
             23: {
                 "consider_history": True,
-                "description": "Depth-first search, tiny maze (history not considered)",
+                "description": "Depth-first search, small maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)"]
+                },
+            24: {
+                "consider_history": True,
+                "description": "Depth-first search, medium maze (history not considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), mediumMaze)"]
+                },
+            25: {
+                "consider_history": True,
+                "description": "Depth-first search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), largeMaze)"]
                 },
 
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
