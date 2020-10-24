@@ -1324,7 +1324,7 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
 # not visited previously.
 # Once it visits a node that it hasn't visited previously, then it resumes
 # the goal-driven approach once again
-def GoalDrivenAgentProgram(use_inference=False):
+def GoalDrivenAgentProgram(use_inference=False, norandom=False):
     # Gaol driven greedy search may get stuck. If it does
     # We need to randomly go to a new node which we haven't visited earlier
     doing_random = False
@@ -1464,7 +1464,10 @@ def GoalDrivenAgentProgram(use_inference=False):
                 return move
             else:
                 # TODO: RB: Remove randomness and see what happens
-                doing_random = True
+                if (False == norandom):
+                    doing_random = True
+                else:
+                    return None
         assert(True == doing_random)
         move = get_random_move(matrix, [a_row, a_col], history)
         assert(None == move or validate_move(move, a_row, a_col, rows, cols))
@@ -2078,6 +2081,30 @@ g_run_profiles = {
             8: {
                 "description": "Simple reflex agent with large maze with weighted randomized selection",
                 "commands": ["RunAgentAlgorithm(SimpleReflexProgram(weighted_rand_sel=True), largeMaze)"]
+                },
+            9: {
+                "description": "Goal Driven (norandom) with Small Maze",
+                "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(norandom=True), smallMaze)"]
+                },
+            10: {
+                "description": "Goal Driven (norandom) with Medium Maze",
+                "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(norandom=True), mediumMaze)"]
+                },
+            11: {
+                "description": "Goal Driven (norandom) with Large Maze",
+                "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(norandom=True), largeMaze)"]
+                },
+            12: {
+                "description": "Goal Driven (with random) with Small Maze",
+                "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)"]
+                },
+            13: {
+                "description": "Goal Driven (with random) with Small Maze",
+                "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze)"]
+                },
+            14: {
+                "description": "Goal Driven (with random) with Small Maze",
+                "commands": ["RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)"]
                 },
         }
 
