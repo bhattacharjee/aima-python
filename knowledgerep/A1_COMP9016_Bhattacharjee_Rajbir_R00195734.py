@@ -50,7 +50,7 @@ try:
     from agents import Environment, Thing, Direction, Agent
     from search import Problem, astar_search, depth_first_graph_search, iterative_deepening_search
     from search import depth_first_tree_search, breadth_first_graph_search, uniform_cost_search
-    from search import greedy_best_first_graph_search
+    from search import greedy_best_first_graph_search, recursive_best_first_search
     from logic import *
 except:
     logging.error("Could not import from parent folder... Exiting")
@@ -2270,6 +2270,78 @@ g_run_profiles = {
                 "consider_history": True,
                 "description": "greedy_best_first_graph_search search, large maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), largeMaze)"]
+                },
+            50: {
+                "description": "recursive_best_first_search search, tiny maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), tinyMaze)"]
+                },
+            51: {
+                "description": "recursive_best_first_search search, small maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), smallMaze)"]
+                },
+            52: {
+                "description": "recursive_best_first_search search, medium maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), mediumMaze)"]
+                },
+            53: {
+                "description": "recursive_best_first_search search, large maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), largeMaze)"]
+                },
+            54: {
+                "consider_history": True,
+                "description": "recursive_best_first_search search, tiny maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), tinyMaze)"]
+                },
+            55: {
+                "consider_history": True,
+                "description": "recursive_best_first_search search, small maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), smallMaze)"]
+                },
+            56: {
+                "consider_history": True,
+                "description": "recursive_best_first_search search, medium maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), mediumMaze)"]
+                },
+            57: {
+                "consider_history": True,
+                "description": "recursive_best_first_search search, large maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), largeMaze)"]
+                },
+            58: {
+                "description": "astar_search search, tiny maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), tinyMaze)"]
+                },
+            59: {
+                "description": "astar_search search, small maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)"]
+                },
+            60: {
+                "description": "astar_search search, medium maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), mediumMaze)"]
+                },
+            61: {
+                "description": "astar_search search, large maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), largeMaze)"]
+                },
+            62: {
+                "consider_history": True,
+                "description": "astar_search search, tiny maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), tinyMaze)"]
+                },
+            63: {
+                "consider_history": True,
+                "description": "astar_search search, small maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)"]
+                },
+            64: {
+                "consider_history": True,
+                "description": "astar_search search, medium maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), mediumMaze)"]
+                },
+            65: {
+                "consider_history": True,
+                "description": "astar_search search, large maze (body-length considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), largeMaze)"]
                 },
         }
 
