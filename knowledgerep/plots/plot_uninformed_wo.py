@@ -38,7 +38,7 @@ ax[1][0].plot(x, y1, label="UCS w/o History", color="green", marker='o')
 
 ax[1][1].set(title="Memory", xlabel="sqrt(n_squares)", ylabel="MB")
 y1 = [66.49, 68.04, 68.89, ]
-ax[1][1].plot(x, y1, label="DFS w/o History", color="red", marker='o')
+ax[1][1].plot(x, y1, label="DFS w/o History", color="blue", marker='o')
 y1 = [68.09, 71.2, 67.815, ]
 ax[1][1].plot(x, y1, label="BFS w/o History", color="red", marker='o')
 y1 = [66.4, 72.89, 67.851, ]
