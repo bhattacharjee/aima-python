@@ -14,28 +14,33 @@ g_self_crossing_not_allowed = True
 g_search_should_consider_history = False
 g_pygame_available = False
 g_use_pygame = True
-g_graphics_sleep_time = 0.25
+g_graphics_sleep_time = 0.1
 g_use_tkinter = True
 g_tkinter_available = False
 g_kb_print_profile_information = True
 g_agent_initial_max_length = 8
 g_agent_can_grow = True
 g_profile_knowledgebase = True
+g_perf_run = True
 
 
-try:
-    import pygame
-    g_pygame_available = True
-except:
-    g_use_pygame = False
-    logging.error("PyGame is not available, running in text mode")
+if not g_perf_run:
+    try:
+        import pygame
+        g_pygame_available = True
+    except:
+        g_use_pygame = False
+        logging.error("PyGame is not available, running in text mode")
 
-try:
-    import tkinter
-    g_tkinter_available = True
-except:
-    g_use_tkinter = False
-    logging.error("Tkinter is not available, running in text mode")
+    try:
+        import tkinter
+        g_tkinter_available = True
+    except:
+        g_use_tkinter = False
+        logging.error("Tkinter is not available, running in text mode")
+else:
+    g_use_pygame = g_pygame_available = False
+    g_use_tkinter = g_tkinter_available = False
 
 # Import the AIMA libraries from the parent directory
 try:
