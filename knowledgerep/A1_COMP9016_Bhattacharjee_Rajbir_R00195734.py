@@ -49,7 +49,7 @@ try:
     sys.path.insert(0,parentdir)
     from agents import Environment, Thing, Direction, Agent
     from search import Problem, astar_search, depth_first_graph_search, iterative_deepening_search
-    from search import depth_first_tree_search, breadth_first_graph_search
+    from search import depth_first_tree_search, breadth_first_graph_search, uniform_cost_search
     from logic import *
 except:
     logging.error("Could not import from parent folder... Exiting")
@@ -2032,7 +2032,10 @@ def RunAgentAlgorithm(program, mazeString: str):
             env.print_state()
             if (0 != g_state_refresh_sleep):
                 time.sleep(g_state_refresh_sleep)
-    statsString = f"Stats = {program(None, get_stats=True)}"
+    try:
+        statsString = f"Stats = {program(None, get_stats=True)}"
+    except:
+        statsString = "Search Stats not available"
     del env
     print(statsString)
 
@@ -2182,18 +2185,54 @@ g_run_profiles = {
                 },
             31: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, small maze (history not considered)",
+                "description": "breadth-first-graph search, small maze (history considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), smallMaze)"]
                 },
             32: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, medium maze (history not considered)",
+                "description": "breadth-first-graph search, medium maze (history considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)"]
                 },
             33: {
                 "consider_history": True,
-                "description": "breadth-first-graph search, large maze (history not considered)",
+                "description": "breadth-first-graph search, large maze (history considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), largeMaze)"]
+                },
+            34: {
+                "description": "uniform-cost-search search, tiny maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), tinyMaze)"]
+                },
+            35: {
+                "description": "uniform-cost-search search, small maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), smallMaze)"]
+                },
+            36: {
+                "description": "uniform-cost-search search, medium maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), mediumMaze)"]
+                },
+            37: {
+                "description": "uniform-cost-search search, large maze (history not considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), largeMaze)"]
+                },
+            38: {
+                "consider_history": True,
+                "description": "uniform-cost-search search, tiny maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), tinyMaze)"]
+                },
+            39: {
+                "consider_history": True,
+                "description": "uniform-cost-search search, small maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), smallMaze)"]
+                },
+            40: {
+                "consider_history": True,
+                "description": "uniform-cost-search search, medium maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), mediumMaze)"]
+                },
+            41: {
+                "consider_history": True,
+                "description": "uniform-cost-search search, large maze (history considered)",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), largeMaze)"]
                 },
         }
 
