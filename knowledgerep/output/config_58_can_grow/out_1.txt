@@ -1,0 +1,22 @@
+astar_search search, tiny maze (body-length not considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), tinyMaze)']
+StartingRun with MazeSize = (6, 17)
+========================================================================================================================
+Dimensions = (6, 17)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 13
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 13
+AgentLenth = 14
+Stats = 
+
+Time taken by <function astar_search at 0x7f333d2eaea0>: 0.08461399999941932
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+             28                        76              29              76
+
+TimeToRun = 0.09130200000072364
+************************************************************************************************************************

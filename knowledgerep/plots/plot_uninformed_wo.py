@@ -17,7 +17,7 @@ y1 = [15, 36, 53,]
 ax[0][0].plot(x, y1, label="UCS w/o Length", color="green", marker='o')
 ax[0][0].set_ylim(bottom=0)
 ax[0][0].legend()
-fig.legend()
+#fig.legend()
 
 ax[0][1].set(title="Successors", xlabel="sqrt(n_squares)", ylabel="Successors")
 y1 = [23, 58, 250, ]
@@ -44,6 +44,5 @@ ax[1][1].plot(x, y1, label="BFS w/o Length", color="red", marker='o')
 y1 = [66.4, 72.89, 67.851, ]
 ax[1][1].plot(x, y1, label="UCS w/o Length", color="green", marker='o')
 
-plt.gca().yaxis.set_minor_formatter(NullFormatter())
-plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+fig.suptitle("Uninformed search compared\nLength/history of body not considered")
 plt.show()

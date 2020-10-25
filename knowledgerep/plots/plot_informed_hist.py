@@ -16,7 +16,6 @@ ax[0][0].plot(x[:3], y1, label="A* w/o Length", color="green", marker='o')
 y1 = [15, 36, ]
 ax[0][0].plot(x[:2], y1, label="RBFS w/o Length", color="red", marker='^')
 ax[0][0].legend()
-fig.legend()
 
 ax[0][1].set(title="Successors", xlabel="sqrt(n_squares)", ylabel="Successors")
 y1 = [27, 43, 8851, 340, ]
@@ -43,6 +42,5 @@ ax[1][1].plot(x[:3], y1, label="A* w/o Length", color="green", marker='o')
 y1 = [66.53, 66.38, ]
 ax[1][1].plot(x[:2], y1, label="RBFS w/o Length", color="red", marker='^')
 
-plt.gca().yaxis.set_minor_formatter(NullFormatter())
-plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+fig.suptitle("Informed Search\nLength/History of body taken into account\n(more states)")
 plt.show()

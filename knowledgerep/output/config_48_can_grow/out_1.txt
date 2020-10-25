@@ -1,0 +1,22 @@
+greedy_best_first_graph_search search, medium maze (body-length considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=greedy_best_first_graph_search, useheuristic=True), mediumMaze)']
+StartingRun with MazeSize = (17, 43)
+========================================================================================================================
+Dimensions = (17, 43)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 81
+InitialDistanceToGoal = 41
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 41
+AgentLenth = 9
+Stats = 
+
+Time taken by <function best_first_graph_search at 0x7f1112739bf8>: 100.5572800000009
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+           8851                     16032            8852           16032
+
+TimeToRun = 100.60283500000514
+************************************************************************************************************************

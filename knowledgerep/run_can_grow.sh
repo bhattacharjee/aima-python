@@ -8,7 +8,7 @@
     mkdir -p $DIR
 
     echo f"./A1_COMP9016_Bhattacharjee_Rajbir_R00195734.py -ssp -ng -nonc -config ${CONFIG_NUM}" > $DIR/details.txt
-    for i in {1..10}
+    for i in 1
     do
         OUTPUT1="${DIR}/time_${i}.txt"
         OUTPUT2="${DIR}/out_${i}.txt"

@@ -1,0 +1,1500 @@
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.0041189999974449165
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 11
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 12
+TimeToRun = 0.009621999997762032
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.012748999997711508
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 11
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 12
+TimeToRun = 0.003705000002810266
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 50
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 26
+DistanceCloserToGoal = 2
+AgentLenth = 14
+TimeToRun = 0.011985999997705221
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.004365999997389736
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 22
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.01233700000011595
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.004147999999986496
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 10
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 11
+TimeToRun = 0.0035180000013497192
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 18
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 14
+TimeToRun = 0.0049140000010083895
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 21
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005580999997619074
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005170000000362052
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 56
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 24
+DistanceCloserToGoal = 4
+AgentLenth = 19
+TimeToRun = 0.012929000000440283
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 58
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 28
+AgentLenth = 9
+TimeToRun = 0.013413000000582542
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 41
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 19
+DistanceCloserToGoal = 9
+AgentLenth = 14
+TimeToRun = 0.009582999999111053
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 21
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005500999999640044
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.00415400000201771
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.0040969999972730875
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 32
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 10
+DistanceCloserToGoal = 18
+AgentLenth = 14
+TimeToRun = 0.0083279999998922
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 11
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 9
+TimeToRun = 0.003325999998196494
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 18
+DistanceCloserToGoal = 10
+AgentLenth = 14
+TimeToRun = 0.004186000001936918
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 39
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 19
+DistanceCloserToGoal = 9
+AgentLenth = 14
+TimeToRun = 0.009172999998554587
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 32
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 8
+DistanceCloserToGoal = 20
+AgentLenth = 14
+TimeToRun = 0.013910000001487788
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 12
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 13
+TimeToRun = 0.003894999998010462
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 52
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 6
+DistanceCloserToGoal = 22
+AgentLenth = 14
+TimeToRun = 0.012379999996483093
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 21
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005782000000181142
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.00413999999727821
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.003979999997682171
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 16
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 14
+TimeToRun = 0.004519999998592539
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 80
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 12
+DistanceCloserToGoal = 16
+AgentLenth = 14
+TimeToRun = 0.017901000002893852
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 18
+DistanceCloserToGoal = 10
+AgentLenth = 14
+TimeToRun = 0.004320000000006985
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 9
+TimeToRun = 0.00378899999850546
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 78
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 8
+DistanceCloserToGoal = 20
+AgentLenth = 24
+TimeToRun = 0.026237999998556916
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 214
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 6
+TimeToRun = 0.044539000002259854
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 10
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.0035580000003392342
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 18
+DistanceCloserToGoal = 10
+AgentLenth = 14
+TimeToRun = 0.004184000001259847
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 35
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 19
+TimeToRun = 0.008164999999280553
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 8
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.0040120000012393575
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 58
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 18
+DistanceCloserToGoal = 10
+AgentLenth = 19
+TimeToRun = 0.014251000000513159
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 58
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 14
+TimeToRun = 0.018326999997952953
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 14
+TimeToRun = 0.004170000000158325
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 6
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 26
+DistanceCloserToGoal = 2
+AgentLenth = 7
+TimeToRun = 0.003306000002339715
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 10
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 11
+TimeToRun = 0.005375000000640284
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 14
+TimeToRun = 0.004281000001356006
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 73
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 5
+DistanceCloserToGoal = 23
+AgentLenth = 9
+TimeToRun = 0.03117500000007567
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 63
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 9
+TimeToRun = 0.014820000000327127
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 17
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005191000000195345
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 30
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 14
+TimeToRun = 0.021540000001550652
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 16
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 18
+DistanceCloserToGoal = 10
+AgentLenth = 14
+TimeToRun = 0.004659000001993263
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 48
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 28
+AgentLenth = 14
+TimeToRun = 0.016562000000703847
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 10
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 11
+TimeToRun = 0.003585999998904299
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.006412000002455898
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 42
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 6
+DistanceCloserToGoal = 22
+AgentLenth = 14
+TimeToRun = 0.010482000001502456
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 8
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 24
+DistanceCloserToGoal = 4
+AgentLenth = 9
+TimeToRun = 0.003329999999550637
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 8
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.0030270000024756882
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 12
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.00407199999972363
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.004668999998102663
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 19
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005250999998679617
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 22
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 14
+DistanceCloserToGoal = 14
+AgentLenth = 9
+TimeToRun = 0.0057760000017879065
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 19
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 19
+DistanceCloserToGoal = 9
+AgentLenth = 14
+TimeToRun = 0.005315999998856569
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 14
+TimeToRun = 0.004455000002053566
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 71
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 5
+DistanceCloserToGoal = 23
+AgentLenth = 24
+TimeToRun = 0.018742999996902654
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 75
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 7
+DistanceCloserToGoal = 21
+AgentLenth = 9
+TimeToRun = 0.017080999998142943
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 40
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.009399999999004649
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 11
+TimeToRun = 0.004307999999582535
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 19
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.006250000002182787
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 11
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 12
+TimeToRun = 0.003692999998747837
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 12
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 13
+TimeToRun = 0.009696000000985805
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.003940000002330635
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 6
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 26
+DistanceCloserToGoal = 2
+AgentLenth = 7
+TimeToRun = 0.002480999999534106
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 7
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 8
+TimeToRun = 0.0050469999987399206
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 49
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.010857000001124106
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 6
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 24
+DistanceCloserToGoal = 4
+AgentLenth = 7
+TimeToRun = 0.003055000001040753
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 21
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 17
+DistanceCloserToGoal = 11
+AgentLenth = 14
+TimeToRun = 0.008954999997513369
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 70
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 10
+DistanceCloserToGoal = 18
+AgentLenth = 14
+TimeToRun = 0.020757999998750165
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 31
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 14
+TimeToRun = 0.007851999998820247
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 23
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.006611000000702916
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 14
+TimeToRun = 0.004862000001594424
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 16
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 14
+TimeToRun = 0.004665000000386499
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 23
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 17
+DistanceCloserToGoal = 11
+AgentLenth = 14
+TimeToRun = 0.006199999999807915
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 12
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.003816000000369968
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 11
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 12
+TimeToRun = 0.004215999997541076
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 11
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 12
+TimeToRun = 0.0035339999994903337
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 19
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 21
+DistanceCloserToGoal = 7
+AgentLenth = 14
+TimeToRun = 0.005353999997169012
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 40
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 14
+TimeToRun = 0.010920000000623986
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 20
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 18
+DistanceCloserToGoal = 10
+AgentLenth = 14
+TimeToRun = 0.005654000000504311
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 89
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 19
+DistanceCloserToGoal = 9
+AgentLenth = 19
+TimeToRun = 0.020586999999068212
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 6
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 24
+DistanceCloserToGoal = 4
+AgentLenth = 7
+TimeToRun = 0.002644000000145752
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 17
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.0048349999997299165
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 10
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 24
+DistanceCloserToGoal = 4
+AgentLenth = 9
+TimeToRun = 0.0037379999994300306
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 16
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.013772999998764135
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 28
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 16
+DistanceCloserToGoal = 12
+AgentLenth = 14
+TimeToRun = 0.013256999998702668
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 41
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 25
+DistanceCloserToGoal = 3
+AgentLenth = 14
+TimeToRun = 0.009654000001319218
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 16
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.004727999999886379
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 16
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 24
+DistanceCloserToGoal = 4
+AgentLenth = 12
+TimeToRun = 0.0044989999987592455
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 23
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 19
+TimeToRun = 0.009726000000227941
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 13
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 23
+DistanceCloserToGoal = 5
+AgentLenth = 14
+TimeToRun = 0.004166999999142718
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 60
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 22
+DistanceCloserToGoal = 6
+AgentLenth = 14
+TimeToRun = 0.01427500000136206
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 29
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 9
+DistanceCloserToGoal = 19
+AgentLenth = 14
+TimeToRun = 0.017461999999795808
+************************************************************************************************************************
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = True
+DidAgentDie = False
+AgentNumMoves = 14
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 20
+DistanceCloserToGoal = 8
+AgentLenth = 9
+TimeToRun = 0.0040960000005725306
+************************************************************************************************************************

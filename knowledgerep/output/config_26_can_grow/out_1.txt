@@ -1,0 +1,22 @@
+breadth-first-graph search, tiny maze (history not considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), tinyMaze)']
+StartingRun with MazeSize = (6, 17)
+========================================================================================================================
+Dimensions = (6, 17)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 13
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 13
+AgentLenth = 14
+Stats = 
+
+Time taken by <function breadth_first_graph_search at 0x7f8ae87f7730>: 0.1674559999955818
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+            148                       362             168             362
+
+TimeToRun = 0.17155099999945378
+************************************************************************************************************************

@@ -1,0 +1,14 @@
+recursive_best_first_search search, large maze (body-length considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), largeMaze)']
+StartingRun with MazeSize = (50, 116)
+========================================================================================================================
+Dimensions = (50, 116)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 0
+InitialDistanceToGoal = 151
+RemainingDistanceToGoal = 151
+DistanceCloserToGoal = 0
+AgentLenth = 2

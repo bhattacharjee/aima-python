@@ -1,0 +1,22 @@
+breadth-first-graph search, medium maze (history not considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)']
+StartingRun with MazeSize = (17, 43)
+========================================================================================================================
+Dimensions = (17, 43)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 53
+InitialDistanceToGoal = 41
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 41
+AgentLenth = 9
+Stats = 
+
+Time taken by <function breadth_first_graph_search at 0x7f11a8867730>: 2.8502910000024713
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+            428                      1329             439            1329
+
+TimeToRun = 2.8686480000033043
+************************************************************************************************************************

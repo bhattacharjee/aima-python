@@ -1,0 +1,22 @@
+Depth-first search, small maze (history not considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=depth_first_graph_search), smallMaze)']
+StartingRun with MazeSize = (9, 30)
+========================================================================================================================
+Dimensions = (9, 30)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 36
+InitialDistanceToGoal = 28
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 28
+AgentLenth = 9
+Stats = 
+
+Time taken by <function depth_first_graph_search at 0x7fc49def66a8>: 0.13044799999988754
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+             58                       157              59             157
+
+TimeToRun = 0.13886199999979
+************************************************************************************************************************

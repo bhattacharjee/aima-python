@@ -1,0 +1,22 @@
+uniform-cost-search search, medium maze (history not considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), mediumMaze)']
+StartingRun with MazeSize = (17, 43)
+========================================================================================================================
+Dimensions = (17, 43)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 53
+InitialDistanceToGoal = 41
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 41
+AgentLenth = 9
+Stats = 
+
+Time taken by <function uniform_cost_search at 0x7f9d63f28c80>: 4681.72812
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+         231030                    475114          231031          475114
+
+TimeToRun = 4681.769519000001
+************************************************************************************************************************

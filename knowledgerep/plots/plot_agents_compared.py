@@ -50,8 +50,6 @@ y1 = [3.13, 4.45, 75.147]
 ax[2].plot(x, y1, label="Simple Reflex (non weighted)", color="magenta", marker='o')
 ax[2].legend()
 
+fig.suptitle("All Agents Compared")
 
-
-plt.gca().yaxis.set_minor_formatter(NullFormatter())
-plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
 plt.show()

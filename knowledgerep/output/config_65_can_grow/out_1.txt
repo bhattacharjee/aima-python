@@ -1,0 +1,4 @@
+astar_search search, large maze (body-length considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), largeMaze)']
+StartingRun with MazeSize = (50, 116)

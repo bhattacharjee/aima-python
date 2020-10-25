@@ -24,7 +24,5 @@ ax[1].plot(x, y2, label="Goal Driven", color="blue", marker='o')
 ax[1].legend()
 
 
-
-plt.gca().yaxis.set_minor_formatter(NullFormatter())
-plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+fig.suptitle("Goal Driven Agent\nnSteps = Moves the snake makes to the goal")
 plt.show()

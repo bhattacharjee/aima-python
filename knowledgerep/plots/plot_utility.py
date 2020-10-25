@@ -30,6 +30,5 @@ ax[1].legend()
 
 
 
-plt.gca().yaxis.set_minor_formatter(NullFormatter())
-plt.subplots_adjust(top=0.92, bottom=0.08, left=0.10, right=0.95, hspace=0.25, wspace=0.35)
+fig.suptitle("Utility Based Agent\nLength/history of body not considered")
 plt.show()

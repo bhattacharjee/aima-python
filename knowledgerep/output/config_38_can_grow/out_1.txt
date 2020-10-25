@@ -1,0 +1,22 @@
+uniform-cost-search search, tiny maze (history considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=uniform_cost_search), tinyMaze)']
+StartingRun with MazeSize = (6, 17)
+========================================================================================================================
+Dimensions = (6, 17)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 13
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 13
+AgentLenth = 14
+Stats = 
+
+Time taken by <function uniform_cost_search at 0x7fd772c68c80>: 0.3912369999961811
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+            377                       626             378             626
+
+TimeToRun = 0.3946369999976014
+************************************************************************************************************************

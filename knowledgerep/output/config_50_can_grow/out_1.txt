@@ -1,0 +1,22 @@
+recursive_best_first_search search, tiny maze (body-length not considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=recursive_best_first_search, useheuristic=True), tinyMaze)']
+StartingRun with MazeSize = (6, 17)
+========================================================================================================================
+Dimensions = (6, 17)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 15
+InitialDistanceToGoal = 13
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 13
+AgentLenth = 14
+Stats = 
+
+Time taken by <function recursive_best_first_search at 0x7f640a58af28>: 0.11172399999998106
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+             35                        88              36              88
+
+TimeToRun = 0.11680600000011054
+************************************************************************************************************************

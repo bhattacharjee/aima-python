@@ -1,0 +1,22 @@
+astar_search search, medium maze (body-length considered)
+------------------------------------------------------------------------------------------------------------------------
+['RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), mediumMaze)']
+StartingRun with MazeSize = (17, 43)
+========================================================================================================================
+Dimensions = (17, 43)
+Agent = <TwoDAgent>
+IsAgentStuck = False
+DidAgentDie = False
+AgentNumMoves = 53
+InitialDistanceToGoal = 41
+RemainingDistanceToGoal = 0
+DistanceCloserToGoal = 41
+AgentLenth = 9
+Stats = 
+
+Time taken by <function astar_search at 0x7fd5cc8faea0>: 546.8729709999998
+    n_Sccessors    n_CandidatesConsidered     n_GoalTests        n_States
+          24516                     50376           24517           50376
+
+TimeToRun = 546.9184860000005
+************************************************************************************************************************
