@@ -1254,6 +1254,7 @@ class TwoDEnvironment(Environment):
         self.window.refresh()
         return 0
 
+    # If graphics is available print teh graphics
     def display_graphics(self):
         global g_use_tkinter, g_tkinter_available, g_use_pygame, g_pygame_available
         m = self.get_print_matrix()
@@ -1335,6 +1336,14 @@ class TwoDMaze(TwoDEnvironment):
         print(f"StartingRun with MazeSize = ({rows}, {cols})")
 
     def is_deque_stuck(self, d):
+        """[If the snake is stuck, return true]
+
+        Args:
+            d ([deque]): [history of past movements]
+
+        Returns:
+            [bool]: [True if snake is stuck/trapped]
+        """
         if (0 == len(d) or 1 == len(d) or None == d):
             return False
         for e in d:
@@ -1366,6 +1375,11 @@ class TwoDMaze(TwoDEnvironment):
             self.is_stuck = self.is_deque_stuck(self.stuck_detect)
 
     def got_stuck(self):
+        """[did we get stuck?]
+
+        Returns:
+            [bool]: [True if we got stuck]
+        """
         the_agent = None
         the_door = None
         for thing in self.things:
@@ -1379,6 +1393,8 @@ class TwoDMaze(TwoDEnvironment):
         return self.is_stuck
 
     def __del__(self):
+        """[delete the object and print some statistics]
+        """
         global g_curses_available
         if g_curses_available:
             curses.endwin()
@@ -1403,6 +1419,14 @@ class TwoDMaze(TwoDEnvironment):
         print(f"AgentLenth = {len(self.agent_history) + 1}")
 
 def get_agent_location_from_maze_string(mazeString=str):
+    """[Get the location of the agent from the maze]
+
+    Args:
+        mazeString ([str], optional): [string of the maze location]. Defaults to str.
+
+    Returns:
+        [tuple]: [location of the maze]
+    """
     mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
     rows = len(mazeString)
     cols = len(mazeString[0])
@@ -1479,6 +1503,15 @@ class NextMoveHelper(object):
         return candidates
 
     def get_move_string(dx, dy):
+        """[convert a dy/dx into a string for the move]
+
+        Args:
+            dx ([int]): [delta in rows]
+            dy ([int]): [delta in cols]
+
+        Returns:
+            [str]: [describe the move]
+        """
         return NextMoveHelper.move_table[(dx, dy)]
 
     def get_new_location(move, x, y):
@@ -1502,6 +1535,19 @@ class NextMoveHelper(object):
         return NextMoveHelper.get_move_string2(old[0], old[1], new[0], new[1])
 
     def get_move_suitability(oldx, oldy, newx, newy, gdx, gdy):
+        """[Return a higher score if the move is in the direction of the goal]
+
+        Args:
+            oldx ([type]): [description]
+            oldy ([type]): [description]
+            newx ([type]): [description]
+            newy ([type]): [description]
+            gdx ([type]): [description]
+            gdy ([type]): [description]
+
+        Returns:
+            [int]: [a higher score if the move is in the direction of the goal]
+        """
         gdx = 0 if 0 == gdx else gdx // abs(gdx)
         gdy = 0 if 0 == gdy else gdy // abs(gdy)
         dx = newx - oldx
@@ -1516,6 +1562,16 @@ class NextMoveHelper(object):
         return score
 
     def get_updated_row_col(x, y, action):
+        """[given a location and an action, get the new location]
+
+        Args:
+            x ([int]): [row]
+            y ([int]): [col]
+            action ([type]): [description]
+
+        Returns:
+            [tuple]: [new location]
+        """
         row = x
         col = y
         if "moveUp" == action:
@@ -2364,24 +2420,6 @@ def RunAgentAlgorithm(program, mazeString: str):
         statsString = "Search Stats not available"
     del env
     print(statsString)
-
-def process():
-    #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
-    #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
-    #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
-    #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
-    #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
-    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    #RunAgentAlgorithm(UtilityBasedAgentProgram(use_inference=True), smallHawkTestMaze2)
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, use_inference=False), smallHawkTestMaze2)
-    #RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
-    #RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)
-    pass
 
 g_run_profiles = {
             1: {
