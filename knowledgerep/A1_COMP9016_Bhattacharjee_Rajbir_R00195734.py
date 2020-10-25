@@ -1987,6 +1987,14 @@ class SearchHelper:
         return tup
 
     def convert_state_to_percepts(state):
+        """[Convert the stored state back to percepts]
+
+        Args:
+            state (str): state from node
+
+        Returns:
+            [dict]: [Percepts recreated]
+        """
         global g_search_should_consider_history
         ag_hist = None
         state = pickle.loads(state)
@@ -2146,6 +2154,15 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, use_infe
 
 
     def time_and_run_algorithm(problem, heuristic):
+        """[run an algorithm and profile it]
+
+        Args:
+            problem ([Problem]): [search problem]
+            heuristic ([heuristic]): [heuristic function]
+
+        Returns:
+            [type]: [search results]
+        """
         nonlocal search_algorithm
         nonlocal perf_string
         nonlocal use_heuristic
@@ -2162,6 +2179,14 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, use_infe
         return SearchHelper.convert_percepts_to_state(percepts)
 
     def heuristic(node):
+        """[Heuristic function for informed search]
+
+        Args:
+            node ([type]): [the Node]
+
+        Returns:
+            [int]: [heuristic value, in this case just the manhattan distance]
+        """
         percept = SearchHelper.convert_state_to_percepts(node.state)
         (curx, cury) = tuple(percept["location"])
         (goalx, goaly) = tuple(percept["goal_direction"])
@@ -2278,6 +2303,11 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         print(f"n(Clauses) = {len(self.kb.clauses)}")
 
     def append_clause(self, clause):
+        """[add a clause to the knowledge base]
+
+        Args:
+            clause ([str]): [clause]
+        """
         if clause not in self.clauses:
             logging.debug("Adding " + clause)
             self.clauses.append(clause)
@@ -2425,6 +2455,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         logging.info(f"checking if location is hawk {location} = {ret}")
         return ret
 
+# Driver function
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
     global g_state_refresh_sleep
