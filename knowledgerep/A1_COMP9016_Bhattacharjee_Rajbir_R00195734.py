@@ -3,28 +3,60 @@ import os,sys,inspect, random, collections, copy, pickle
 import argparse
 import time
 import logging
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 
 # Is curses available or not?
 g_curses_available = True
+
+# Do not print state after every step
 g_suppress_state_printing = False
+
+# How many loops to do at after each step while printing?
 g_state_print_same_place_loop_count = 6
+
+# Sleep between two steps
 g_state_refresh_sleep = 0.05
+
+# Can snake cross itself?
 g_self_crossing_not_allowed = True
+
+# Should search consider the history of the body of the snake?
 g_search_should_consider_history = False
+
+# Is Pygame available
 g_pygame_available = False
+
+# Should use pygame if available?
 g_use_pygame = True
+
+# Sleep duration for graphics between steps
 g_graphics_sleep_time = 0.01
+
+# Should use tkinter if available?
 g_use_tkinter = True
+
+# Is TKinter available
 g_tkinter_available = False
+
+# For inference problems, need to print profiling information?
 g_kb_print_profile_information = True
+
+# Initial maximum length of snake
 g_agent_initial_max_length = 8
+
+# Can agent grow/shrink?
 g_agent_can_grow = True
+
+# Should gather profiling information for knowledgebase?
 g_profile_knowledgebase = True
+
+# Is this a perf run? Don't import graphics libraries
 g_perf_run = False
+
+# Inference algorithm override
 g_override_global_algorithm = -1
 
-
+# Don't import graphics libraries if we're profiling, this throws numbers off
 if not g_perf_run:
     try:
         import pygame
@@ -323,19 +355,49 @@ g_stuck_banner2 = """
 ////////            //            ///////          //////        //   //       // """
 
 
+# General utilities the rest of the program uses
 class Utils:
     def manhattan_distance(l1, l2):
+        """[summary]
+
+        Args:
+            l1 ([tuple]): [location1]
+            l2 ([tuple]): [location2]
+
+        Returns:
+            [int]: [manhattan distance]
+        """
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
         logging.debug(f"{l1[0]} {l1[1]} {l2[0]} {l2[1]} {abs(l1[0] - l2[0])} {abs(l1[1] - l2[1])}")
         return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
 
     def euclidean_distance(l1, l2):
+        """[summary]
+
+        Args:
+            l1 ([tuple]): [location1]
+            l2 ([tuple]): [location2]
+
+        Returns:
+            [int]: [Euclidan distance]
+        """
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
         return math.sqrt((l1[0] - l2[0])**2 + (l1[1] - l2[1])**2)
 
     def get_matrix_for_program(rows, cols, things, include_grow_shrink=False):
+        """[summary]
+
+        Args:
+            rows ([int]): [dimensions - rows]
+            cols ([int]): [dimensions - cols]
+            things ([list]): [array of things]
+            include_grow_shrink (bool, optional): [can agent grow/shrink?]. Defaults to False.
+
+        Returns:
+            [list of list or chars]: [text form of the maze]
+        """
         matrix = [[' ' for i in range(cols)] for j in range(rows)]
         for thing in things:
             if not isinstance(thing, Agent):
@@ -351,6 +413,16 @@ class Utils:
         return matrix
 
     def convert_text_matrix_to_object(rows, cols, tmatrix):
+        """[summary]
+
+        Args:
+            rows ([int]): [dimensions - rows]
+            cols ([int]): [dimensions - colsl]
+            tmatrix ([list of lists of chars]): [text matrix form of the maze]
+
+        Returns:
+            [list of lists of Object]: [Matrix with real objects]
+        """
         matrix = [[None for i in range(cols)] for j in range(rows)]
         for i in range(rows):
             for j in range(cols):
