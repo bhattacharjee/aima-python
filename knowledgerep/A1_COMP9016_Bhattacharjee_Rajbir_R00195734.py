@@ -2022,7 +2022,20 @@ class SearchHelper:
         percepts["things"] = Utils.create_things_array_from_text_matrix(dimensions[0], dimensions[1], textmatrix)
         return percepts
 
+class MazeSearchProblem(Problem):
     """
+    Path Cost:          Deafult, adds 1 for every move
+    Set of actions:     Move Up/Down/Left/Right
+    Initial State:      Maze as it is, snake as where it starts
+    Goal State:         When the head of the snake reaches the door
+    Transition Model:   State of the board --Action--> State of the board
+                        - Includes new position of the snake
+                        - May or may not include body history of the snake
+                          (configurable)
+                        - Implemented via pickling of the entire maze
+
+
+
     Sequence of actions performed in execute_action
     1. Convert the move to the newrow, newcol
     2. Set the matrix position at curent row, col to None (agent was there till nwo)
@@ -2034,7 +2047,6 @@ class SearchHelper:
     8. Update the agent's internal location and other parameters
     9. If we stepped on a square that grows or shrinks us, change the length of the history dequeue
     """
-class MazeSearchProblem(Problem):
     def __init__(self, initial, goal=None):
         self.cand_moves = self.succs = self.goal_tests = self.states = 0
         self.found = None
