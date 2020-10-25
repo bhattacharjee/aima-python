@@ -676,6 +676,12 @@ class Power(TwoDThing):
 
     # Get the display character, overriding that from the parent class
     def get_display(self):
+        """[Get the character to display to indicate this object. This is used
+        when printing the state of the maze]
+
+        Returns:
+            [str]: [character to display]
+        """
         return str(self.power_value)
 
 # Wall
@@ -711,10 +717,19 @@ class Hawk(TwoDThing):
         self.agent_cannot_see_me = True
 
     def get_agent_feelings(self, ag_loc):
+        """[If an agent should feel something, return what it should feel]
+
+        Args:
+            ag_loc ([list or tuple]): [location of agent]
+
+        Returns:
+            [string]: [shriek if agent is adjacent to me]
+        """
         if 1 == Utils.manhattan_distance(ag_loc, self.get_location()):
             return "shriek"
 
 
+# Simple graphics using TKinter
 class SimpleGraphics():
     SQUARE_SIZE = 10
     RADIUS = SQUARE_SIZE // 2
@@ -766,6 +781,11 @@ class SimpleGraphics():
         pygame.draw.rect(self.screen, color, (x, y, width, width))
 
     def update(self, m):
+        """[Update the screen]
+
+        Args:
+            m ([list]): [matrix representing the maze]
+        """
         global g_graphics_sleep_time
         if not self.is_inited:
             return
@@ -841,6 +861,14 @@ class SimpleGraphicsTkinter():
         self.canvas.create_oval(x, y, x + diameter + 1, y + diameter + 1, fill=self.get_color_string(color), outline="")
 
     def get_color_string(self, color: tuple):
+        """[convert a tuple to a string]
+
+        Args:
+            color (tuple): [tuple representing the color]
+
+        Returns:
+            [str]: [string representating the color.]
+        """
         stringcolor = "#"
         for i in color:
             tempstr = "%.2x" % i
@@ -858,6 +886,11 @@ class SimpleGraphicsTkinter():
         self.labels = []
 
     def update(self, m):
+        """[Update the screen]
+
+        Args:
+            m ([list]): [matrix representing the maze]
+        """
         global g_graphics_sleep_time
         if not self.is_inited:
             return
