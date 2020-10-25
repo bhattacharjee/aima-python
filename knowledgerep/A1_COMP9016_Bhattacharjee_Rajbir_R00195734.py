@@ -14,7 +14,7 @@ g_self_crossing_not_allowed = True
 g_search_should_consider_history = False
 g_pygame_available = False
 g_use_pygame = True
-g_graphics_sleep_time = 0.1
+g_graphics_sleep_time = 0.01
 g_use_tkinter = True
 g_tkinter_available = False
 g_kb_print_profile_information = True
@@ -22,6 +22,7 @@ g_agent_initial_max_length = 8
 g_agent_can_grow = True
 g_profile_knowledgebase = True
 g_perf_run = True
+g_override_global_algorithm = -1
 
 
 if not g_perf_run:
@@ -69,6 +70,13 @@ tinyMaze = """
 #o####       #  #
 # #  #  #  # x  #
 #     #         #
+#################"""
+tinyMazeWithHawk = """
+#################
+##     #     #  #
+#o###H       #  #
+# #H##  #  #    #
+#            x  #
 #################"""
 smallHawkTestMaze= """
 ##############################
@@ -143,6 +151,24 @@ mediumMaze= """
 #                                         #
 ###########################################"""
 
+mediumHawkTestMaze= """
+###########################################
+#     #                #              #   #
+#o    #        ####    ########       #   #
+#     #####       #    #              #   #
+#         #       ###     #####  ######   #
+#   #######  ####   #     #   #  #      ###
+#   #  #           #####    #    #  # x   #
+#H  #  #              #     #       #     #
+#      #    ######    #         #         #
+#      #              #         #  ########
+#     ##     ##########         #         #
+#                         ############    #
+#   ##             #            #         #
+#    #########     ########               #
+#    #             #           #########  #
+#                                         #
+###########################################"""
 # Maze with fewer cul-de-sacs
 mediumMaze2= """
 ###########################################
@@ -215,6 +241,57 @@ largeMaze = """
 #G                                                                                                                 #
 ####################################################################################################################"""
 
+largeMazeWithHawk = """
+####################################################################################################################
+#                                                                                                                  #
+#                   #                  ############################            #        ####    ########       #   #
+#                   #                                                              #       #    #              #   #
+#                   #############################                                  #       ###     #####  ######   #
+#                           G   GG#                                          #######  ####         #   #  #        #
+#                           G     #                                          #  #              ##    #    #  # x   #
+#                                G#          ###########################     #  #              #     #       #     #
+#           ################      #                                             #    ######    #         #         #
+#                                 #                                             #              #         #  ########
+#                    #                                                         ##     ##########         #         #
+#                    #                                            #                                ############    #
+#  G          G      #     #####################################  #          ##             #            #         #
+#          G         #                                            #           #########     ########               #
+#                    #           S             S                 S#           #             #           #########  #
+#                    #                                            #  ########                    #                 #
+#                    #          #           #                     #                              #                 #
+#                    #          #           #                     #             #          #     #                 #
+#                    #          #           #                     #             #          #                       #
+#                    #          #           #                     #             #          #           #           #
+#                               #           #                     #   ########  #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #           ######################################          #             #          #    ###############    #
+#     #                                                           #             #          #           #           #
+#     #                                                           #             #          #           #           #
+#     #                              #                            #  #########  #          #           #           #
+#     #                              #                            #             #          #           #           #
+#     #                              #                            #             #          #                       #
+#     #                              #                            #             #          #        #  ##          #
+#     #                              #                            #             #          #        #   #          #
+#     #                              #                            #             #          #            #####      #
+#     #                                                                         #          #                       #
+#     #  ###################################       ########################                #                       #
+#     #                                                                                    #   #############       #
+#     #                                                                   #                #          #            #
+#     #                      #                                            #                #          #            #
+#     #    S    G            #        #############################       #                           #            #
+#     #                      #                                            #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #                      #                         #                  #                           #            #
+#     #    G                 #                         #                  #                           #            #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#     #                      #                         #                  #                                        #
+#######                      #                                            #                                        #
+#o                                                                                                                 #
+###HH##                                                                                                            #
+####################################################################################################################"""
 g_stuck_banner = """
   ********       **********       **     **         ******        **   **       **
  **//////       /////**///       /**    /**        **////**      /**  **       /**
@@ -369,13 +446,18 @@ class Utils:
         return shreik_heard
 
     def create_initial_kb(percepts, algorithm):
+        global g_override_global_algorithm
         shreik_heard = False
+        thealgorithm = algorithm
+        if g_override_global_algorithm != -1:
+            logging.info(f"theAlgorithm = {g_override_global_algorithm}")
+            thealgorithm = g_override_global_algorithm
         assert(Utils.verify_agent_view_doesnt_have_hawk(percepts["things"]))
         (row, col) = tuple(percepts["dimensions"])
         location = percepts["location"]
         matrix = Utils.get_matrix_for_program(row, col,\
                 percepts["things"], include_grow_shrink=True)
-        kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), algorithm)
+        kb = SnakeKnowledgeBaseToDetectHawk(matrix, (len(matrix), len(matrix[0])), thealgorithm)
         return kb
 
     def trim_candidate_if_hawk(kb, shreik_heard, candidates, a_loc, mt_dim):
@@ -1486,13 +1568,13 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
 # Utility based agent program. This program calculates the utility function
 # For each of the candidate locations, and then chooses the one that
 # maximizes the utility function
-def UtilityBasedAgentProgram(usekb=False):
+def UtilityBasedAgentProgram(use_inference=False):
 
     # Agent program's memories of places visited, this becomes important
     # To the utility function because a negative score must be associated
     # with places we've visited so that we don't get stuck in a loop
     memories = None
-    use_kb = usekb
+    use_kb = use_inference
     kb = None
 
     def utility_function(percepts, location, goal, matrix):
@@ -1748,7 +1830,7 @@ class MazeSearchProblem(Problem):
             return True
         return False
 
-def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=False):
+def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, use_inference=False):
 
     search_results = None
     search_results_deque = collections.deque()
@@ -1757,7 +1839,7 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, usekb=Fa
     search_algorithm = algorithm
     perf_string = ""
     use_heuristic = useheuristic
-    use_kb = usekb
+    use_kb = use_inference
     kb = None
     known_hawks = []
 
@@ -1882,7 +1964,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
             print("Using pl_fc_entails")
         elif self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC:
             print("Using fol_fc_ask")
-        elif self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC:
+        elif self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC:
             print("Using fol_bc_ask")
         else:
             assert(False)
@@ -2052,8 +2134,8 @@ def process():
     #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
     #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
-    #RunAgentAlgorithm(UtilityBasedAgentProgram(usekb=True), smallHawkTestMaze2)
-    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, usekb=False), smallHawkTestMaze2)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(use_inference=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, use_inference=False), smallHawkTestMaze2)
     #RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
     #RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)
     pass
@@ -2343,6 +2425,25 @@ g_run_profiles = {
                 "description": "astar_search search, large maze (body-length considered)",
                 "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), largeMaze)"]
                 },
+            66: {
+                "consider_history": True,
+                "description": "Inference Search (astar) based agent on tiny Maze with Hawk",
+                "commands": ["RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, use_inference=True), tinyMazeWithHawk)"]
+                },
+            67: {
+                "consider_history": True,
+                "description": "Inference with Simple Reflex Agent Program (small Maze with Hawk)",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)"]
+                },
+            68: {
+                "consider_history": True,
+                "description": "Inference with Simple Reflex Agent Program (medium Maze With Hawk)",
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), mediumHawkTestMaze)"]
+                },
+            69: {
+                "description": "inference with utility based agent program, large maze (body-length not considered)",
+                "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(use_inference=True), largeMazeWithHawk)"]
+                },
         }
 
 def print_configuration_help():
@@ -2354,7 +2455,7 @@ def main():
     global g_curses_available, g_suppress_state_printing, g_state_refresh_sleep, g_self_crossing_not_allowed
     global g_state_print_same_place_loop_count, g_tkinter_available, g_use_tkinter, g_pygame_available, g_use_pygame
     global g_agent_can_grow, g_agent_initial_max_length, g_profile_knowledgebase
-    global g_run_profiles, g_search_should_consider_history
+    global g_run_profiles, g_search_should_consider_history, g_override_global_algorithm
     parser = argparse.ArgumentParser()
     parser.add_argument("-nonc", "--no-ncurses", help="Do not use ncurses", action="store_true")
     parser.add_argument("-ssp", "--suppress-state-printing",\
@@ -2369,12 +2470,15 @@ def main():
                             action="store_true")
     parser.add_argument("-config" "--configuration", type=int,\
             help="The configuration of the run, mandatory", default=999)
+    parser.add_argument("-inferalgo", "--inference-algorithm", type=int, default=-1,
+            help="0 - pl_fc_entails, 1 = fol_bc_ask, 2 = fol_fc_ask")
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
     g_state_refresh_sleep = 0 if args.refresh_delay < 0.0001 else args.refresh_delay
     g_self_crossing_not_allowed = not args.allow_crossing_self
     g_agent_can_grow = False if args.agent_cannot_grow else g_agent_can_grow
+    g_override_global_algorithm = args.inference_algorithm if -1 != args.inference_algorithm else g_override_global_algorithm
     g_agent_initial_max_length = args.agent_initial_max_length if args.agent_initial_max_length >= 0\
             else g_agent_initial_max_length
     g_profile_knowledgebase = True if args.profile_knowledge_base else g_profile_knowledgebase
