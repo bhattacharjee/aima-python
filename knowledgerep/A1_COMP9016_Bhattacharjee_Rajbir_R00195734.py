@@ -1515,6 +1515,16 @@ class NextMoveHelper(object):
         return NextMoveHelper.move_table[(dx, dy)]
 
     def get_new_location(move, x, y):
+        """[given a move string and a location, get the new location]
+
+        Args:
+            move ([string]): [action]
+            x ([int]): [row]
+            y ([int]): [col]
+
+        Returns:
+            [tuple]: [new location]
+        """
         if (isinstance(x, list) or isinstance(x, tuple)):
             y = x[0]
             x = x[1]
@@ -1602,6 +1612,7 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
     matrix = None
     use_weighted_random_selection = weighted_rand_sel
 
+    # Select at random from candidates
     def select_random(cp):
         rowCandidate = colCandidate = -1
         while 0 != len(cp):
@@ -1615,6 +1626,7 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
                 del cp[i]
         return rowCandidate, colCandidate
 
+    # Get the directions of the goal
     def get_goal_directions(percepts):
         goal_direction = percepts["goal_direction"]
         dx = goal_direction[0]
@@ -1623,6 +1635,7 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
         dy = dy if 0 == dy else dy // abs(dy)
         return dx, dy
 
+    # Recreate teh maze from percepts
     def recreate_board(percepts):
         things = percepts["things"]
         mt_dimensions = percepts["dimensions"]
@@ -1696,9 +1709,11 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
     kb = None
     shreik_heard = False
 
+    # get the matrix from things array from percepts
     def get_matrix(rows, cols, things):
         return Utils.get_matrix_for_program(rows, cols, things)
 
+    # Move randomly till we reach a location that we haven't visited before
     def get_random_move(matrix, a_loc, history):
         nonlocal kb, shreik_heard
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
@@ -1729,6 +1744,8 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
         return None
 
 
+    # Get a move in the direction of the goal Sometimes it will prioritize x axis, sometimes y axis
+    # if movement along both axis is possible
     def get_goal_directed_new_location_int(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
         # Sometimes, try moving rows first, at other times, try moving columns first
         assert(None != history)
@@ -1764,6 +1781,7 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
                         return newrow, newcol
         return -1, -1
 
+    # Get the new goal directed location
     def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
         nonlocal kb, shreik_heard
         r, c = get_goal_directed_new_location_int(matrix, m_rows, m_cols,\
@@ -1772,7 +1790,7 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
             return -1, -1
         return r, c
 
-
+    # Get the action string
     def get_action_string(n_r, n_c, o_r, o_c):
         dx = n_r - o_r
         dy = n_c - o_c
@@ -1850,6 +1868,7 @@ def UtilityBasedAgentProgram(use_inference=False):
     use_kb = use_inference
     kb = None
 
+    # Utility function
     def utility_function(percepts, location, goal, matrix):
         nonlocal memories
         GOAL_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
@@ -1877,6 +1896,7 @@ def UtilityBasedAgentProgram(use_inference=False):
             utility_score += SHRINK_SCALING_FACTOR
         return utility_score
 
+    # Get the candidate positions
     def get_candidate_positions(percepts, matrix, shreik_heard):
         import sys
         nonlocal kb, use_kb
@@ -1942,6 +1962,14 @@ class SearchHelper:
         return Utils.get_matrix_for_program(maxrow, maxcol, things, True)
 
     def convert_percepts_to_state(percepts:dict):
+        """[Convert percepts recieved from env to a state that can be used in Node]
+
+        Args:
+            percepts (dict): [Percepts]
+
+        Returns:
+            [str]: [state that can be used in Node]
+        """
         global g_search_should_consider_history
         matrix = SearchHelper.get_text_matrix_for_search(percepts)
         ag_hist = []
