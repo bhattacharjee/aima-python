@@ -30,7 +30,7 @@ g_pygame_available = False
 g_use_pygame = True
 
 # Sleep duration for graphics between steps
-g_graphics_sleep_time = 0.01
+g_graphics_sleep_time = 0.1
 
 # Should use tkinter if available?
 g_use_tkinter = True
@@ -358,7 +358,7 @@ g_stuck_banner2 = """
 # General utilities the rest of the program uses
 class Utils:
     def manhattan_distance(l1, l2):
-        """[summary]
+        """[Manhattan Distance]
 
         Args:
             l1 ([tuple]): [location1]
@@ -373,7 +373,7 @@ class Utils:
         return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
 
     def euclidean_distance(l1, l2):
-        """[summary]
+        """[euclidan distance]
 
         Args:
             l1 ([tuple]): [location1]
@@ -387,7 +387,7 @@ class Utils:
         return math.sqrt((l1[0] - l2[0])**2 + (l1[1] - l2[1])**2)
 
     def get_matrix_for_program(rows, cols, things, include_grow_shrink=False):
-        """[summary]
+        """[get text form of matrix]
 
         Args:
             rows ([int]): [dimensions - rows]
@@ -413,7 +413,7 @@ class Utils:
         return matrix
 
     def convert_text_matrix_to_object(rows, cols, tmatrix):
-        """[summary]
+        """[convert text matrix to matrix of objects]
 
         Args:
             rows ([int]): [dimensions - rows]
@@ -488,6 +488,15 @@ class Utils:
         return True
 
     def get_adjacent_squares(loc, dimensions):
+        """[Get adjacent squares]
+
+        Args:
+            loc ([tuple or list]): [current location]
+            dimensions ([tuple or list]): [dimensions of the maze]
+
+        Returns:
+            [list]: [adjacent squares]
+        """
         (x, y) = tuple(loc)
         (r, c) = tuple(dimensions)
         candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
@@ -499,10 +508,28 @@ class Utils:
         return ret
 
     def get_logic_symbol(prefix, location):
+        """[Get a unique logic symbol]
+
+        Args:
+            prefix ([str]): [string]
+            location ([list or tuple]): [location]
+
+        Returns:
+            [str]: [returns a unique identifier to be used as a symbol]
+        """
         (x, y) = tuple(location)
         return "%s_%0.3d_%0.3d" % (prefix, x, y)
 
     def update_kb_for_location(kb, percepts):
+        """[Updates the current location int the KB]
+
+        Args:
+            kb ([SnakeKnowledgeBaseToDetectHawk]): [KB]
+            percepts ([list]): [percepts]
+
+        Returns:
+            [bool]: [Shriek heard or not]
+        """
         assert(isinstance(kb, SnakeKnowledgeBaseToDetectHawk))
         location = percepts["location"]
         feelings = percepts["feelings"]
@@ -518,6 +545,15 @@ class Utils:
         return shreik_heard
 
     def create_initial_kb(percepts, algorithm):
+        """[Create an initial kb]
+
+        Args:
+            percepts ([list]): [percepts from env]
+            algorithm ([int]): [which inference algorithm to use]
+
+        Returns:
+            [SnakeKnowledgeBaseToDetectHawk]: [the created KB]
+        """
         global g_override_global_algorithm
         shreik_heard = False
         thealgorithm = algorithm
@@ -533,6 +569,18 @@ class Utils:
         return kb
 
     def trim_candidate_if_hawk(kb, shreik_heard, candidates, a_loc, mt_dim):
+        """[for all candidates, leave out the ones that we know are hawks]
+
+        Args:
+            kb ([SnakeKnowledgeBaseToDetectHawk]): [KB]
+            shreik_heard ([Bool]): [did we hear a shriek at the current location]
+            candidates ([list]): [candidate locations where we might move]
+            a_loc ([list or tuple]): [current agent location]
+            mt_dim ([list or tuple]): [matrix dimensions]
+
+        Returns:
+            [list]: [candidate locations which are not known hawks]
+        """
         if shreik_heard and kb:
             temp = []
             for cand in candidates:
@@ -588,9 +636,22 @@ class TwoDThing(Thing):
         return self.display
 
     def is_hidden_from_agent(self):
+        """[Is this thing something the agent can't see]
+
+        Returns:
+            [bool]: [True if hidden from agent]
+        """
         return self.agent_cannot_see_me
 
     def can_kill_agent(self, ag_location):
+        """[Can I kill the agent now?]
+
+        Args:
+            ag_location ([list or tuple]): [location of the agent]
+
+        Returns:
+            [Bool]: [True if I can kill the agent now else false]
+        """
         if self.i_can_kill_agent and tuple(self.location) == tuple(ag_location):
             return True
         return False
