@@ -2827,10 +2827,10 @@ def main():
                             default=8)
     parser.add_argument("-profkb", "--profile-knowledge-base", help="Print profiling information of knowledgebase",\
                             action="store_true")
-    parser.add_argument("-config" "--configuration", type=int,\
+    parser.add_argument("-config", "--configuration", type=int,\
             help="The configuration of the run, mandatory", default=999)
     parser.add_argument("-inferalgo", "--inference-algorithm", type=int, default=-1,
-            help="0 - pl_fc_entails, 1 = fol_bc_ask, 2 = fol_fc_ask")
+            help="0 - pl_fc_entails, 1 = fol_bc_ask, 2 = fol_fc_ask (fol_bc_ask may run out of stack space)")
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
@@ -2847,13 +2847,16 @@ def main():
     if g_suppress_state_printing:
         g_state_refresh_sleep = 0
         g_state_print_same_place_loop_count
-    if 999 == args.config__configuration:
+    if 999 == args.configuration:
         print("Please specify the configuration with the -config flag, legend below:")
         print_configuration_help()
         print("-" * 120)
         parser.print_help()
+        print("*" * 120)
+        print("Please specify the context number with the -context option")
+        print("*" * 120)
         sys.exit(1)
-    config = g_run_profiles[args.config__configuration]
+    config = g_run_profiles[args.configuration]
     try:
         if config["consider_history"]:
             g_search_should_consider_history = True
