@@ -2075,6 +2075,33 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         self.append_clause(nothawk)
         self.append_clause(shreik)
 
+    def ask_if_location_not_hawk(self, location):
+        print("In ask")
+        hwk = expr(Utils.get_logic_symbol("NOTHAWK", location))
+        fn = pl_fc_entails
+        fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
+        fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
+        if g_profile_knowledgebase:
+            time1 = time.perf_counter()
+        gen = fn(self.kb, hwk)
+        if g_profile_knowledgebase:
+            time2 = time.perf_counter()
+            time2 = time2 - time1
+            print(f"Ask took {time2}")
+            self.ask_perf += time2
+            self.ask_count += 1
+        ret = False
+        if (isinstance(gen, bool)):
+            ret = gen
+        else:
+            for i in gen:
+                ret = True
+        logging.info(f"checking if location is not hawk {location} = {ret}")
+        return ret
+
+    def ask_if_location_hawk_maybe(self, location):
+        return not self.ask_if_location_not_hawk(location)
+
     def ask_if_location_hawk(self, location):
         hwk = expr(Utils.get_logic_symbol("HAWK", location))
         fn = pl_fc_entails
@@ -2088,7 +2115,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
             time2 = time2 - time1
             self.ask_perf += time2
             self.ask_count += 1
-
         ret = False
         if (isinstance(gen, bool)):
             ret = gen
