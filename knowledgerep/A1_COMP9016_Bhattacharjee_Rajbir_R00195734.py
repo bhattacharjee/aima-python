@@ -2321,6 +2321,9 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                 self.tell_count += 1
 
 
+    # WALL ==> NOTHAWK
+    # SHREIK ==> NOTHAWK
+    # NOTSHREIK ==> NOTHAWK
     def create_simple_rules(self):
         for i in range(self.rows):
             for j in range(self.cols):
@@ -2352,6 +2355,10 @@ class SnakeKnowledgeBaseToDetectHawk(object):
             ret.append((b, a,))
         return ret
 
+    # HAWK ==> SHREIK1, HAWK ==> SHREIK2 ...
+    # NOTSHREIK ==> NOTHAWK1, NOTSHREIK => NOTHAWK2, ...
+    # NOTHAWK1 & NOTHAWK2 & NOTHAWK3 & SHREIK ==> HAWK4
+    # NOTSHREIK1 & NOTSHREIK2 & NOTSHREIK3 & NOTSHREIK4 ==> NOTHAWK
     def create_compound_clauses1(self):
         for i in range(self.rows):
             for j in range(self.cols):
