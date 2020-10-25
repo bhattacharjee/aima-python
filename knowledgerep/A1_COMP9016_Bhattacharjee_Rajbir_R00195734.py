@@ -970,6 +970,11 @@ class TwoDEnvironment(Environment):
 
     # keeps track of
     def process_agent_grow_shrink(self, direction):
+        """[if agent needs to grow or shrink, update the state]
+
+        Args:
+            direction ([int]): [1 if agent needs to grow, -1 agents needs to shrink]
+        """
         if not self.agent_can_grow:
             return
         self.agent_max_length = Utils.get_new_max_length(self.agent_max_length, direction)
@@ -979,6 +984,15 @@ class TwoDEnvironment(Environment):
         self.trim_history()
 
     def process_agent_grow_shrink2(self, should_grow, should_shrink):
+        """[if agent needs to grow or shrink, update the state]
+
+        Args:
+            should_grow ([bool]): [does agent need to grow?]
+            should_shrink ([bool]): [does agent need to shrink?]
+
+        Returns:
+            [type]: [description]
+        """
         direction = 0
         direction = 1 if should_grow else direction
         direction = -1 if should_shrink else direction
@@ -986,6 +1000,11 @@ class TwoDEnvironment(Environment):
 
     # If the agent is stuck, or the agent has reached the door, return true
     def is_done(self):
+        """[are we stuck, or have we completed]
+
+        Returns:
+            [bool]: [true if we are stuck or we have reached the door]
+        """
         if self.is_stuck:
             return True
         if not self.agents[0].is_alive:
@@ -1012,10 +1031,21 @@ class TwoDEnvironment(Environment):
             curses.endwin()
 
     def trim_history(self):
+        """[Trim the history so that it is consistent with teh current history size]
+        """
         while(len(self.agent_history) > self.agent_max_length):
             self.agent_history.popleft()
 
     def old_object_processing(self, old_object):
+        """[If we stepped on a square where there already was some object, some
+        stuff needs to be done]
+
+        Args:
+            old_object ([TwoDObject]): [the object that was here before the agent stepped]
+
+        Returns:
+            [tuple]: [should agent grow, should agent shrink, does agent get any points/power?]
+        """
         should_grow = False
         should_shrink = False
         num_power = 0
@@ -1032,12 +1062,19 @@ class TwoDEnvironment(Environment):
         return should_grow, should_shrink, num_power
 
     def stash_old_object(self, old_object):
+        """[save the old object when an agent steps into a square]
+
+        Args:
+            old_object ([TwoDObject]): [old object]
+        """
         if True == self.restore_power and old_object != None:
             if isinstance(old_object, Power) or isinstance(old_object, Grow)\
                     or isinstance(old_object, Shrink):
                 self.stored_power = old_object
 
     def restore_old_object(self):
+        """[Resotre the old object that was stashed to its original lcoation]
+        """
         if True == self.restore_power and None != self.stored_power:
             (row, col) = tuple(self.stored_power.location)
             self.matrix[row][col] = self.stored_power
@@ -1146,6 +1183,15 @@ class TwoDEnvironment(Environment):
             self.agent_history.append((x, y))
 
     def print_stuck_banner(self, m, is_recursing=False):
+        """[If we got stuck, print a banner]
+
+        Args:
+            m ([list]): [matrix]
+            is_recursing (bool, optional): [Set internally, don't touch]. Defaults to False.
+
+        Returns:
+            [list]: [matrix with the banner printed in it]
+        """
         global g_stuck_banner, g_stuck_banner1
         try:
             self.last_banner_used = 0 if self.last_banner_used != 0 else 1
@@ -1163,6 +1209,11 @@ class TwoDEnvironment(Environment):
                 return self(self, m, is_recursing=True)
 
     def get_print_matrix(self):
+        """[Return Matrix for printing]
+
+        Returns:
+            [list]: [string list matirx for printing]
+        """
         theAgent = None
         m = [[' ' for i in range(self.cols + 2)] for j in range(self.rows + 2)]
         for i in range(self.cols +2):
