@@ -21,7 +21,7 @@ g_kb_print_profile_information = True
 g_agent_initial_max_length = 8
 g_agent_can_grow = True
 g_profile_knowledgebase = True
-g_perf_run = True
+g_perf_run = False
 g_override_global_algorithm = -1
 
 
