@@ -88,7 +88,7 @@ class NaiveBayesTextClassifier(object):
 
     def update_document(self, class_label:str, document:str)->None:
         if class_label not in self.count_w_c.keys():
-            self.count_w_c.keys[class_label] = dict()
+            self.count_w_c[class_label] = dict()
         if class_label not in self.count_c.keys():
             self.count_c[class_label] = 0
         for word in self.get_words(document):
