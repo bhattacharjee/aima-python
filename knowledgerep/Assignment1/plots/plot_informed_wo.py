@@ -43,5 +43,5 @@ ax[1][1].plot(x, y1, label="A* w/o Length", color="green", marker='o')
 y1 = [66.4]
 ax[1][1].plot(x[:1], y1, label="RBFS w/o Length", color="red", marker='^')
 
-plt.suptitle("Informed Search\nLength/History of body not accounted.")
+plt.suptitle("Informed Search\nBody Length/History Excluded")
 plt.show()

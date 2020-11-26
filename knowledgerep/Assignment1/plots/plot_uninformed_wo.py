@@ -44,5 +44,5 @@ ax[1][1].plot(x, y1, label="BFS w/o Length", color="red", marker='o')
 y1 = [66.4, 72.89, 67.851, ]
 ax[1][1].plot(x, y1, label="UCS w/o Length", color="green", marker='o')
 
-fig.suptitle("Uninformed search compared\nLength/history of body not considered")
+fig.suptitle("Uninformed search compared\nBody Length/History Excluded")
 plt.show()

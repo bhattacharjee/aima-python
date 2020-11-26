@@ -3,60 +3,28 @@ import os,sys,inspect, random, collections, copy, pickle
 import argparse
 import time
 import logging
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 
 # Is curses available or not?
 g_curses_available = True
-
-# Do not print state after every step
 g_suppress_state_printing = False
-
-# How many loops to do at after each step while printing?
 g_state_print_same_place_loop_count = 6
-
-# Sleep between two steps
 g_state_refresh_sleep = 0.05
-
-# Can snake cross itself?
 g_self_crossing_not_allowed = True
-
-# Should search consider the history of the body of the snake?
 g_search_should_consider_history = False
-
-# Is Pygame available
 g_pygame_available = False
-
-# Should use pygame if available?
 g_use_pygame = True
-
-# Sleep duration for graphics between steps
-g_graphics_sleep_time = 0.1
-
-# Should use tkinter if available?
+g_graphics_sleep_time = 0.01
 g_use_tkinter = True
-
-# Is TKinter available
 g_tkinter_available = False
-
-# For inference problems, need to print profiling information?
 g_kb_print_profile_information = True
-
-# Initial maximum length of snake
 g_agent_initial_max_length = 8
-
-# Can agent grow/shrink?
 g_agent_can_grow = True
-
-# Should gather profiling information for knowledgebase?
 g_profile_knowledgebase = True
-
-# Is this a perf run? Don't import graphics libraries
-g_perf_run = False
-
-# Inference algorithm override
+g_perf_run = True
 g_override_global_algorithm = -1
 
-# Don't import graphics libraries if we're profiling, this throws numbers off
+
 if not g_perf_run:
     try:
         import pygame
@@ -105,10 +73,10 @@ tinyMaze = """
 #################"""
 tinyMazeWithHawk = """
 #################
-##     #     #  #
-#o###H       #  #
-# #H##  #  #    #
-#            x  #
+#o      #    #  #
+# #######  #    #
+#H           x  #
+#               #
 #################"""
 smallHawkTestMaze= """
 ##############################
@@ -322,7 +290,7 @@ largeMazeWithHawk = """
 #     #                      #                         #                  #                                        #
 #######                      #                                            #                                        #
 #o                                                                                                                 #
-###HH##                                                                                                            #
+#H#####                                                                                                            #
 ####################################################################################################################"""
 g_stuck_banner = """
   ********       **********       **     **         ******        **   **       **
@@ -355,49 +323,19 @@ g_stuck_banner2 = """
 ////////            //            ///////          //////        //   //       // """
 
 
-# General utilities the rest of the program uses
 class Utils:
     def manhattan_distance(l1, l2):
-        """[Manhattan Distance]
-
-        Args:
-            l1 ([tuple]): [location1]
-            l2 ([tuple]): [location2]
-
-        Returns:
-            [int]: [manhattan distance]
-        """
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
         logging.debug(f"{l1[0]} {l1[1]} {l2[0]} {l2[1]} {abs(l1[0] - l2[0])} {abs(l1[1] - l2[1])}")
         return abs(l1[0] - l2[0]) + abs(l1[1] - l2[1])
 
     def euclidean_distance(l1, l2):
-        """[euclidan distance]
-
-        Args:
-            l1 ([tuple]): [location1]
-            l2 ([tuple]): [location2]
-
-        Returns:
-            [int]: [Euclidan distance]
-        """
         assert((isinstance(l1, tuple) or isinstance(l1, list)) and 2 == len(l1))
         assert((isinstance(l2, tuple) or isinstance(l2, list)) and 2 == len(l2))
         return math.sqrt((l1[0] - l2[0])**2 + (l1[1] - l2[1])**2)
 
     def get_matrix_for_program(rows, cols, things, include_grow_shrink=False):
-        """[get text form of matrix]
-
-        Args:
-            rows ([int]): [dimensions - rows]
-            cols ([int]): [dimensions - cols]
-            things ([list]): [array of things]
-            include_grow_shrink (bool, optional): [can agent grow/shrink?]. Defaults to False.
-
-        Returns:
-            [list of list or chars]: [text form of the maze]
-        """
         matrix = [[' ' for i in range(cols)] for j in range(rows)]
         for thing in things:
             if not isinstance(thing, Agent):
@@ -413,16 +351,6 @@ class Utils:
         return matrix
 
     def convert_text_matrix_to_object(rows, cols, tmatrix):
-        """[convert text matrix to matrix of objects]
-
-        Args:
-            rows ([int]): [dimensions - rows]
-            cols ([int]): [dimensions - colsl]
-            tmatrix ([list of lists of chars]): [text matrix form of the maze]
-
-        Returns:
-            [list of lists of Object]: [Matrix with real objects]
-        """
         matrix = [[None for i in range(cols)] for j in range(rows)]
         for i in range(rows):
             for j in range(cols):
@@ -488,15 +416,6 @@ class Utils:
         return True
 
     def get_adjacent_squares(loc, dimensions):
-        """[Get adjacent squares]
-
-        Args:
-            loc ([tuple or list]): [current location]
-            dimensions ([tuple or list]): [dimensions of the maze]
-
-        Returns:
-            [list]: [adjacent squares]
-        """
         (x, y) = tuple(loc)
         (r, c) = tuple(dimensions)
         candidates = [(x-1, y), (x+1, y), (x, y-1), (x, y+1)]
@@ -508,28 +427,10 @@ class Utils:
         return ret
 
     def get_logic_symbol(prefix, location):
-        """[Get a unique logic symbol]
-
-        Args:
-            prefix ([str]): [string]
-            location ([list or tuple]): [location]
-
-        Returns:
-            [str]: [returns a unique identifier to be used as a symbol]
-        """
         (x, y) = tuple(location)
         return "%s_%0.3d_%0.3d" % (prefix, x, y)
 
     def update_kb_for_location(kb, percepts):
-        """[Updates the current location int the KB]
-
-        Args:
-            kb ([SnakeKnowledgeBaseToDetectHawk]): [KB]
-            percepts ([list]): [percepts]
-
-        Returns:
-            [bool]: [Shriek heard or not]
-        """
         assert(isinstance(kb, SnakeKnowledgeBaseToDetectHawk))
         location = percepts["location"]
         feelings = percepts["feelings"]
@@ -545,15 +446,6 @@ class Utils:
         return shreik_heard
 
     def create_initial_kb(percepts, algorithm):
-        """[Create an initial kb]
-
-        Args:
-            percepts ([list]): [percepts from env]
-            algorithm ([int]): [which inference algorithm to use]
-
-        Returns:
-            [SnakeKnowledgeBaseToDetectHawk]: [the created KB]
-        """
         global g_override_global_algorithm
         shreik_heard = False
         thealgorithm = algorithm
@@ -569,26 +461,22 @@ class Utils:
         return kb
 
     def trim_candidate_if_hawk(kb, shreik_heard, candidates, a_loc, mt_dim):
-        """[for all candidates, leave out the ones that we know are hawks]
-
-        Args:
-            kb ([SnakeKnowledgeBaseToDetectHawk]): [KB]
-            shreik_heard ([Bool]): [did we hear a shriek at the current location]
-            candidates ([list]): [candidate locations where we might move]
-            a_loc ([list or tuple]): [current agent location]
-            mt_dim ([list or tuple]): [matrix dimensions]
-
-        Returns:
-            [list]: [candidate locations which are not known hawks]
-        """
         if shreik_heard and kb:
             temp = []
-            for cand in candidates:
-                hawk = kb.ask_if_location_hawk(tuple(cand))
-                if not hawk:
-                    temp.append(cand)
-                else:
-                    logging.info(f"{cand} is definitely a hawk. skipping...")
+            try:
+                for cand in candidates:
+                    hawk = kb.ask_if_location_hawk(tuple(cand))
+                    if not hawk:
+                        temp.append(cand)
+                    else:
+                        logging.info(f"{cand} is definitely a hawk. skipping...")
+            except:
+                for cand in candidates:
+                    nothawk = kb.ask_if_location_not_hawk(tuple(cand))
+                    if nothawk:
+                        temp.append(cand)
+                    else:
+                        logging.info(f"{cand} is may be a hawk. skipping...")
             return temp
         else:
             return candidates
@@ -636,22 +524,9 @@ class TwoDThing(Thing):
         return self.display
 
     def is_hidden_from_agent(self):
-        """[Is this thing something the agent can't see]
-
-        Returns:
-            [bool]: [True if hidden from agent]
-        """
         return self.agent_cannot_see_me
 
     def can_kill_agent(self, ag_location):
-        """[Can I kill the agent now?]
-
-        Args:
-            ag_location ([list or tuple]): [location of the agent]
-
-        Returns:
-            [Bool]: [True if I can kill the agent now else false]
-        """
         if self.i_can_kill_agent and tuple(self.location) == tuple(ag_location):
             return True
         return False
@@ -676,12 +551,6 @@ class Power(TwoDThing):
 
     # Get the display character, overriding that from the parent class
     def get_display(self):
-        """[Get the character to display to indicate this object. This is used
-        when printing the state of the maze]
-
-        Returns:
-            [str]: [character to display]
-        """
         return str(self.power_value)
 
 # Wall
@@ -717,19 +586,10 @@ class Hawk(TwoDThing):
         self.agent_cannot_see_me = True
 
     def get_agent_feelings(self, ag_loc):
-        """[If an agent should feel something, return what it should feel]
-
-        Args:
-            ag_loc ([list or tuple]): [location of agent]
-
-        Returns:
-            [string]: [shriek if agent is adjacent to me]
-        """
         if 1 == Utils.manhattan_distance(ag_loc, self.get_location()):
             return "shriek"
 
 
-# Simple graphics using TKinter
 class SimpleGraphics():
     SQUARE_SIZE = 10
     RADIUS = SQUARE_SIZE // 2
@@ -781,11 +641,6 @@ class SimpleGraphics():
         pygame.draw.rect(self.screen, color, (x, y, width, width))
 
     def update(self, m):
-        """[Update the screen]
-
-        Args:
-            m ([list]): [matrix representing the maze]
-        """
         global g_graphics_sleep_time
         if not self.is_inited:
             return
@@ -861,14 +716,6 @@ class SimpleGraphicsTkinter():
         self.canvas.create_oval(x, y, x + diameter + 1, y + diameter + 1, fill=self.get_color_string(color), outline="")
 
     def get_color_string(self, color: tuple):
-        """[convert a tuple to a string]
-
-        Args:
-            color (tuple): [tuple representing the color]
-
-        Returns:
-            [str]: [string representating the color.]
-        """
         stringcolor = "#"
         for i in color:
             tempstr = "%.2x" % i
@@ -886,11 +733,6 @@ class SimpleGraphicsTkinter():
         self.labels = []
 
     def update(self, m):
-        """[Update the screen]
-
-        Args:
-            m ([list]): [matrix representing the maze]
-        """
         global g_graphics_sleep_time
         if not self.is_inited:
             return
@@ -970,11 +812,6 @@ class TwoDEnvironment(Environment):
 
     # keeps track of
     def process_agent_grow_shrink(self, direction):
-        """[if agent needs to grow or shrink, update the state]
-
-        Args:
-            direction ([int]): [1 if agent needs to grow, -1 agents needs to shrink]
-        """
         if not self.agent_can_grow:
             return
         self.agent_max_length = Utils.get_new_max_length(self.agent_max_length, direction)
@@ -984,15 +821,6 @@ class TwoDEnvironment(Environment):
         self.trim_history()
 
     def process_agent_grow_shrink2(self, should_grow, should_shrink):
-        """[if agent needs to grow or shrink, update the state]
-
-        Args:
-            should_grow ([bool]): [does agent need to grow?]
-            should_shrink ([bool]): [does agent need to shrink?]
-
-        Returns:
-            [type]: [description]
-        """
         direction = 0
         direction = 1 if should_grow else direction
         direction = -1 if should_shrink else direction
@@ -1000,11 +828,6 @@ class TwoDEnvironment(Environment):
 
     # If the agent is stuck, or the agent has reached the door, return true
     def is_done(self):
-        """[are we stuck, or have we completed]
-
-        Returns:
-            [bool]: [true if we are stuck or we have reached the door]
-        """
         if self.is_stuck:
             return True
         if not self.agents[0].is_alive:
@@ -1031,21 +854,10 @@ class TwoDEnvironment(Environment):
             curses.endwin()
 
     def trim_history(self):
-        """[Trim the history so that it is consistent with teh current history size]
-        """
         while(len(self.agent_history) > self.agent_max_length):
             self.agent_history.popleft()
 
     def old_object_processing(self, old_object):
-        """[If we stepped on a square where there already was some object, some
-        stuff needs to be done]
-
-        Args:
-            old_object ([TwoDObject]): [the object that was here before the agent stepped]
-
-        Returns:
-            [tuple]: [should agent grow, should agent shrink, does agent get any points/power?]
-        """
         should_grow = False
         should_shrink = False
         num_power = 0
@@ -1062,19 +874,12 @@ class TwoDEnvironment(Environment):
         return should_grow, should_shrink, num_power
 
     def stash_old_object(self, old_object):
-        """[save the old object when an agent steps into a square]
-
-        Args:
-            old_object ([TwoDObject]): [old object]
-        """
         if True == self.restore_power and old_object != None:
             if isinstance(old_object, Power) or isinstance(old_object, Grow)\
                     or isinstance(old_object, Shrink):
                 self.stored_power = old_object
 
     def restore_old_object(self):
-        """[Resotre the old object that was stashed to its original lcoation]
-        """
         if True == self.restore_power and None != self.stored_power:
             (row, col) = tuple(self.stored_power.location)
             self.matrix[row][col] = self.stored_power
@@ -1183,15 +988,6 @@ class TwoDEnvironment(Environment):
             self.agent_history.append((x, y))
 
     def print_stuck_banner(self, m, is_recursing=False):
-        """[If we got stuck, print a banner]
-
-        Args:
-            m ([list]): [matrix]
-            is_recursing (bool, optional): [Set internally, don't touch]. Defaults to False.
-
-        Returns:
-            [list]: [matrix with the banner printed in it]
-        """
         global g_stuck_banner, g_stuck_banner1
         try:
             self.last_banner_used = 0 if self.last_banner_used != 0 else 1
@@ -1209,11 +1005,6 @@ class TwoDEnvironment(Environment):
                 return self(self, m, is_recursing=True)
 
     def get_print_matrix(self):
-        """[Return Matrix for printing]
-
-        Returns:
-            [list]: [string list matirx for printing]
-        """
         theAgent = None
         m = [[' ' for i in range(self.cols + 2)] for j in range(self.rows + 2)]
         for i in range(self.cols +2):
@@ -1254,7 +1045,6 @@ class TwoDEnvironment(Environment):
         self.window.refresh()
         return 0
 
-    # If graphics is available print teh graphics
     def display_graphics(self):
         global g_use_tkinter, g_tkinter_available, g_use_pygame, g_pygame_available
         m = self.get_print_matrix()
@@ -1336,14 +1126,6 @@ class TwoDMaze(TwoDEnvironment):
         print(f"StartingRun with MazeSize = ({rows}, {cols})")
 
     def is_deque_stuck(self, d):
-        """[If the snake is stuck, return true]
-
-        Args:
-            d ([deque]): [history of past movements]
-
-        Returns:
-            [bool]: [True if snake is stuck/trapped]
-        """
         if (0 == len(d) or 1 == len(d) or None == d):
             return False
         for e in d:
@@ -1375,11 +1157,6 @@ class TwoDMaze(TwoDEnvironment):
             self.is_stuck = self.is_deque_stuck(self.stuck_detect)
 
     def got_stuck(self):
-        """[did we get stuck?]
-
-        Returns:
-            [bool]: [True if we got stuck]
-        """
         the_agent = None
         the_door = None
         for thing in self.things:
@@ -1393,8 +1170,6 @@ class TwoDMaze(TwoDEnvironment):
         return self.is_stuck
 
     def __del__(self):
-        """[delete the object and print some statistics]
-        """
         global g_curses_available
         if g_curses_available:
             curses.endwin()
@@ -1419,14 +1194,6 @@ class TwoDMaze(TwoDEnvironment):
         print(f"AgentLenth = {len(self.agent_history) + 1}")
 
 def get_agent_location_from_maze_string(mazeString=str):
-    """[Get the location of the agent from the maze]
-
-    Args:
-        mazeString ([str], optional): [string of the maze location]. Defaults to str.
-
-    Returns:
-        [tuple]: [location of the maze]
-    """
     mazeString = [list(x.strip()) for x in mazeString.split("\n") if x]
     rows = len(mazeString)
     cols = len(mazeString[0])
@@ -1503,28 +1270,9 @@ class NextMoveHelper(object):
         return candidates
 
     def get_move_string(dx, dy):
-        """[convert a dy/dx into a string for the move]
-
-        Args:
-            dx ([int]): [delta in rows]
-            dy ([int]): [delta in cols]
-
-        Returns:
-            [str]: [describe the move]
-        """
         return NextMoveHelper.move_table[(dx, dy)]
 
     def get_new_location(move, x, y):
-        """[given a move string and a location, get the new location]
-
-        Args:
-            move ([string]): [action]
-            x ([int]): [row]
-            y ([int]): [col]
-
-        Returns:
-            [tuple]: [new location]
-        """
         if (isinstance(x, list) or isinstance(x, tuple)):
             y = x[0]
             x = x[1]
@@ -1545,19 +1293,6 @@ class NextMoveHelper(object):
         return NextMoveHelper.get_move_string2(old[0], old[1], new[0], new[1])
 
     def get_move_suitability(oldx, oldy, newx, newy, gdx, gdy):
-        """[Return a higher score if the move is in the direction of the goal]
-
-        Args:
-            oldx ([type]): [description]
-            oldy ([type]): [description]
-            newx ([type]): [description]
-            newy ([type]): [description]
-            gdx ([type]): [description]
-            gdy ([type]): [description]
-
-        Returns:
-            [int]: [a higher score if the move is in the direction of the goal]
-        """
         gdx = 0 if 0 == gdx else gdx // abs(gdx)
         gdy = 0 if 0 == gdy else gdy // abs(gdy)
         dx = newx - oldx
@@ -1572,16 +1307,6 @@ class NextMoveHelper(object):
         return score
 
     def get_updated_row_col(x, y, action):
-        """[given a location and an action, get the new location]
-
-        Args:
-            x ([int]): [row]
-            y ([int]): [col]
-            action ([type]): [description]
-
-        Returns:
-            [tuple]: [new location]
-        """
         row = x
         col = y
         if "moveUp" == action:
@@ -1612,7 +1337,6 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
     matrix = None
     use_weighted_random_selection = weighted_rand_sel
 
-    # Select at random from candidates
     def select_random(cp):
         rowCandidate = colCandidate = -1
         while 0 != len(cp):
@@ -1626,7 +1350,6 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
                 del cp[i]
         return rowCandidate, colCandidate
 
-    # Get the directions of the goal
     def get_goal_directions(percepts):
         goal_direction = percepts["goal_direction"]
         dx = goal_direction[0]
@@ -1635,7 +1358,6 @@ def SimpleReflexProgram(weighted_rand_sel=False, use_inference=False):
         dy = dy if 0 == dy else dy // abs(dy)
         return dx, dy
 
-    # Recreate teh maze from percepts
     def recreate_board(percepts):
         things = percepts["things"]
         mt_dimensions = percepts["dimensions"]
@@ -1709,11 +1431,9 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
     kb = None
     shreik_heard = False
 
-    # get the matrix from things array from percepts
     def get_matrix(rows, cols, things):
         return Utils.get_matrix_for_program(rows, cols, things)
 
-    # Move randomly till we reach a location that we haven't visited before
     def get_random_move(matrix, a_loc, history):
         nonlocal kb, shreik_heard
         assert(None != matrix and isinstance(matrix, list) and isinstance(matrix[0], list))
@@ -1744,8 +1464,6 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
         return None
 
 
-    # Get a move in the direction of the goal Sometimes it will prioritize x axis, sometimes y axis
-    # if movement along both axis is possible
     def get_goal_directed_new_location_int(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
         # Sometimes, try moving rows first, at other times, try moving columns first
         assert(None != history)
@@ -1781,7 +1499,6 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
                         return newrow, newcol
         return -1, -1
 
-    # Get the new goal directed location
     def get_goal_directed_new_location(matrix, m_rows, m_cols, a_row, a_col, dx, dy, history):
         nonlocal kb, shreik_heard
         r, c = get_goal_directed_new_location_int(matrix, m_rows, m_cols,\
@@ -1790,7 +1507,7 @@ def GoalDrivenAgentProgram(use_inference=False, norandom=False):
             return -1, -1
         return r, c
 
-    # Get the action string
+
     def get_action_string(n_r, n_c, o_r, o_c):
         dx = n_r - o_r
         dy = n_c - o_c
@@ -1868,7 +1585,6 @@ def UtilityBasedAgentProgram(use_inference=False):
     use_kb = use_inference
     kb = None
 
-    # Utility function
     def utility_function(percepts, location, goal, matrix):
         nonlocal memories
         GOAL_SCALING_FACTOR = -100 * (len(percepts["history"]) + 1)
@@ -1896,7 +1612,6 @@ def UtilityBasedAgentProgram(use_inference=False):
             utility_score += SHRINK_SCALING_FACTOR
         return utility_score
 
-    # Get the candidate positions
     def get_candidate_positions(percepts, matrix, shreik_heard):
         import sys
         nonlocal kb, use_kb
@@ -1962,14 +1677,6 @@ class SearchHelper:
         return Utils.get_matrix_for_program(maxrow, maxcol, things, True)
 
     def convert_percepts_to_state(percepts:dict):
-        """[Convert percepts recieved from env to a state that can be used in Node]
-
-        Args:
-            percepts (dict): [Percepts]
-
-        Returns:
-            [str]: [state that can be used in Node]
-        """
         global g_search_should_consider_history
         matrix = SearchHelper.get_text_matrix_for_search(percepts)
         ag_hist = []
@@ -1987,14 +1694,6 @@ class SearchHelper:
         return tup
 
     def convert_state_to_percepts(state):
-        """[Convert the stored state back to percepts]
-
-        Args:
-            state (str): state from node
-
-        Returns:
-            [dict]: [Percepts recreated]
-        """
         global g_search_should_consider_history
         ag_hist = None
         state = pickle.loads(state)
@@ -2022,20 +1721,7 @@ class SearchHelper:
         percepts["things"] = Utils.create_things_array_from_text_matrix(dimensions[0], dimensions[1], textmatrix)
         return percepts
 
-class MazeSearchProblem(Problem):
     """
-    Path Cost:          Deafult, adds 1 for every move
-    Set of actions:     Move Up/Down/Left/Right
-    Initial State:      Maze as it is, snake as where it starts
-    Goal State:         When the head of the snake reaches the door
-    Transition Model:   State of the board --Action--> State of the board
-                        - Includes new position of the snake
-                        - May or may not include body history of the snake
-                          (configurable)
-                        - Implemented via pickling of the entire maze
-
-
-
     Sequence of actions performed in execute_action
     1. Convert the move to the newrow, newcol
     2. Set the matrix position at curent row, col to None (agent was there till nwo)
@@ -2047,6 +1733,7 @@ class MazeSearchProblem(Problem):
     8. Update the agent's internal location and other parameters
     9. If we stepped on a square that grows or shrinks us, change the length of the history dequeue
     """
+class MazeSearchProblem(Problem):
     def __init__(self, initial, goal=None):
         self.cand_moves = self.succs = self.goal_tests = self.states = 0
         self.found = None
@@ -2166,15 +1853,6 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, use_infe
 
 
     def time_and_run_algorithm(problem, heuristic):
-        """[run an algorithm and profile it]
-
-        Args:
-            problem ([Problem]): [search problem]
-            heuristic ([heuristic]): [heuristic function]
-
-        Returns:
-            [type]: [search results]
-        """
         nonlocal search_algorithm
         nonlocal perf_string
         nonlocal use_heuristic
@@ -2191,14 +1869,6 @@ def SearchBasedAgentProgram(algorithm=astar_search, useheuristic=False, use_infe
         return SearchHelper.convert_percepts_to_state(percepts)
 
     def heuristic(node):
-        """[Heuristic function for informed search]
-
-        Args:
-            node ([type]): [the Node]
-
-        Returns:
-            [int]: [heuristic value, in this case just the manhattan distance]
-        """
         percept = SearchHelper.convert_state_to_percepts(node.state)
         (curx, cury) = tuple(percept["location"])
         (goalx, goaly) = tuple(percept["goal_direction"])
@@ -2315,11 +1985,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         print(f"n(Clauses) = {len(self.kb.clauses)}")
 
     def append_clause(self, clause):
-        """[add a clause to the knowledge base]
-
-        Args:
-            clause ([str]): [clause]
-        """
         if clause not in self.clauses:
             logging.debug("Adding " + clause)
             self.clauses.append(clause)
@@ -2333,9 +1998,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
                 self.tell_count += 1
 
 
-    # WALL ==> NOTHAWK
-    # SHREIK ==> NOTHAWK
-    # NOTSHREIK ==> NOTHAWK
     def create_simple_rules(self):
         for i in range(self.rows):
             for j in range(self.cols):
@@ -2367,10 +2029,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
             ret.append((b, a,))
         return ret
 
-    # HAWK ==> SHREIK1, HAWK ==> SHREIK2 ...
-    # NOTSHREIK ==> NOTHAWK1, NOTSHREIK => NOTHAWK2, ...
-    # NOTHAWK1 & NOTHAWK2 & NOTHAWK3 & SHREIK ==> HAWK4
-    # NOTSHREIK1 & NOTSHREIK2 & NOTSHREIK3 & NOTSHREIK4 ==> NOTHAWK
     def create_compound_clauses1(self):
         for i in range(self.rows):
             for j in range(self.cols):
@@ -2453,7 +2111,8 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         return not self.ask_if_location_not_hawk(location)
 
     def ask_if_location_hawk(self, location):
-        hwk = expr(Utils.get_logic_symbol("HAWK", location))
+        print("In ask")
+        hwk = expr(Utils.get_logic_symbol("NOTHAWK", location))
         fn = pl_fc_entails
         fn = fol_bc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_BC else fn
         fn = fol_fc_ask if self.algorithm == SnakeKnowledgeBaseToDetectHawk.USE_FOL_FC else fn
@@ -2463,6 +2122,7 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         if g_profile_knowledgebase:
             time2 = time.perf_counter()
             time2 = time2 - time1
+            print(f"Ask took {time2}")
             self.ask_perf += time2
             self.ask_count += 1
         ret = False
@@ -2474,7 +2134,6 @@ class SnakeKnowledgeBaseToDetectHawk(object):
         logging.info(f"checking if location is hawk {location} = {ret}")
         return ret
 
-# Driver function
 def RunAgentAlgorithm(program, mazeString: str):
     global g_state_print_same_place_loop_count
     global g_state_refresh_sleep
@@ -2498,6 +2157,24 @@ def RunAgentAlgorithm(program, mazeString: str):
         statsString = "Search Stats not available"
     del env
     print(statsString)
+
+def process():
+    #RunAgentAlgorithm(SimpleReflexProgram(), smallMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), smallMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(), smallMazeWithPower)
+    #RunAgentAlgorithm(SimpleReflexProgram(), mediumMaze2)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), mediumMaze2)
+    #RunAgentAlgorithm(SimpleReflexProgram(False), largeMaze)
+    #RunAgentAlgorithm(SimpleReflexProgram(True), largeMaze)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(), largeMaze)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True), smallMaze)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=breadth_first_graph_search), mediumMaze)
+    #RunAgentAlgorithm(UtilityBasedAgentProgram(use_inference=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(SearchBasedAgentProgram(algorithm=astar_search, useheuristic=True, use_inference=False), smallHawkTestMaze2)
+    #RunAgentAlgorithm(GoalDrivenAgentProgram(use_inference=True), smallHawkTestMaze2)
+    #RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), smallHawkTestMaze2)
+    pass
 
 g_run_profiles = {
             1: {
@@ -2801,7 +2478,7 @@ g_run_profiles = {
                 },
             69: {
                 "description": "inference with utility based agent program, large maze (body-length not considered)",
-                "commands": ["RunAgentAlgorithm(UtilityBasedAgentProgram(use_inference=True), largeMazeWithHawk)"]
+                "commands": ["RunAgentAlgorithm(SimpleReflexProgram(use_inference=True), largeMazeWithHawk)"]
                 },
         }
 
@@ -2827,10 +2504,10 @@ def main():
                             default=8)
     parser.add_argument("-profkb", "--profile-knowledge-base", help="Print profiling information of knowledgebase",\
                             action="store_true")
-    parser.add_argument("-config", "--configuration", type=int,\
+    parser.add_argument("-config" "--configuration", type=int,\
             help="The configuration of the run, mandatory", default=999)
     parser.add_argument("-inferalgo", "--inference-algorithm", type=int, default=-1,
-            help="0 - pl_fc_entails, 1 = fol_bc_ask, 2 = fol_fc_ask (fol_bc_ask may run out of stack space)")
+            help="0 - pl_fc_entails, 1 = fol_bc_ask, 2 = fol_fc_ask")
     args = parser.parse_args()
     g_curses_available = False if args.no_ncurses else g_curses_available
     g_suppress_state_printing = True if args.suppress_state_printing else g_suppress_state_printing
@@ -2847,16 +2524,13 @@ def main():
     if g_suppress_state_printing:
         g_state_refresh_sleep = 0
         g_state_print_same_place_loop_count
-    if 999 == args.configuration:
+    if 999 == args.config__configuration:
         print("Please specify the configuration with the -config flag, legend below:")
         print_configuration_help()
         print("-" * 120)
         parser.print_help()
-        print("*" * 120)
-        print("Please specify the context number with the -context option")
-        print("*" * 120)
         sys.exit(1)
-    config = g_run_profiles[args.configuration]
+    config = g_run_profiles[args.config__configuration]
     try:
         if config["consider_history"]:
             g_search_should_consider_history = True
