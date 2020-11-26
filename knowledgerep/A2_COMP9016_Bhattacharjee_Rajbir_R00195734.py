@@ -229,7 +229,7 @@ def get_accuracy_score(y_test, y_predict):
             c += 1
     return c/n
 
-def main():
+def NaiveBayesSmsSpamCollection():
     df = read_lines_and_convert_to_df('SMSSpamCollection')
     nb = NaiveBayesTextClassifier()
     train, test = train_test_split(df)
@@ -238,5 +238,8 @@ def main():
     y_test = test.class_label.to_list()
     y_predict = nb.predict(X_test)
     print(get_accuracy_score(y_predict, y_test))
+
+def main():
+    NaiveBayesSmsSpamCollection('SMSSpamCollection')
 
 main()
