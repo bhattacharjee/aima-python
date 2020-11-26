@@ -38,6 +38,8 @@ class NaiveBayesTextClassifier(object):
                 continue
             if c in list("<>(){}\\/"):
                 continue
+            if c in list('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'):
+                ret.append(' ')
             ret.append(c)
         if len(ret) < 0:
             raise AssertionError("cleaned up line contains no characters")
@@ -51,7 +53,12 @@ class NaiveBayesTextClassifier(object):
         """
         line = line.lower()
         line = self.cleanup_line(line)
-        print (line)
+        words = re.split('\s+', line)
+
+        # TODO: remove stop words
+        # TODO: Get n grams
+        #
+        return words
 
     def calculate_priors(self):
         n_inst = len(self.train_data)
@@ -60,6 +67,9 @@ class NaiveBayesTextClassifier(object):
             n_c = len(rows)
             # TODO: Apply smoothing here
             self.priors[c] = n_c / n_inst
+
+    def update_document(class_label:str, document:str)->None:
+        print(class_label, get_words(document))
 
     def fit(self, df:pd.DataFrame)->None:
         # Save the training data
@@ -74,6 +84,10 @@ class NaiveBayesTextClassifier(object):
         # Calculate priori probabilities of all classes
         self.calculate_priors()
 
+        for i in len(df):
+            class_label = df.iloc[i, 'class_label']
+            document = df.iloc[i, 'document']
+            self.update_document(class_label, document)
         # Identify all unique words
         # Calculate Priori Probabilities
         # Calculate conditional probabilities of each word
