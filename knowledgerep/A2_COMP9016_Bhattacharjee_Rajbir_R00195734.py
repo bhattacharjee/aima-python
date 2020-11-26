@@ -3,6 +3,8 @@
 import re
 import string
 import pandas as pd
+import random
+random.seed(12345)
 
 class NaiveBayesTextClassifier(object):
 
@@ -100,6 +102,27 @@ class LineParser(object):
         assert(None != m.group(2) and isinstance(m.group(2), str))
         return(m.group(1), m.group(2))
 
+def train_test_split(df:pd.DataFrame)->tuple:
+    classes = set(df.class_label.unique())
+    temp_split_tuples = list()
+    for c in classes:
+        reduced_df = df[df['class_label'] == c]
+        train_instances = pd.DataFrame(columns=df.columns)
+        test_instances = pd.DataFrame(columns=df.columns)
+        for i in range(len(reduced_df)):
+            if random.uniform(0, 1) < 0.2:
+                test_instances = test_instances.append(reduced_df.iloc[i,:])
+            else:
+                train_instances = train_instances.append(reduced_df.iloc[i,:])
+        temp_split_tuples.append((train_instances, test_instances, ))
+    train_instances = pd.DataFrame(columns=df.columns)
+    test_instances = pd.DataFrame(columns=df.columns)
+    for train, test in temp_split_tuples:
+        train_instances = train_instances.append(train)
+        test_instances = test_instances.append(test)
+    return train_instances.reset_index(), test_instances.reset_index()
+
+
 def read_lines_and_convert_to_df(filename)->pd.DataFrame:
     lines = read_lines(filename)
     lp = LineParser()
@@ -118,5 +141,8 @@ def main():
     df = read_lines_and_convert_to_df("small.txt")
     nb = NaiveBayesTextClassifier()
     nb.fit(df)
+    train, test = train_test_split(df)
+    print(len(train), len(test))
+    print(test)
 
 main()
