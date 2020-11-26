@@ -30,7 +30,7 @@ class NaiveBayesTextClassifier(object):
         self.total_word_count_by_class = dict()
         pass
 
-    def cleanup_line(line:str)->list:
+    def cleanup_line(self, line:str)->list:
         # cleanup line
         ret = []
         for c in list(line):
@@ -45,7 +45,7 @@ class NaiveBayesTextClassifier(object):
             raise AssertionError("cleaned up line contains no characters")
         return "".join(ret)
 
-    def get_words(line:str)->list:
+    def get_words(self, line:str)->list:
         """
         Take a line, and split it into words, perform any string manipulation
         required on it.
@@ -68,8 +68,8 @@ class NaiveBayesTextClassifier(object):
             # TODO: Apply smoothing here
             self.priors[c] = n_c / n_inst
 
-    def update_document(class_label:str, document:str)->None:
-        print(class_label, get_words(document))
+    def update_document(self, class_label:str, document:str)->None:
+        print(class_label, self.get_words(document))
 
     def fit(self, df:pd.DataFrame)->None:
         # Save the training data
@@ -84,9 +84,9 @@ class NaiveBayesTextClassifier(object):
         # Calculate priori probabilities of all classes
         self.calculate_priors()
 
-        for i in len(df):
-            class_label = df.iloc[i, 'class_label']
-            document = df.iloc[i, 'document']
+        for i in range(len(df)):
+            class_label = df.iloc[i].class_label
+            document = df.iloc[i].document
             self.update_document(class_label, document)
         # Identify all unique words
         # Calculate Priori Probabilities
@@ -156,7 +156,5 @@ def main():
     nb = NaiveBayesTextClassifier()
     nb.fit(df)
     train, test = train_test_split(df)
-    print(len(train), len(test))
-    print(test)
 
 main()
