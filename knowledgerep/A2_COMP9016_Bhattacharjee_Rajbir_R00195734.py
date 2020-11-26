@@ -240,6 +240,6 @@ def NaiveBayesSmsSpamCollection():
     print(get_accuracy_score(y_predict, y_test))
 
 def main():
-    NaiveBayesSmsSpamCollection('SMSSpamCollection')
+    NaiveBayesSmsSpamCollection()
 
 main()
