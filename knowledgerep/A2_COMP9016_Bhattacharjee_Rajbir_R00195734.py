@@ -6,6 +6,7 @@ import pandas as pd
 import random
 import json
 import math
+from sklearn.metrics import confusion_matrix, f1_score
 random.seed(12345)
 
 class NaiveBayesTextClassifier(object):
@@ -231,13 +232,15 @@ def get_accuracy_score(y_test, y_predict):
 
 def NaiveBayesSmsSpamCollection():
     df = read_lines_and_convert_to_df('SMSSpamCollection')
+    #df = read_lines_and_convert_to_df('small.txt')
     nb = NaiveBayesTextClassifier()
     train, test = train_test_split(df)
     nb.fit(train)
     X_test = test.document.to_list()
     y_test = test.class_label.to_list()
     y_predict = nb.predict(X_test)
-    print(get_accuracy_score(y_predict, y_test))
+    print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
+    print(confusion_matrix(y_test, y_predict))
 
 def main():
     NaiveBayesSmsSpamCollection()
