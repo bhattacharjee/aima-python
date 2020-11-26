@@ -125,7 +125,6 @@ class NaiveBayesTextClassifier(object):
                     p += self.p_w_c[word][c]
                 except:
                     pass
-            print(c, p)
             all_ps.append(p)
             all_class_p_tuples.append((c, p, ))
         max_p = max(all_ps)
