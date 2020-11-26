@@ -33,6 +33,7 @@ class NaiveBayesTextClassifier(object):
     def cleanup_line(self, line:str)->list:
         # cleanup line
         ret = []
+        ret2 = []
         for c in list(line):
             if c in string.punctuation:
                 continue
@@ -43,7 +44,16 @@ class NaiveBayesTextClassifier(object):
             ret.append(c)
         if len(ret) < 0:
             raise AssertionError("cleaned up line contains no characters")
-        return "".join(ret)
+        last_c = None
+        for c in ret:
+            if last_c != None:
+                if last_c in list('0123456789') and c not in list('0123456789'):
+                    ret2.append(' ')
+                elif last_c not in list('0123456789') and c in list('0123456789'):
+                    ret2.append(' ')
+            last_c = c
+            ret2.append(c)
+        return "".join(ret2)
 
     def get_words(self, line:str)->list:
         """
@@ -154,7 +164,7 @@ def read_lines_and_convert_to_df(filename)->pd.DataFrame:
 def main():
     df = read_lines_and_convert_to_df("small.txt")
     nb = NaiveBayesTextClassifier()
-    nb.fit(df)
     train, test = train_test_split(df)
+    nb.fit(train)
 
 main()
