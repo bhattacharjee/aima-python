@@ -17,7 +17,7 @@ try:
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir)
     from probability import ProbDist
-    from probability import BayesNet, BayesNode, enumeration_ask
+    from probability import BayesNet, BayesNode, enumeration_ask, elimination_ask
 except:
     print("Failed to import")
 
@@ -367,17 +367,18 @@ def Q1_1_2():
         ('AI', '', 0.8),
         ('FossilFuel', '', 0.4),
         ('RenewableEnergy', 'AI FossilFuel', 
-            {(T, T): 0.2, (T,F):0.7, (F,F):0.02, (F,F):0.5}),
+            {(T, T): 0.2, (T,F):0.7, (F,T):0.02, (F,F):0.5}),
         ('Traffic', 'FossilFuel', {T:0.95, F:0.1}),
         ('GlobalWarming', 'RenewableEnergy Traffic',
             {(T,T):0.6, (T,F):0.4, (F,T):0.95, (F,F):0.55}),
         ('Employed', 'AI GlobalWarming',
             {(T,T):0.01, (T,F):0.03, (F,T):0.03, (F,F):0.95})
     ])
-    print(bayes_net)
-    print(bayes_net.variable_node('GlobalWarming').cpt)
-    p_employed = enumeration_ask('Employed', e={'AI': True, 'FossilFuel':True}, bn=bayes_net)
-    print(p_employed[T], p_employed[F])
+    #print(bayes_net.variable_node('GlobalWarming').cpt)
+    p_employed = enumeration_ask(X='Employed', e={'AI': True, 'FossilFuel':True}, bn=bayes_net)
+    print(f"Probability of getting employed given AI=true and FossilFuel=True: {p_employed.show_approx()}")
+    p_global_warming = elimination_ask(X='GlobalWarming', e={'Employed':False, 'Traffic':False}, bn=bayes_net)
+    print(f"Probability of GlobalWarming given Employed=False and Traffic=False = {p_global_warming.show_approx()}")
 
 def Q1_2_1():
     pass
