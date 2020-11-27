@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import os
 import re
 import string
 import pandas as pd
@@ -296,10 +297,31 @@ def NaiveBayesClinc150():
     print(f"accuracy = {get_accuracy_score(y_predict, test_y)}")
     print(confusion_matrix(test_y, y_predict))
 
+def NaiveBayesYoutubeSpam():
+    files = ['YoutubeSpam/Youtube01-Psy.csv']
+    df = pd.DataFrame()
+    for filename in os.listdir('YoutubeSpam'):
+        if not filename.endswith(".csv"):
+            continue
+        filename = "YoutubeSpam/" + filename
+        df = df = df.append(pd.read_csv(filename))
+    comments = df.CONTENT.to_list()
+    classes = df.CLASS.to_list()
+    df = pd.DataFrame({'class_label': classes, 'document': comments})
+    train, test = train_test_split(df)
+    X_test = test.document.to_list()
+    y_test = test.class_label.to_list()
+    nb = NaiveBayesTextClassifier(max_n_grams=25)
+    nb.fit(train)
+    y_predict = nb.predict(X_test)
+    print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
+    print(confusion_matrix(y_test, y_predict))
+
 
 def main():
     #NaiveBayesSmsSpamCollection()
-    NaiveBayesClinc150()
+    #NaiveBayesClinc150()
+    NaiveBayesYoutubeSpam()
 
 
 main()
