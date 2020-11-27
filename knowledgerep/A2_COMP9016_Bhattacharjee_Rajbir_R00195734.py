@@ -45,7 +45,7 @@ class NaiveBayesTextClassifier(object):
             'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after',\
             'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under',\
             'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how',\
-            'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor',\
+            'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', \
             'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just',\
             'don', 'should', 'now', 'the', 'a'])
         pass
@@ -289,11 +289,11 @@ def NaiveBayesClinc150():
         test_X.append(arr[0])
         test_y.append(arr[1])
     nb = NaiveBayesTextClassifier()
-    print("Trying to fit")
+    #print("Trying to fit")
     nb.fit(train)
-    print("Fit finished")
+    #print("Fit finished")
     y_predict = nb.predict(test_X)
-    print("predict finished")
+    #print("predict finished")
     print(f"accuracy = {get_accuracy_score(y_predict, test_y)}")
     print(confusion_matrix(test_y, y_predict))
 
