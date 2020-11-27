@@ -362,6 +362,20 @@ def Q1_1_1():
     
 
 def Q1_1_2():
+    T, F = True, False
+    bayes_net = BayesNet([
+        ('AI', '', 0.8),
+        ('FossilFuel', '', 0.4),
+        ('RenewableEnergy', 'AI FossilFuel', 
+            {(T, T): 0.2, (T,F):0.7, (F,F):0.02, (F,F):0.5}),
+        ('Traffic', 'FossilFuel', {T:0.95, F:0.1}),
+        ('GlobalWarming', 'RenewableEnergy Traffic',
+            {(T,T):0.6, (T,F):0.4, (F,T):0.95, (F,F):0.55}),
+        ('Employed', 'AI GlobalWarming',
+            {(T,T):0.01, (T,F):0.03, (F,T):0.03, (F,F):0.95})
+    ])
+    print(bayes_net)
+    print(bayes_net.variable_node('GlobalWarming').cpt)
     pass
 
 def Q1_2_1():
@@ -384,6 +398,6 @@ def Q1_2_2():
 
 
 def main():
-    Q1_1_1()
+    Q1_1_2()
 
 main()
