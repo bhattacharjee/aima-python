@@ -298,7 +298,6 @@ def NaiveBayesClinc150():
     print(confusion_matrix(test_y, y_predict))
 
 def NaiveBayesYoutubeSpam():
-    files = ['YoutubeSpam/Youtube01-Psy.csv']
     df = pd.DataFrame()
     for filename in os.listdir('YoutubeSpam'):
         if not filename.endswith(".csv"):
@@ -317,11 +316,39 @@ def NaiveBayesYoutubeSpam():
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
     print(confusion_matrix(y_test, y_predict))
 
+def NaiveBayesSentimentLabeledSentences():
+    documents = []
+    class_labels = []
+    compiled_re = re.compile("(.*)\s+(\d+)$")
+    for filename in os.listdir('sentiment_labelled_sentences'):
+        if not filename.endswith('labelled.txt'):
+            continue
+        filename = "sentiment_labelled_sentences/" + filename
+        with open(filename, "r") as f:
+            lines = [line.strip() for line in f.readlines()]
+            for line in lines:
+                m = compiled_re.search(line)
+                if None != m:
+                    documents.append(m.group(1))
+                    class_labels.append(m.group(2))
+    df = pd.DataFrame({'class_label': class_labels, 'document': documents})
+    train, test = train_test_split(df)
+    X_test = test.document.to_list()
+    y_test = test.class_label.to_list()
+    nb = NaiveBayesTextClassifier(max_n_grams=8)
+    nb.fit(train)
+    y_predict = nb.predict(X_test)
+    print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
+    print(confusion_matrix(y_test, y_predict))
+
+
 
 def main():
     #NaiveBayesSmsSpamCollection()
     #NaiveBayesClinc150()
-    NaiveBayesYoutubeSpam()
+    #NaiveBayesYoutubeSpam()
+    #NaiveBayesSmsSpamCollection()
+    NaiveBayesSentimentLabeledSentences()
 
 
 main()
