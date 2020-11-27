@@ -17,7 +17,7 @@ try:
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir)
     from probability import ProbDist
-    from probability import BayesNet, BayesNode
+    from probability import BayesNet, BayesNode, enumeration_ask
 except:
     print("Failed to import")
 
@@ -376,8 +376,8 @@ def Q1_1_2():
     ])
     print(bayes_net)
     print(bayes_net.variable_node('GlobalWarming').cpt)
-    print(enumerate_ask('Employed', {'AI': True, 'FossilFuel':True}))
-    pass
+    p_employed = enumeration_ask('Employed', e={'AI': True, 'FossilFuel':True}, bn=bayes_net)
+    print(p_employed[T], p_employed[F])
 
 def Q1_2_1():
     pass
