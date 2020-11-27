@@ -17,6 +17,7 @@ try:
     parentdir = os.path.dirname(currentdir)
     sys.path.insert(0,parentdir)
     from probability import ProbDist
+    from probability import BayesNet, BayesNode
 except:
     print("Failed to import")
 
@@ -360,8 +361,13 @@ def Q1_1_1():
     print(f"TIP 3: {tip3.show_approx()}")
     
 
+def Q1_1_2():
+    pass
 
-def NaiveBayesTextDriver():
+def Q1_2_1():
+    pass
+
+def Q1_2_2():
     print('-' * 120)
     print("SMS Spam Classification")
     NaiveBayesSmsSpamCollection()
