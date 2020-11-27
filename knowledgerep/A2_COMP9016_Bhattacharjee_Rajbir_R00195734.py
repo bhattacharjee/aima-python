@@ -11,7 +11,8 @@ random.seed(12345)
 
 class NaiveBayesTextClassifier(object):
 
-    def __init__(self):
+    def __init__(self, max_n_grams:int=1):
+        self.max_n_grams = max_n_grams
         # the set of all classes
         self.classes = set()
 
@@ -32,6 +33,20 @@ class NaiveBayesTextClassifier(object):
 
         # For each class w, count of all words in that class, count(c)
         self.count_c = dict()
+
+        self.stopwords = set(['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you',\
+            'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she',\
+            'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs',\
+            'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', 'these',\
+            'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have',\
+            'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and',\
+            'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for',\
+            'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after',\
+            'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under',\
+            'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how',\
+            'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor',\
+            'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just',\
+            'don', 'should', 'now', 'the', 'a'])
         pass
 
     def cleanup_line(self, line:str)->list:
@@ -63,6 +78,19 @@ class NaiveBayesTextClassifier(object):
         ret = re.sub(r'\d+', r'###', ret)
         return ret
 
+    def get_n_grams(self, words):
+        all_grams = []
+        for i in range(2, self.max_n_grams+1):
+            for j in range(i-1, len(words)):
+                temp = words[j-i+1:j+1]
+                all_grams.append("".join(temp))
+        all_grams = [w for w in all_grams if w != '']
+        for w in words:
+            all_grams.append(w)
+        #print(all_grams)
+        return all_grams
+
+
     def get_words(self, line:str)->list:
         """
         Take a line, and split it into words, perform any string manipulation
@@ -72,6 +100,8 @@ class NaiveBayesTextClassifier(object):
         line = line.lower()
         line = self.cleanup_line(line)
         words = re.split('\s+', line)
+        words = [w for w in words if w not in self.stopwords]
+        words = self.get_n_grams(words)
 
         # TODO: remove stop words
         # TODO: Get n grams
@@ -96,8 +126,8 @@ class NaiveBayesTextClassifier(object):
             if word not in self.count_w_c[class_label].keys():
                 self.count_w_c[class_label][word] = 0
             self.count_w_c[class_label][word] += 1
-        if word not in self.vocabulary:
-            self.vocabulary.add(word)
+            if word not in self.vocabulary:
+                self.vocabulary.add(word)
 
     def calculate_conditionals(self):
         for word in self.vocabulary:
@@ -231,9 +261,10 @@ def get_accuracy_score(y_test, y_predict):
     return c/n
 
 def NaiveBayesSmsSpamCollection():
-    df = read_lines_and_convert_to_df('SMSSpamCollection')
+    #df = read_lines_and_convert_to_df('SMSSpamCollection')
     #df = read_lines_and_convert_to_df('small.txt')
-    nb = NaiveBayesTextClassifier()
+    df = read_lines_and_convert_to_df('temp.txt')
+    nb = NaiveBayesTextClassifier(max_n_grams=5)
     train, test = train_test_split(df)
     nb.fit(train)
     X_test = test.document.to_list()
