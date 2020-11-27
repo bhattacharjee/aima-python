@@ -257,9 +257,9 @@ def get_accuracy_score(y_test, y_predict):
     return c/n
 
 def NaiveBayesSmsSpamCollection():
-    #df = read_lines_and_convert_to_df('SMSSpamCollection')
-    #df = read_lines_and_convert_to_df('small.txt')
-    df = read_lines_and_convert_to_df('temp.txt')
+    #df = read_lines_and_convert_to_df('SMSSpamCollection/SMSSpamCollection')
+    #df = read_lines_and_convert_to_df('SMSSpamCollection/small.txt')
+    df = read_lines_and_convert_to_df('SMSSpamCollection/no_duplicates.txt')
     nb = NaiveBayesTextClassifier(max_n_grams=5)
     train, test = train_test_split(df)
     nb.fit(train)
