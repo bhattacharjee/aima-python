@@ -376,6 +376,7 @@ def Q1_1_2():
     ])
     print(bayes_net)
     print(bayes_net.variable_node('GlobalWarming').cpt)
+    print(enumerate_ask('Employed', {'AI': True, 'FossilFuel':True}))
     pass
 
 def Q1_2_1():
