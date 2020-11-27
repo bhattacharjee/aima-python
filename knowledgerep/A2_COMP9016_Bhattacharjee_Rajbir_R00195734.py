@@ -95,17 +95,13 @@ class NaiveBayesTextClassifier(object):
         """
         Take a line, and split it into words, perform any string manipulation
         required on it.
-        Also if required, take 2-3 grams
+        Also if required, take n grams
         """
         line = line.lower()
         line = self.cleanup_line(line)
         words = re.split('\s+', line)
         words = [w for w in words if w not in self.stopwords]
         words = self.get_n_grams(words)
-
-        # TODO: remove stop words
-        # TODO: Get n grams
-        #
         return words
 
     def calculate_priors(self):
