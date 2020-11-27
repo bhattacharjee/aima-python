@@ -2,13 +2,23 @@
 
 import os
 import re
+import sys
 import string
+import inspect
 import pandas as pd
 import random
 import json
 import math
 from sklearn.metrics import confusion_matrix, f1_score
 random.seed(12345)
+
+try:
+    currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+    parentdir = os.path.dirname(currentdir)
+    sys.path.insert(0,parentdir)
+    from probability import ProbDist
+except:
+    print("Failed to import")
 
 class NaiveBayesTextClassifier(object):
 
@@ -341,22 +351,33 @@ def NaiveBayesSentimentLabeledSentences():
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
     print(confusion_matrix(y_test, y_predict))
 
+def Q1_1_1():
+    tip1 = ProbDist(freq={"Never": 1, "Rarely": 4, "Sometimes": 6, "Often": 12, "Always": 23})
+    tip2 = ProbDist(freq={"Never": 12, "Rarely": 4, "Sometimes": 12, "Often": 4, "Always": 2})
+    tip3 = ProbDist(freq={"Never": 24, "Rarely": 2, "Sometimes": 5, "Often": 4, "Always": 4})
+    print(f"TIP 1: {tip1.show_approx()}")
+    print(f"TIP 2: {tip2.show_approx()}")
+    print(f"TIP 3: {tip3.show_approx()}")
+    
 
 
-def main():
+def NaiveBayesTextDriver():
     print('-' * 120)
     print("SMS Spam Classification")
-    #NaiveBayesSmsSpamCollection()
+    NaiveBayesSmsSpamCollection()
     print('-' * 120)
     print("\nClinc 150")
     NaiveBayesClinc150()
     print('-' * 120)
     print("\nYoutube Spam")
-    #NaiveBayesYoutubeSpam()
+    NaiveBayesYoutubeSpam()
     print('-' * 120)
     print("\nSentiment Analysis")
     NaiveBayesSentimentLabeledSentences()
     print('-' * 120)
 
+
+def main():
+    Q1_1_1()
 
 main()
