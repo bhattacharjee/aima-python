@@ -270,7 +270,7 @@ def NaiveBayesSmsSpamCollection():
     print(confusion_matrix(y_test, y_predict))
 
 def NaiveBayesClinc150():
-    with open ("./clinc150_uci/data_small.json", "r") as f:
+    with open ("./clinc150_uci/data_full.json", "r") as f:
         data = json.load(f)
     validation = data['val']
     train = data['train']
@@ -287,9 +287,12 @@ def NaiveBayesClinc150():
     for arr in test:
         test_X.append(arr[0])
         test_y.append(arr[1])
-    nb = NaiveBayesTextClassifier(max_n_grams=5)
+    nb = NaiveBayesTextClassifier()
+    print("Trying to fit")
     nb.fit(train)
+    print("Fit finished")
     y_predict = nb.predict(test_X)
+    print("predict finished")
     print(f"accuracy = {get_accuracy_score(y_predict, test_y)}")
     print(confusion_matrix(test_y, y_predict))
 
