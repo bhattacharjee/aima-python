@@ -269,7 +269,34 @@ def NaiveBayesSmsSpamCollection():
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
     print(confusion_matrix(y_test, y_predict))
 
+def NaiveBayesClinc150():
+    with open ("./clinc150_uci/data_small.json", "r") as f:
+        data = json.load(f)
+    validation = data['val']
+    train = data['train']
+    test = data['test']
+    train_X = []
+    train_y = []
+    test_X = []
+    test_y = []
+    for arr in train:
+        train_X.append(arr[0])
+        train_y.append(arr[1])
+    train = pd.DataFrame({'class_label': train_y, 'document':train_X})
+    [test.append(i) for i in validation]
+    for arr in test:
+        test_X.append(arr[0])
+        test_y.append(arr[1])
+    nb = NaiveBayesTextClassifier(max_n_grams=5)
+    nb.fit(train)
+    y_predict = nb.predict(test_X)
+    print(f"accuracy = {get_accuracy_score(y_predict, test_y)}")
+    print(confusion_matrix(test_y, y_predict))
+
+
 def main():
-    NaiveBayesSmsSpamCollection()
+    #NaiveBayesSmsSpamCollection()
+    NaiveBayesClinc150()
+
 
 main()
