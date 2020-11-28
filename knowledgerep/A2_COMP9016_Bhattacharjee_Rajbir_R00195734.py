@@ -376,10 +376,30 @@ def Q1_1_2():
             {(T,T):0.01, (T,F):0.03, (F,T):0.03, (F,F):0.95})
     ])
     #print(bayes_net.variable_node('GlobalWarming').cpt)
-    p_employed = enumeration_ask(X='Employed', e={'AI': True, 'FossilFuel':True}, bn=bayes_net)
-    print(f"Probability of getting employed given AI=true and FossilFuel=True: {p_employed.show_approx()}")
-    p_global_warming = elimination_ask(X='GlobalWarming', e={'Employed':False, 'Traffic':False}, bn=bayes_net)
-    print(f"Probability of GlobalWarming given Employed=False and Traffic=False = {p_global_warming.show_approx()}")
+    p_employed = enumeration_ask(X='Employed',
+                                        e={'AI': True,
+                                        'FossilFuel':True},
+                                    bn=bayes_net)
+    print('-' * 80)
+    print(f"given AI=true and FossilFuel=True:",
+            f"\n\t\tP(Employed)\t\t=\t\t{p_employed.show_approx()}")
+    print('-' * 80)
+    p_global_warming = elimination_ask(X='GlobalWarming',
+                                        e={'Employed':False,
+                                            'Traffic':False}, bn=bayes_net)
+    print('-' * 80)
+    print(f"Given Employed=False and Traffic=False, \n\t\tP(GlobalWarming)\t=",
+            f"\t\t{p_global_warming.show_approx()}")
+    print('-' * 80)
+    p_ai = elimination_ask(X='AI', e={'RenewableEnergy': True,
+                                        'GlobalWarming': True,
+                                        'Employed': True,
+                                        'Traffic':True,
+                                        'FossilFuel':True}, bn=bayes_net)
+    print('-' * 80)
+    print(f"Given RenewableEnergy=T, GlobalWarming=T",
+            f"Employed=T, Traffic=T, FossilFuel=T, \n\t\tP(AI)\t\t\t=\t\t{p_ai.show_approx()}")
+    print('-' * 80)
 
 def Q1_2_1():
     pass
