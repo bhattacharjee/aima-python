@@ -23,7 +23,7 @@ except:
 
 class NaiveBayesTextClassifier(object):
 
-    def __init__(self, max_n_grams:int=1):
+    def __init__(self, max_n_grams:int=1, leave_hyperlinks_unchanged=False):
         self.max_n_grams = max_n_grams
         # the set of all classes
         self.classes = set()
@@ -46,6 +46,18 @@ class NaiveBayesTextClassifier(object):
         # For each class w, count of all words in that class, count(c)
         self.count_c = dict()
 
+        # Count of each words
+        self.count_w = dict()
+
+        # Total number of words
+        self.n_words = 0
+
+        # count of each class
+        self.count_classes = dict()
+
+        self.leave_hyperlinks_unchanged = leave_hyperlinks_unchanged
+
+
         self.stopwords = set(['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you',\
             'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she',\
             'her', 'hers', 'herself', 'it', 'its', 'itself', 'they', 'them', 'their', 'theirs',\
@@ -61,6 +73,9 @@ class NaiveBayesTextClassifier(object):
             'don', 'should', 'now', 'the', 'a'])
         pass
 
+    def get_counts(self)->tuple:
+        return self.count_c, self.n_words, self.count_w, self.count_w_c
+
     def cleanup_line(self, line:str)->list:
         # cleanup line
         ret = []
@@ -68,10 +83,15 @@ class NaiveBayesTextClassifier(object):
         for c in list(line):
             if c in string.punctuation:
                 continue
-            if c in list("<>(){}\\/"):
-                continue
-            if c in list('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'):
-                ret.append(' ')
+            if not self.leave_hyperlinks_unchanged:
+                if c in list("<>(){}\\/"):
+                    continue
+            if not self.leave_hyperlinks_unchanged:
+                if c in list('!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'):
+                    ret.append(' ')
+            else:
+                if c in list('!"#$%&\'()*+,-.;<=>?@[\\]^_`{|}~'):
+                    ret.append(' ')
             ret.append(c)
         if len(ret) < 0:
             raise AssertionError("cleaned up line contains no characters")
@@ -90,7 +110,7 @@ class NaiveBayesTextClassifier(object):
         ret = re.sub(r'\d+', r'###', ret)
         return ret
 
-    def get_n_grams(self, words):
+    def get_n_grams(self, words)->list:
         all_grams = []
         for i in range(2, self.max_n_grams+1):
             for j in range(i-1, len(words)):
@@ -116,7 +136,7 @@ class NaiveBayesTextClassifier(object):
         words = self.get_n_grams(words)
         return words
 
-    def calculate_priors(self):
+    def calculate_priors(self)->None:
         n_inst = len(self.train_data)
         for c in self.classes:
             rows = self.train_data.loc[self.train_data['class_label'] == c]
@@ -136,8 +156,14 @@ class NaiveBayesTextClassifier(object):
             self.count_w_c[class_label][word] += 1
             if word not in self.vocabulary:
                 self.vocabulary.add(word)
+                self.count_w[word] = 0
+            self.count_w[word] += 1
+        if class_label not in self.count_classes.keys():
+            self.count_classes[class_label] = 0
+        self.count_classes[class_label] += 1
+        self.n_words += 1
 
-    def calculate_conditionals(self):
+    def calculate_conditionals(self)->None:
         for word in self.vocabulary:
             self.p_w_c[word] = {}
             for c in self.classes:
@@ -299,7 +325,7 @@ def NaiveBayesClinc150():
     for arr in test:
         test_X.append(arr[0])
         test_y.append(arr[1])
-    nb = NaiveBayesTextClassifier()
+    nb = NaiveBayesTextClassifier(leave_hyperlinks_unchanged=True)
     #print("Trying to fit")
     nb.fit(train)
     #print("Fit finished")
@@ -353,6 +379,8 @@ def NaiveBayesSentimentLabeledSentences():
     print(confusion_matrix(y_test, y_predict))
 
 def Q1_1_1():
+    print("=" * 80)
+    print("ANSWER 1.1.1")
     tip1 = ProbDist(freq={"Never": 1, "Rarely": 4, "Sometimes": 6, "Often": 12, "Always": 23})
     tip2 = ProbDist(freq={"Never": 12, "Rarely": 4, "Sometimes": 12, "Often": 4, "Always": 2})
     tip3 = ProbDist(freq={"Never": 24, "Rarely": 2, "Sometimes": 5, "Often": 4, "Always": 4})
@@ -362,6 +390,8 @@ def Q1_1_1():
     
 
 def Q1_1_2():
+    print("=" * 80)
+    print("ANSWER 1.1.2")
     T, F = True, False
     bayes_net = BayesNet([
         ('AI', '', 0.8),
@@ -402,25 +432,65 @@ def Q1_1_2():
     print('-' * 80)
 
 def Q1_2_1():
-    pass
+    print("=" * 80)
+    print("ANSWER 1.2.1")
+    df = read_lines_and_convert_to_df('SMSSpamCollection/no_duplicates.txt')
+    nb = NaiveBayesTextClassifier(max_n_grams=5)
+    nb.fit(df)
+    count_c, n_words, count_w, count_w_c = nb.get_counts()
+
+    # Prior Probability
+    prior_prob = ProbDist(freq=count_c)
+    print("Prior Probabilities = ", prior_prob.show_approx())
+
+    # Probability of Evidence
+    word_probs = dict()
+    for word, count in count_w.items():
+        word_probs[word] = count / n_words
+    # Only display the top 10
+    print("-" * 80, "\nProbability of Evidence")
+    maxwords = 20
+    for word, prob in word_probs.items():
+        print("%40s:%f" % (word, prob))
+        maxwords -= 1
+        if maxwords < 0:
+            break
+
+    # Likelihood
+    print('-' * 80, "\nPrinting Likelihood Probabilities")
+    for classlabel in count_w_c.keys():
+        words_counts = count_w_c[classlabel]
+        cond_probabilities = dict()
+        n_words = 0 # Number of words in this class only
+        for word, count in words_counts.items():
+            n_words += count
+        max_prints = 40
+        for word, count in words_counts.items():
+            prob = count / n_words
+            cond_probabilities[word + "|" + classlabel] = prob
+            if max_prints >= 0:
+                print("%60s : %f" % (word + "|" + classlabel, prob))
+            max_prints -= 1
 
 def Q1_2_2():
+    print("=" * 80)
+    print("ANSWER 1.2.2")
     print('-' * 120)
     print("SMS Spam Classification")
     NaiveBayesSmsSpamCollection()
     print('-' * 120)
-    print("\nClinc 150")
+    print("Clinc 150")
     NaiveBayesClinc150()
     print('-' * 120)
-    print("\nYoutube Spam")
+    print("Youtube Spam")
     NaiveBayesYoutubeSpam()
     print('-' * 120)
-    print("\nSentiment Analysis")
+    print("Sentiment Analysis")
     NaiveBayesSentimentLabeledSentences()
     print('-' * 120)
 
 
 def main():
-    Q1_1_2()
+    Q1_2_2()
 
 main()
