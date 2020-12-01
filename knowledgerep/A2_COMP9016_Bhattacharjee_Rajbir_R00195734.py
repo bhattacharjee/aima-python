@@ -10,6 +10,8 @@ import random
 import json
 import math
 from sklearn.metrics import confusion_matrix, f1_score
+from sklearn.metrics import roc_curve
+import matplotlib.pyplot as plt
 random.seed(12345)
 
 try:
@@ -295,6 +297,13 @@ def get_accuracy_score(y_test, y_predict):
     return c/n
 
 def NaiveBayesSmsSpamCollection():
+
+    def convert(x):
+        ret = []
+        for i in x:
+            ret.append(1) if i == 'spam' else ret.append(0)
+        return ret
+
     #df = read_lines_and_convert_to_df('SMSSpamCollection/SMSSpamCollection')
     #df = read_lines_and_convert_to_df('SMSSpamCollection/small.txt')
     df = read_lines_and_convert_to_df('SMSSpamCollection/no_duplicates.txt')
@@ -304,10 +313,24 @@ def NaiveBayesSmsSpamCollection():
     X_test = test.document.to_list()
     y_test = test.class_label.to_list()
     y_predict = nb.predict(X_test)
-    print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
+    f1score = f1_score(convert(y_test), convert(y_predict))
+    print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
     print(confusion_matrix(y_test, y_predict))
 
 def NaiveBayesClinc150():
+    convert_dict = {}
+    convert_dict_count = 0
+    def convert(x):
+        nonlocal convert_dict
+        nonlocal convert_dict_count
+        ret = []
+        for i in x:
+            if i not in convert_dict.keys():
+                convert_dict_count += 1
+                convert_dict[i] = convert_dict_count
+            ret.append(convert_dict[i])
+        return ret
+
     with open ("./clinc150_uci/data_full.json", "r") as f:
         data = json.load(f)
     validation = data['val']
@@ -330,8 +353,10 @@ def NaiveBayesClinc150():
     nb.fit(train)
     #print("Fit finished")
     y_predict = nb.predict(test_X)
+    #print(y_predict)
+    f1score = f1_score(convert(test_y), convert(y_predict), average='micro')
     #print("predict finished")
-    print(f"accuracy = {get_accuracy_score(y_predict, test_y)}")
+    print(f"accuracy = {get_accuracy_score(y_predict, test_y)} f1score = {f1score}")
     print(confusion_matrix(test_y, y_predict))
 
 def NaiveBayesYoutubeSpam():
@@ -350,10 +375,14 @@ def NaiveBayesYoutubeSpam():
     nb = NaiveBayesTextClassifier(max_n_grams=25)
     nb.fit(train)
     y_predict = nb.predict(X_test)
-    print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
+    f1score = f1_score(y_test, y_predict)
+    print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
     print(confusion_matrix(y_test, y_predict))
 
 def NaiveBayesSentimentLabeledSentences():
+    def convert(x):
+        return [int(i) for i in x]
+
     documents = []
     class_labels = []
     compiled_re = re.compile("(.*)\s+(\d+)$")
@@ -375,7 +404,8 @@ def NaiveBayesSentimentLabeledSentences():
     nb = NaiveBayesTextClassifier(max_n_grams=8)
     nb.fit(train)
     y_predict = nb.predict(X_test)
-    print(f"accuracy = {get_accuracy_score(y_predict, y_test)}")
+    f1score = f1_score(convert(y_test), convert(y_predict))
+    print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
     print(confusion_matrix(y_test, y_predict))
 
 def Q1_1_1():
