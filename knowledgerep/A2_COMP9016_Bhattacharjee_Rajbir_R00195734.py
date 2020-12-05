@@ -9,8 +9,6 @@ import pandas as pd
 import random
 import json
 import math
-from sklearn.metrics import confusion_matrix, f1_score
-from sklearn.metrics import roc_curve
 import matplotlib.pyplot as plt
 random.seed(12345)
 
@@ -296,6 +294,11 @@ def get_accuracy_score(y_test, y_predict):
             c += 1
     return c/n
 
+
+def F1_score(x, y):
+    from sklearn.metrics import f1_score
+    return f1_score(x, y)
+
 def NaiveBayesSmsSpamCollection():
 
     def convert(x):
@@ -313,9 +316,8 @@ def NaiveBayesSmsSpamCollection():
     X_test = test.document.to_list()
     y_test = test.class_label.to_list()
     y_predict = nb.predict(X_test)
-    f1score = f1_score(convert(y_test), convert(y_predict))
+    f1score = F1_score(convert(y_test), convert(y_predict))
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
-    print(confusion_matrix(y_test, y_predict))
 
 def NaiveBayesClinc150():
     convert_dict = {}
@@ -354,10 +356,9 @@ def NaiveBayesClinc150():
     #print("Fit finished")
     y_predict = nb.predict(test_X)
     #print(y_predict)
-    f1score = f1_score(convert(test_y), convert(y_predict), average='micro')
+    f1score = F1_score(convert(test_y), convert(y_predict), average='micro')
     #print("predict finished")
     print(f"accuracy = {get_accuracy_score(y_predict, test_y)} f1score = {f1score}")
-    print(confusion_matrix(test_y, y_predict))
 
 def NaiveBayesYoutubeSpam():
     df = pd.DataFrame()
@@ -375,9 +376,8 @@ def NaiveBayesYoutubeSpam():
     nb = NaiveBayesTextClassifier(max_n_grams=25)
     nb.fit(train)
     y_predict = nb.predict(X_test)
-    f1score = f1_score(y_test, y_predict)
+    f1score = F1_score(y_test, y_predict)
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
-    print(confusion_matrix(y_test, y_predict))
 
 def NaiveBayesSentimentLabeledSentences():
     def convert(x):
@@ -404,9 +404,8 @@ def NaiveBayesSentimentLabeledSentences():
     nb = NaiveBayesTextClassifier(max_n_grams=8)
     nb.fit(train)
     y_predict = nb.predict(X_test)
-    f1score = f1_score(convert(y_test), convert(y_predict))
+    f1score = F1_score(convert(y_test), convert(y_predict))
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
-    print(confusion_matrix(y_test, y_predict))
 
 def Q1_1_1():
     print("=" * 80)
@@ -521,6 +520,21 @@ def Q1_2_2():
 
 
 def main():
+    print('-' * 80)
+    print('Question 1.1')
+    print()
+    Q1_1_1()
+    print('-' * 80)
+    print('Question 1.2')
+    print()
+    Q1_1_2()
+    print('-' * 80)
+    print('Question 2.1')
+    print()
+    Q1_2_1()
+    print('-' * 80)
+    print('Question 2.2')
+    print()
     Q1_2_2()
 
 main()
