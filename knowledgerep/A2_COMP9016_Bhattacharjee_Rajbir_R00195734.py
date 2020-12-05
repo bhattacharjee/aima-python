@@ -295,9 +295,11 @@ def get_accuracy_score(y_test, y_predict):
     return c/n
 
 
-def F1_score(x, y):
+def F1_score(x, y, z=None):
     from sklearn.metrics import f1_score
-    return f1_score(x, y)
+    if None == z:
+        return f1_score(x, y)
+    return f1_score(x, y, average=z)
 
 def NaiveBayesSmsSpamCollection():
 
@@ -356,7 +358,7 @@ def NaiveBayesClinc150():
     #print("Fit finished")
     y_predict = nb.predict(test_X)
     #print(y_predict)
-    f1score = F1_score(convert(test_y), convert(y_predict), average='micro')
+    f1score = F1_score(convert(test_y), convert(y_predict), 'micro')
     #print("predict finished")
     print(f"accuracy = {get_accuracy_score(y_predict, test_y)} f1score = {f1score}")
 
