@@ -74,10 +74,30 @@ class NaiveBayesTextClassifier(object):
         pass
 
     def get_counts(self)->tuple:
+        """Interface to get the counts of all the words and classes so that all the
+        probabilities can be calculated
+
+        Returns:
+            tuple: count of classes, total number of words, counts for every word, counts for every word given the class
+        """
         return self.count_c, self.n_words, self.count_w, self.count_w_c
 
-    def cleanup_line(self, line:str)->list:
-        # cleanup line
+    def cleanup_line(self, line:str)->str:
+        """cleans up a line by doing the following
+        1. Remove punctuations
+        2. Remove :// and <> from hyperlinks if applicable
+        3. Remove some special characters and replace with space
+        4. Replace numbers by ###
+
+        Args:
+            line (str): [description]
+
+        Raises:
+            AssertionError: [description]
+
+        Returns:
+            str: [description]
+        """
         ret = []
         ret2 = []
         for c in list(line):
@@ -111,6 +131,14 @@ class NaiveBayesTextClassifier(object):
         return ret
 
     def get_n_grams(self, words)->list:
+        """Create n-grams
+
+        Args:
+            words ([str]): words to create n-grams from
+
+        Returns:
+            list: list of original words and the n-grams
+        """
         all_grams = []
         for i in range(2, self.max_n_grams+1):
             for j in range(i-1, len(words)):
@@ -137,6 +165,8 @@ class NaiveBayesTextClassifier(object):
         return words
 
     def calculate_priors(self)->None:
+        """Calculate the prior probabilities
+        """
         n_inst = len(self.train_data)
         for c in self.classes:
             rows = self.train_data.loc[self.train_data['class_label'] == c]
@@ -145,6 +175,13 @@ class NaiveBayesTextClassifier(object):
             self.priors[c] = math.log(n_c / n_inst)
 
     def update_document(self, class_label:str, document:str)->None:
+        """This is called for every document. This function updates the
+        counts of the words, count of the words given the class etc.
+
+        Args:
+            class_label (str): The class of the current document
+            document (str): The document
+        """
         if class_label not in self.count_w_c.keys():
             self.count_w_c[class_label] = dict()
         if class_label not in self.count_c.keys():
@@ -164,6 +201,8 @@ class NaiveBayesTextClassifier(object):
         self.n_words += 1
 
     def calculate_conditionals(self)->None:
+        """Calculate the conditional probabilities
+        """
         for word in self.vocabulary:
             self.p_w_c[word] = {}
             for c in self.classes:
@@ -181,6 +220,14 @@ class NaiveBayesTextClassifier(object):
                 self.p_w_c[word][c] = pwc
 
     def predict_one(self, document:str)->str:
+        """Make a prediction of the class for one document
+
+        Args:
+            document (str): The document for which the class is to be predicted
+
+        Returns:
+            str: return the class of the document
+        """
         all_ps = []
         all_class_p_tuples = []
         for c in self.classes:
@@ -198,6 +245,14 @@ class NaiveBayesTextClassifier(object):
                 return c
 
     def predict(self, documents:list)->list:
+        """Make a prediction for a number of documents
+
+        Args:
+            documents (list): The documents for which the class is to be predicted
+
+        Returns:
+            list: list of predictions
+        """
         ys = []
         for document in documents:
             y = self.predict_one(document)
@@ -206,6 +261,11 @@ class NaiveBayesTextClassifier(object):
 
 
     def fit(self, df:pd.DataFrame)->None:
+        """Train the Naive Bayes network by calculating all the probabilities
+
+        Args:
+            df (pd.DataFrame): Data frame containing all the documents to be trained on
+        """
         # Save the training data
         self.train_data = df
 
@@ -230,10 +290,23 @@ class NaiveBayesTextClassifier(object):
 
 
 def read_lines(filename:str)->list:
+    """Open a file and read lines
+
+    Args:
+        filename (str): The filename to read from
+
+    Returns:
+        list: list of lines
+    """
     with open(filename, "r") as f:
         return [line.strip() for line in f.readlines()]
 
 class LineParser(object):
+    """Line parser for the SMS classification problem
+
+    Args:
+        object ([type]): [description]
+    """
     def __init__(self):
         self.compiled_re = re.compile("(\S+)\s*(\S.*)")
         pass
@@ -251,6 +324,14 @@ class LineParser(object):
         return(m.group(1), m.group(2))
 
 def train_test_split(df:pd.DataFrame)->tuple:
+    """Split a dataset into training and test instances
+
+    Args:
+        df (pd.DataFrame): The data set that is to be split
+
+    Returns:
+        tuple: train instances, test instances
+    """
     classes = set(df.class_label.unique())
     temp_split_tuples = list()
     for c in classes:
@@ -272,6 +353,14 @@ def train_test_split(df:pd.DataFrame)->tuple:
 
 
 def read_lines_and_convert_to_df(filename)->pd.DataFrame:
+    """Read lines from a file and convert it into a pandas dataframe
+
+    Args:
+        filename ([type]): The filename to read from
+
+    Returns:
+        pd.DataFrame: The dataframe that contains all the records of the file names
+    """
     lines = read_lines(filename)
     lp = LineParser()
     labels = []
@@ -286,6 +375,15 @@ def read_lines_and_convert_to_df(filename)->pd.DataFrame:
     return df
 
 def get_accuracy_score(y_test, y_predict):
+    """Get the accuracy score of the prediction
+
+    Args:
+        y_test ([type]): true values
+        y_predict ([type]): predicted values
+
+    Returns:
+        [float]: accuracy score
+    """
     assert(len(y_test) == len(y_predict))
     n = len(y_test)
     c = 0
@@ -296,12 +394,24 @@ def get_accuracy_score(y_test, y_predict):
 
 
 def F1_score(x, y, z=None):
+    """Get the f1 score of the prediction. Calls sklearn.metrics.f1_score in turn
+
+    Args:
+        x ([type]): true values
+        y ([type]): predicted values
+        z ([type], optional): optional argument
+
+    Returns:
+        [type]: f1 score
+    """
     from sklearn.metrics import f1_score
     if None == z:
         return f1_score(x, y)
     return f1_score(x, y, average=z)
 
 def NaiveBayesSmsSpamCollection():
+    """Apply Naive Bayes to SMS Spam Collection
+    """
 
     def convert(x):
         ret = []
@@ -309,9 +419,9 @@ def NaiveBayesSmsSpamCollection():
             ret.append(1) if i == 'spam' else ret.append(0)
         return ret
 
-    #df = read_lines_and_convert_to_df('SMSSpamCollection/SMSSpamCollection')
+    df = read_lines_and_convert_to_df('SMSSpamCollection/SMSSpamCollection')
     #df = read_lines_and_convert_to_df('SMSSpamCollection/small.txt')
-    df = read_lines_and_convert_to_df('SMSSpamCollection/no_duplicates.txt')
+    #df = read_lines_and_convert_to_df('SMSSpamCollection/no_duplicates.txt')
     nb = NaiveBayesTextClassifier(max_n_grams=5)
     train, test = train_test_split(df)
     nb.fit(train)
@@ -322,6 +432,8 @@ def NaiveBayesSmsSpamCollection():
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
 
 def NaiveBayesClinc150():
+    """Apply Naive bayes to Clinc 150 dataset
+    """
     convert_dict = {}
     convert_dict_count = 0
     def convert(x):
@@ -363,6 +475,8 @@ def NaiveBayesClinc150():
     print(f"accuracy = {get_accuracy_score(y_predict, test_y)} f1score = {f1score}")
 
 def NaiveBayesYoutubeSpam():
+    """Apply Naive Bayes to youtube spam classificaiton database
+    """
     df = pd.DataFrame()
     for filename in os.listdir('YoutubeSpam'):
         if not filename.endswith(".csv"):
@@ -382,6 +496,8 @@ def NaiveBayesYoutubeSpam():
     print(f"accuracy = {get_accuracy_score(y_predict, y_test)} f1score = {f1score}")
 
 def NaiveBayesSentimentLabeledSentences():
+    """Sentiment prediction on Sentiment Labeled Sentences dataset using Naive Bayes predictor
+    """
     def convert(x):
         return [int(i) for i in x]
 
